@@ -35,6 +35,9 @@ class CgroupCollector(Collector.Collector):
         self.paths = paths
         self.last = {}
 
+    def key_prefixer(cgpath, name):
+        return "/".join([cgpath, name]) 
+
     def collect_function(self):
         memory_mount_point = get_subsys_mount_point('memory')
         cpuacct_mount_point = get_subsys_mount_point('cpuacct')
@@ -50,14 +53,14 @@ class CgroupCollector(Collector.Collector):
             for name in ['usage_in_bytes', 'limit_in_bytes', 'max_usage_in_bytes', 'soft_limit_in_bytes', 'failcnt'] + ['memsw.usage_in_bytes', 'memsw.limit_in_bytes', 'memsw.max_usage_in_bytes', 'memsw.failcnt']:
                 path = os.path.join(directory, 'memory.'+name)
                 with open(path) as f:
-                    key = "/".join([cgpath, name])
+                    key = self.key_prefixer(cgpath, name)
                     v[key] = int(f.readline())
                 path = os.path.join(directory, 'memory.stat')
                 with open(path) as f:
                     for l in f:
                         name, val = l.split(' ')
                         val = int(val)
-                        key = "/".join([cgpath, name]) 
+                        key = self.key_prefixer(cgpath, name)
                         v[key] = val
             # CPUACCT
             newglobalcpu = 0
@@ -99,10 +102,10 @@ class CgroupCollector(Collector.Collector):
                 cpus = f.readline().split(' ')[:-1] # Skip \n
                 ncpus = len(cpus)
                 for i in range(ncpus):
-                    cpu = "/".join([cgpath, "cpu-%d" % (i)])
+                    cpu = self.key_prefixer(cgpath, "cpu-%d" % (i))
                     newcpu = int(cpus[i]) # TODO: percentage
                     v[cpu] = newcpu
-                    pcpu = "/".join([cgpath, "cpu-%d%%" % (i)])
+                    pcpu = self.key_prefixer(cgpath, "cpu-%d%%" % (i))
                     v[pcpu] = ''
                     if cpu in last:
                         lastcpu = last[cpu]
@@ -114,8 +117,8 @@ class CgroupCollector(Collector.Collector):
             path = os.path.join(directory, 'cpuacct.usage')
             with open(path) as f:
                 newcpu = int(f.readline()) # TODO: percentage
-                cpu = "/".join([cgpath, "cpu"])
-                pcpu = "/".join([cgpath, "cpu%"])
+                cpu = self.key_prefixer(cgpath, "cpu")
+                pcpu = self.key_prefixer(cgpath, "cpu%")
                 v[cpu] = newcpu
                 v[pcpu] = ''
                 if cpu in last:

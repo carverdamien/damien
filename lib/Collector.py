@@ -21,13 +21,16 @@ class Collector(threading.Thread):
     def run(self):
         while not self.exitEvent.is_set():
             time.sleep(self.sleep_delay)
-            for values in self.collect_function():
-                timestamp = datetime.datetime.fromtimestamp(float(values['timestamp']))
-                for metric in values:
-                    if metric == 'timestamp':
-                        continue
-                    value = values[metric]
-                    self.data_writer.write(label=metric, y=value, x=timestamp)
+            try:
+                for values in self.collect_function():
+                    timestamp = datetime.datetime.fromtimestamp(float(values['timestamp']))
+                    for metric in values:
+                        if metric == 'timestamp':
+                            continue
+                        value = values[metric]
+                        self.data_writer.write(label=metric, y=value, x=timestamp)
+            except Exception as e:
+                print(e)
 
     def exit(self):
         self.exitEvent.set()

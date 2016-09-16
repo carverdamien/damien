@@ -1,0 +1,5 @@
+{
+    "sourceId" : "756135c9c5e4414caf10bac80a6fe9c5a2efd66fdc41d48356672fca",
+    "duration" : 60,
+    "image" : "nginx:latest"
+}

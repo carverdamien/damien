@@ -7,3 +7,4 @@ pandas
 parse
 graphviz
 numpy
+docker-py
