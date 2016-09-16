@@ -1,0 +1,279 @@
+#!/usr/bin/env python
+__globals = globals().copy()
+import argparse, json, hashlib, pymongo, bson, tabulate, time, gridfs, argcomplete, os
+
+main_parser = argparse.ArgumentParser()
+main_parser.add_argument('--dbname', type=str, nargs='?', default='toto')
+main_subparsers = main_parser.add_subparsers()
+
+httpd_parser = main_subparsers.add_parser('httpd')
+def httpd(db, args):
+    import lib.HTML as HTML
+    import bottle, csv, StringIO, datetime
+    import numpy as np
+    import pandas as pd
+    fs = gridfs.GridFS(db)
+    if not os.path.exists('cache'):
+        os.mkdir('cache')
+    @bottle.route('/plot')
+    def plot_List():
+        table = [['plot', 'filename']] + \
+        [[HTML.link(f._id, '/plot/%s' % f._id), f.filename] for f in fs.find({'type':'csv'})]
+        return HTML.table(table)
+    @bottle.route('/plot/<fid>')
+    def plotfid(fid):
+        cache = "cache/%s.html" % (fid)
+        if not os.path.exists(cache):
+            data = next(fs.find({'_id':bson.ObjectId(fid)}))
+            df = pd.read_csv(StringIO.StringIO(data.read()[:-1]))
+            def label_sel_generator(df):
+                for label in np.unique(df['label']):
+                    sel = df['label'] == label
+                    yield label, sel
+            def X_Y_label_generator(df):
+                for label, sel in label_sel_generator(df):
+                    X = df['x'][sel]
+                    Y = df['y'][sel]
+                    yield X, Y, label
+            from plotly.offline import download_plotlyjs, init_notebook_mode, iplot, plot
+            from plotly.graph_objs import Scatter, Layout, Figure
+            data = [Scatter(x=X, y=Y, name=label, visible="legendonly") for (X,Y,label) in X_Y_label_generator(df)]
+            layout = Layout(xaxis={'title':'xtitle'}, yaxis={'title':'ytitle'})
+            fig = Figure(data=data, layout=layout)
+            plot(fig, filename=cache, auto_open=False)
+        with open(cache) as f:
+            return f.read()
+        return "Oops"
+    @bottle.route('/run')
+    def run_list():
+        table = [['runId', 'configId', 'plot']] + \
+            [[run['runId'],
+              HTML.link(run['configId'],'/config/%s' % run['configId']),
+              " ".join([HTML.link(k, '/plot/%s' % v) for k,v in run['files'].iteritems() ])] for run in db.run.find({'status':'done'})]
+        return HTML.table(table)
+    @bottle.route('/config')
+    def config_list():
+        table = [['configId']] + \
+        [[HTML.link(config['configId'], '/config/%s' % config['configId'])] for config in db.config.find({})]
+        return HTML.table(table)
+    @bottle.route('/config/<configId>')
+    def config_show(configId):
+        for config in db.config.find({'configId':configId}):
+            del config['_id']
+            return json.dumps(config, sort_keys=True, indent=1)
+        return "Not Found"
+    bottle.run(host='0.0.0.0', port=8080, debug=True)
+httpd_parser.set_defaults(func=httpd)
+
+daemon_parser = main_subparsers.add_parser('daemon')
+def daemon(db, args):
+    fs = gridfs.GridFS(db)
+    while True:
+        cursor = db.run.find({'status' : 'created'}).sort([('runId',pymongo.ASCENDING)]).limit(1)
+        try:
+            run = next(cursor)
+            runId = run['runId']
+            config = matches_only_one_config(db, run['configId'])
+            source = matches_only_one_source(fs, config['sourceId'])
+            source = source.read()[:-1]
+            print('Running %s' % run['runId'])
+            _globals = __globals.copy()
+            _globals['config'] = config
+            _locals = _globals
+            exec(source,_globals,_locals)
+            if 'document' in _locals:
+                document = _locals['document']
+                db.run.update_one({'_id':run['_id']}, {"$set": {'document':document}})
+                if 'files' in document:
+                    db.run.update_one({'_id':run['_id']}, {'$set':{ 'files':{} }})
+                    for filename in document['files']:
+                        with open(filename) as f:
+                            fid = fs.put(f.read(), filename=filename, type='csv', runId=runId)
+                            db.run.update_one({'_id':run['_id']}, {"$set":{ 'files.%s' % filename : fid}})
+            db.run.update_one({'_id':run['_id']}, {"$set": {'status':'done'}})
+        except StopIteration:
+            time.sleep(1)
+daemon_parser.set_defaults(func=daemon)
+
+source_parser = main_subparsers.add_parser('source')
+source_subparsers = source_parser.add_subparsers()
+
+def source_add(db, args):
+    with open(args.py_file) as py_file:
+        fs = gridfs.GridFS(db)
+        source = py_file.read()
+        sourceId = hashlib.sha224(source).hexdigest()
+        if not fs.exists({'type':'source', 'sourceId':sourceId}):
+            fs.put(source, type='source', sourceId=sourceId, filename=args.py_file)
+        print(sourceId)
+source_add_parser = source_subparsers.add_parser('add')
+source_add_parser.set_defaults(func=source_add)
+source_add_parser.add_argument('py_file', type=str)
+
+def source_list(db, args):
+    fs = gridfs.GridFS(db)
+    cursor = fs.find({'type':'source'})
+    table = [[source.name, source.sourceId] for source in cursor]
+    print(tabulate.tabulate(table, headers=['name', 'sourceId'], tablefmt='plain'))
+source_list_parser = source_subparsers.add_parser('list')
+source_list_parser.set_defaults(func=source_list)
+
+def matches_only_one_file(fs, type, field, regex):
+    cursor = fs.find({'type' : type, field : {'$regex':regex}})
+    count = 0
+    for f in cursor:
+        if count == 1:
+            raise Exception('More than one match!')
+        count += 1
+    if count == 0:
+        raise Exception('No match')
+    return f
+
+def matches_only_one_source(fs, regex):
+    return matches_only_one_file(fs, 'source', 'sourceId', regex)
+
+def source_show(db, args):
+    fs = gridfs.GridFS(db)
+    f = matches_only_one_source(fs, args.sourceId)
+    print(f.read()[:-1])
+source_show_parser = source_subparsers.add_parser('show')
+source_show_parser.set_defaults(func=source_show)
+source_show_parser.add_argument('sourceId')
+
+def source_delete(db, args):
+    fs = gridfs.GridFS(db)
+    f = matches_only_one_source(fs, args.sourceId)
+    sourceId = f.sourceId
+    # delete config ref on source first!
+    for config in db.config.find({'sourceId':sourceId}).limit(1):
+        raise Exception('Found config referencing this sourceId=%s : configId=%s' % (sourceId, config['configId']))
+    fs.delete(f._id)
+    print(sourceId)
+source_delete_parser = source_subparsers.add_parser('delete')
+source_delete_parser.set_defaults(func=source_delete)
+source_delete_parser.add_argument('sourceId')
+
+config_parser = main_subparsers.add_parser('config')
+config_subparsers = config_parser.add_subparsers()
+
+def config_add(db, args):
+    with open(args.json_file) as json_file:
+        fs = gridfs.GridFS(db)
+        config = json.load(json_file)
+        if 'configId' in config:
+            del config['configId']
+        configId = hashlib.sha224(json.dumps(config,sort_keys=True)).hexdigest()
+        config['configId'] = configId
+        sourceId = config['sourceId']
+        matches_only_one_source(fs, sourceId)
+        collection = db.config
+        collection.create_index('configId', unique=True, sparse=True)
+        collection.insert_one(config)
+        print(configId)
+config_add_parser = config_subparsers.add_parser('add')
+config_add_parser.set_defaults(func=config_add)
+config_add_parser.add_argument('json_file', type=str)
+
+def config_list(db, args):
+    collection = db.config
+    cursor = collection.find()
+    table = [[config['configId']] for config in cursor]
+    print(tabulate.tabulate(table, headers=['configId'], tablefmt='plain'))
+config_list_parser = config_subparsers.add_parser('list')
+config_list_parser.set_defaults(func=config_list)
+
+def matches_only_one(collection, field, regex):
+    cursor = collection.find({field: {'$regex':regex}})
+    count = 0
+    for doc in cursor:
+        if count == 1:
+            raise Exception('More than one match!')
+        count += 1
+    if count == 0:
+        raise Exception('No match')
+    return doc
+
+def matches_only_one_config(db, regex):
+    return matches_only_one(db.config, 'configId', regex)
+
+def config_show(db, args):
+    config = matches_only_one_config(db, args.configId)
+    del config['_id']
+    print(json.dumps(config, sort_keys=True, indent=1))
+config_show_parser = config_subparsers.add_parser('show')
+config_show_parser.set_defaults(func=config_show)
+config_show_parser.add_argument('configId', type=str)
+
+def config_delete(db, args):
+    config = matches_only_one_config(db, args.configId)
+    configId = config['configId']
+    # should rm run ref on config first!
+    for run in db.run.find({'configId':configId}).limit(1):
+        raise Exception('Found run referencing this configId=%s : runId=%s' % (configId, run['runId']))
+    result = db.config.delete_one({'configId' : configId})
+    print(configId)
+config_delete_parser = config_subparsers.add_parser('delete')
+config_delete_parser.set_defaults(func=config_delete)
+config_delete_parser.add_argument('configId', type=str)
+
+run_parser = main_subparsers.add_parser('run')
+run_subparsers = run_parser.add_subparsers()
+
+def run_list(db, args):
+    collection = db.run
+    cursor = collection.find()
+    table = [[run['runId'], run['status'], run['configId']] for run in cursor]
+    print(tabulate.tabulate(table, headers=['runId', 'status', 'configId'], tablefmt="plain"))
+run_list_parser = run_subparsers.add_parser('list')
+run_list_parser.set_defaults(func=run_list)
+
+def run_new(db, args):
+    config = matches_only_one_config(db, args.configId)
+    run = { 'status' : 'created', 'configId' : config['configId'] }
+    runId = db.run.insert_one(run).inserted_id
+    db.run.update_one({'_id' : runId}, {"$set" : { 'runId' : str(runId) }})
+    db.run.create_index('runId', unique=True, sparse=True)
+    print(runId)
+run_new_parser = run_subparsers.add_parser('new')
+run_new_parser.set_defaults(func=run_new)
+run_new_parser.add_argument('configId', type=str)
+
+def matches_only_one_run(db, regex):
+    return matches_only_one(db.run, 'runId', regex)
+
+def run_show(db, args):
+    run = matches_only_one_run(db, args.runId)
+    del run['_id']
+    print(json.dumps(run, sort_keys=True, indent=1))
+run_show_parser = run_subparsers.add_parser('show')
+run_show_parser.set_defaults(func=run_show)
+run_show_parser.add_argument('runId', type=str)
+
+def run_delete(db, args):
+    run = matches_only_one_run(db, args.runId)
+    runId = run['runId']
+    fs = gridfs.GridFS(db)
+    fs.delete({'runId':runId})
+    db.run.delete_one({'runId' : runId})
+    print(runId)
+run_delete_parser = run_subparsers.add_parser('delete')
+run_delete_parser.set_defaults(func=run_delete)
+run_delete_parser.add_argument('runId', type=str)
+
+def run_showfile(db, args):
+    fs = gridfs.GridFS(db)
+    cursor = fs.find({'runId':{'$regex':args.runId}, 'filename':{'$regex':args.filename}})
+    f = next(cursor)
+    print(f.read()[:-1])
+    pass
+run_showfile_parser = run_subparsers.add_parser('showfile')
+run_showfile_parser.set_defaults(func=run_showfile)
+run_showfile_parser.add_argument('runId', type=str)
+run_showfile_parser.add_argument('filename', type=str)
+
+argcomplete.autocomplete(main_parser)
+args = main_parser.parse_args()
+with pymongo.MongoClient() as client:
+    db = client[args.dbname]
+    res = args.func(db, args)
+    if res != None: print(res)

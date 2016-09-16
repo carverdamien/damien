@@ -1,0 +1,8 @@
+*.pyc
+*~
+*.csv
+*.html
+*.gv
+*.gv.pdf
+
+cache

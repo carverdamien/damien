@@ -1,0 +1,9 @@
+pymongo
+tabulate
+bottle
+argcomplete
+plotly
+pandas
+parse
+graphviz
+numpy
