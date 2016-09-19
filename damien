@@ -22,7 +22,7 @@ def httpd(db, args):
         return HTML.table(table)
     @bottle.route('/plot/StackedBar/<fid>')
     def plot_StackedBar_fid(fid):
-        cache = "/tmp/cache/%s.html" % (fid)
+        cache = "/tmp/cache/%s.StackedBar.html" % (fid)
         if not os.path.exists(cache):
             data = next(fs.find({'_id':bson.ObjectId(fid)}))
             df = pd.read_csv(StringIO.StringIO(data.read()[:-1]))
@@ -46,7 +46,7 @@ def httpd(db, args):
         return "Oops"
     @bottle.route('/plot/Scatter/<fid>')
     def plot_Scatter_fid(fid):
-        cache = "/tmp/cache/%s.html" % (fid)
+        cache = "/tmp/cache/%s.Scatter.html" % (fid)
         if not os.path.exists(cache):
             data = next(fs.find({'_id':bson.ObjectId(fid)}))
             df = pd.read_csv(StringIO.StringIO(data.read()[:-1]))
