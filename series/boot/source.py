@@ -16,8 +16,7 @@ with docker.Client() as client:
         print(line)
     container = client.create_container(image=image)
     with CsvWriter.CsvWriter('data') as datawriter:
-        with Cgroup.CgroupCollector(datawriter, [os.path.join('docker',container['Id'])]) as cgmon:
-            cgmon.key_prefixer = lambda cgpath, name : "/".join([image, name])
+        with Cgroup.CgroupCollector(datawriter, [os.path.join('docker',container['Id'])], key_prefixer=lambda cgpath, name : "/".join([name, image])) as cgmon:
             client.start(container=container['Id'])
             time.sleep(duration)
             client.stop(container=container['Id'])

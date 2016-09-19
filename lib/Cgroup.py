@@ -28,14 +28,18 @@ def get_subsys_mount_point(subsys):
     return mount_point + '/'
 
 class CgroupCollector(Collector.Collector):
-    def __init__(self, data_writer, paths, sleep_delay=1):
+    def __init__(self, data_writer, paths, key_prefixer=None, sleep_delay=1):
         super(CgroupCollector, self).__init__(data_writer, sleep_delay)
         paths = list(set(paths))
         print('Monitoring:'+str(paths))
         self.paths = paths
         self.last = {}
+        if key_prefixer != None:
+            self.key_prefixer = key_prefixer
+        else:
+            self.key_prefixer = default_key_prefixer
 
-    def key_prefixer(cgpath, name):
+    def default_key_prefixer(cgpath, name):
         return "/".join([cgpath, name]) 
 
     def collect_function(self):
@@ -64,12 +68,12 @@ class CgroupCollector(Collector.Collector):
                         v[key] = val
             # CPUACCT
             newglobalcpu = 0
-            global_cpu = "/".join([cgpath, "global_cpu"])
+            global_cpu = self.key_prefixer(cgpath, "global_cpu")
             if global_cpu in last:
                 lastglobalcpu = last[global_cpu]
             newglobalcpus = {}
             lastglobalcpus = {}
-            global_cpus = "/".join([cgpath, "global_cpus"])
+            global_cpus = self.key_prefixer(cgpath, "global_cpus")
             if global_cpus in last:
                 lastglobalcpus = last[global_cpus]
             last[global_cpus] = {}
