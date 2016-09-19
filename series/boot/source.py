@@ -10,16 +10,23 @@ if 'config' not in globals():
 image = config['image']
 duration = config['duration']
 
-with docker.Client() as client:
+def do(client):
     print(image)
-    for line in client.pull(image, stream=True):
-        print(line)
-    container = client.create_container(image=image)
+    try:
+        for line in client.pull(image, stream=True):
+            print(line)
+        container = client.create_container(image=image)
+    except Exception as e:
+        print(e)
+        return
     with CsvWriter.CsvWriter('data') as datawriter:
         with Cgroup.CgroupCollector(datawriter, [os.path.join('docker',container['Id'])], key_prefixer=lambda cgpath, name : "/".join([name, image])) as cgmon:
             client.start(container=container['Id'])
             time.sleep(duration)
             client.stop(container=container['Id'])
     client.remove_container(container=container['Id'])
+    global document
+    document = { 'files' : ['data'] }
 
-document = { 'files' : ['data'] }
+with docker.Client() as client:
+    do(client)
