@@ -13,16 +13,40 @@ def httpd(db, args):
     import numpy as np
     import pandas as pd
     fs = gridfs.GridFS(db)
-    if not os.path.exists('cache'):
-        os.mkdir('cache')
+    if not os.path.exists('/tmp/cache'):
+        os.mkdir('/tmp/cache')
     @bottle.route('/plot')
     def plot_List():
         table = [['plot', 'filename']] + \
         [[HTML.link(f._id, '/plot/%s' % f._id), f.filename] for f in fs.find({'type':'csv'})]
         return HTML.table(table)
-    @bottle.route('/plot/<fid>')
-    def plotfid(fid):
-        cache = "cache/%s.html" % (fid)
+    @bottle.route('/plot/StackedBar/<fid>')
+    def plot_StackedBar_fid(fid):
+        cache = "/tmp/cache/%s.html" % (fid)
+        if not os.path.exists(cache):
+            data = next(fs.find({'_id':bson.ObjectId(fid)}))
+            df = pd.read_csv(StringIO.StringIO(data.read()[:-1]))
+            def label_sel_generator(df):
+                for label in np.unique(df['label']):
+                    sel = df['label'] == label
+                    yield label, sel
+            def X_Y_label_generator(df):
+                for label, sel in label_sel_generator(df):
+                    X = df['x'][sel]
+                    Y = df['y'][sel]
+                    yield X, Y, label
+            from plotly.offline import download_plotlyjs, init_notebook_mode, iplot, plot
+            from plotly.graph_objs import Bar, Layout, Figure
+            data = [Bar(x=X, y=Y, name=label, visible="legendonly") for (X,Y,label) in X_Y_label_generator(df)]
+            layout = Layout(xaxis={'title':'xtitle'}, yaxis={'title':'ytitle'}, barmode='stack')
+            fig = Figure(data=data, layout=layout)
+            plot(fig, filename=cache, auto_open=False)
+        with open(cache) as f:
+            return f.read()
+        return "Oops"
+    @bottle.route('/plot/Scatter/<fid>')
+    def plot_Scatter_fid(fid):
+        cache = "/tmp/cache/%s.html" % (fid)
         if not os.path.exists(cache):
             data = next(fs.find({'_id':bson.ObjectId(fid)}))
             df = pd.read_csv(StringIO.StringIO(data.read()[:-1]))
@@ -49,7 +73,7 @@ def httpd(db, args):
         table = [['runId', 'configId', 'plot']] + \
             [[run['runId'],
               HTML.link(run['configId'],'/config/%s' % run['configId']),
-              " ".join([HTML.link(k, '/plot/%s' % v) for k,v in run['files'].iteritems() ])] for run in db.run.find({'status':'done'})]
+              " ".join([HTML.link(k, '/plot/Scatter/%s' % v) for k,v in run['files'].iteritems() ])] for run in db.run.find({'status':'done'})]
         return HTML.table(table)
     @bottle.route('/config')
     def config_list():
