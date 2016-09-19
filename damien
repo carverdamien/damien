@@ -105,8 +105,8 @@ def daemon(db, args):
             _globals['config'] = config
             _locals = _globals
             exec(source,_globals,_locals)
-            if 'document' in _locals:
-                document = _locals['document']
+            if 'document' in _globals:
+                document = _globals['document']
                 db.run.update_one({'_id':run['_id']}, {"$set": {'document':document}})
                 if 'files' in document:
                     db.run.update_one({'_id':run['_id']}, {'$set':{ 'files':{} }})
