@@ -35,16 +35,20 @@ def do(client):
                 client.start(container=container[i]['Id'])
                 time.sleep(start_wait)
             def bench_single(i):
-                run = client.exec_create(container=container[i], cmd=cmd)
-                for line in client.exec_start(exec_id=run['Id'], stream=True):
-                    timestamp = datetime.datetime.fromtimestamp(time.time())
-                    res = parser.search(line)
-                    if res != None:
-                        for k,v in res.named.iteritems():
-                            label = "/".join(['c%d' % i , k])
-                            perfwriter.write(x=timestamp,y=v,label=label)
-                    else:
-                        print(line)
+                did_parse_something = False
+                while not did_parse_something:
+                    print('bench_single(%d)' % i)
+                    run = client.exec_create(container=container[i], cmd=cmd)
+                    for line in client.exec_start(exec_id=run['Id'], stream=True):
+                        timestamp = datetime.datetime.fromtimestamp(time.time())
+                        res = parser.search(line)
+                        if res != None:
+                            did_parse_something = True
+                            for k,v in res.named.iteritems():
+                                label = "/".join(['c%d' % i , k])
+                                perfwriter.write(x=timestamp,y=v,label=label)
+                        else:
+                            print(line)
             for i in range(N):
                 bench_single(i)
             for i in range(N):
