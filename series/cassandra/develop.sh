@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -x
 DBNAME=cassandra
-mongo<<EOF
+echo mongo<<EOF
 use ${DBNAME}
 db.dropDatabase()
 EOF

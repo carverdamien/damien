@@ -4,7 +4,7 @@ import lib.CsvWriter as CsvWriter
 import lib.Cgroup as Cgroup
 import docker, parse, datetime
 
-N = 1 # 4
+N = 3
 image = 'cassandra:latest'
 mem_limit = 3*2**30
 start_wait = 3*60
@@ -20,7 +20,7 @@ def do(client):
     try:
         for line in client.pull(image, stream=True):
             print(line)
-        host_config = client.create_host_config(mem_limit=mem_limit)
+        host_config = client.create_host_config(mem_limit=mem_limit, oom_kill_disable=True)
         container = [client.create_container(image=image,host_config=host_config) for i in range(N)]
         mapping = { os.path.join('docker',container[i]['Id']) : "c%d" % i for i in range(N)}
         mapping['docker'] = 'docker'
@@ -34,16 +34,19 @@ def do(client):
             for i in range(N):
                 client.start(container=container[i]['Id'])
                 time.sleep(start_wait)
-            for i in range(N):
+            def bench_single(i):
                 run = client.exec_create(container=container[i], cmd=cmd)
                 for line in client.exec_start(exec_id=run['Id'], stream=True):
                     timestamp = datetime.datetime.fromtimestamp(time.time())
                     res = parser.search(line)
                     if res != None:
                         for k,v in res.named.iteritems():
-                            perfwriter.write(x=timestamp,y=v,label=k)
+                            label = "/".join(['c%d' % i , k])
+                            perfwriter.write(x=timestamp,y=v,label=label)
                     else:
                         print(line)
+            for i in range(N):
+                bench_single(i)
             for i in range(N):
                 client.stop(container=container[i]['Id'])
     for i in range(N):
