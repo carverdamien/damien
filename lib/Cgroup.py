@@ -54,6 +54,8 @@ class CgroupCollector(Collector.Collector):
             v = { 'timestamp' : time.time() }
             # MEMORY
             directory = os.path.normpath(memory_mount_point + cgpath)
+            if not os.path.exists(directory):
+                continue
             for name in ['usage_in_bytes', 'limit_in_bytes', 'max_usage_in_bytes', 'soft_limit_in_bytes', 'failcnt'] + ['memsw.usage_in_bytes', 'memsw.limit_in_bytes', 'memsw.max_usage_in_bytes', 'memsw.failcnt']:
                 path = os.path.join(directory, 'memory.'+name)
                 with open(path) as f:

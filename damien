@@ -116,6 +116,7 @@ def daemon(db, args):
                             db.run.update_one({'_id':run['_id']}, {"$set":{ 'files.%s' % filename : fid}})
             db.run.update_one({'_id':run['_id']}, {"$set": {'status':'done'}})
         except StopIteration:
+            print('Waiting for a new run')
             time.sleep(1)
 daemon_parser.set_defaults(func=daemon)
 
