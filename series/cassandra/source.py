@@ -2,14 +2,15 @@
 import json, os, time
 import lib.CsvWriter as CsvWriter
 import lib.Cgroup as Cgroup
-import docker, parse, datetime
+import docker, parse, datetime, threading
 
 N = 3
 image = 'cassandra:latest'
 mem_limit = 3*2**30
 start_wait = 3*60
 #cmd = ['cassandra-stress', 'mixed', 'ratio(write=1,read=3)', 'n=100000', '-rate', 'threads=4']]
-cmd = ['cassandra-stress', 'write', 'duration=3m', '-rate', 'threads=4']
+def cmd(duration):
+    return ['cassandra-stress', 'write', 'duration=%s' % duration, '-rate', 'threads=4']
                 # """type totalops,op/s,pk/s,row/s,mean,med,.95,.99,.999,max,time,stderr,errors,gc: #,max ms, sum ms,sdv ms,mb"""
 expected_output = """total,{:s}{total_ops},{:s}{op_s},{:s}{pk_s},{:s}{row_ps},{:s}{mean},{:s}{med},{:s}{perc95},{:s}{perc99},{:s}{perc999},{:s}{max},{:s}{time},{:s}{stderr},{:s}{erros},{:s}{gc_count},{:s}{max_ms},{:s}{sum_ms},{:s}{sdv_ms},{:s}{mb}"""
 parser = parse.compile(expected_output)
@@ -34,11 +35,12 @@ def do(client):
             for i in range(N):
                 client.start(container=container[i]['Id'])
                 time.sleep(start_wait)
-            def bench_single(i):
+            def bench_single(i, duration):
                 did_parse_something = False
-                while not did_parse_something:
+                did_succeed = False
+                while not did_parse_something or not did_succeed:
                     print('bench_single(%d)' % i)
-                    run = client.exec_create(container=container[i], cmd=cmd)
+                    run = client.exec_create(container=container[i], cmd=cmd(duration))
                     for line in client.exec_start(exec_id=run['Id'], stream=True):
                         timestamp = datetime.datetime.fromtimestamp(time.time())
                         res = parser.search(line)
@@ -48,9 +50,17 @@ def do(client):
                                 label = "/".join(['c%d' % i , k])
                                 perfwriter.write(x=timestamp,y=v,label=label)
                         else:
-                            print(line)
-            for i in range(N):
-                bench_single(i)
+                            if line not in ['', '\n']:
+                                print(line)
+                    did_succeed = client.exec_inspect(run)['ExitCode'] == 0
+                    if not did_succeed:
+                        print('WARING: bench_single(%d) did not succeed' % i)
+            t = threading.Thread(target=bench_single, args=(0,'35m'))
+            t.start()
+            time.sleep(10*60)
+            for i in range(1,N):
+                bench_single(i,'10m')
+            t.join()
             for i in range(N):
                 client.stop(container=container[i]['Id'])
     for i in range(N):
