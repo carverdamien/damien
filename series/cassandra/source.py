@@ -10,7 +10,7 @@ mem_limit = 3*2**30
 start_wait = 3*60
 #cmd = ['cassandra-stress', 'mixed', 'ratio(write=1,read=3)', 'n=100000', '-rate', 'threads=4']]
 def cmd(duration):
-    return ['cassandra-stress', 'write', 'duration=%s' % duration, '-rate', 'threads=4']
+    return ['cassandra-stress', 'write', 'duration=%s' % duration, '-rate', 'threads=4'] #, '-log', 'interval=10']
                 # """type totalops,op/s,pk/s,row/s,mean,med,.95,.99,.999,max,time,stderr,errors,gc: #,max ms, sum ms,sdv ms,mb"""
 expected_output = """total,{:s}{total_ops},{:s}{op_s},{:s}{pk_s},{:s}{row_ps},{:s}{mean},{:s}{med},{:s}{perc95},{:s}{perc99},{:s}{perc999},{:s}{max},{:s}{time},{:s}{stderr},{:s}{erros},{:s}{gc_count},{:s}{max_ms},{:s}{sum_ms},{:s}{sdv_ms},{:s}{mb}"""
 parser = parse.compile(expected_output)
@@ -55,11 +55,11 @@ def do(client):
                     did_succeed = client.exec_inspect(run)['ExitCode'] == 0
                     if not did_succeed:
                         print('WARING: bench_single(%d) did not succeed' % i)
-            t = threading.Thread(target=bench_single, args=(0,'35m'))
+            t = threading.Thread(target=bench_single, args=(0,'100m'))
             t.start()
             time.sleep(10*60)
             for i in range(1,N):
-                bench_single(i,'10m')
+                bench_single(i,'30m')
             t.join()
             for i in range(N):
                 client.stop(container=container[i]['Id'])
