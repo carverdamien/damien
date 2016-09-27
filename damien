@@ -31,6 +31,8 @@ def collector(db, args):
         spawn_worker(container['Id'])
     for event in clt.events(decode=True):
         print(event)
+        if 'status' not in event:
+            continue
         status = event['status']
         if status == 'start':
             spawn_worker(event['id'])
