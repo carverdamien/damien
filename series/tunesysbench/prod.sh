@@ -11,7 +11,7 @@ cat <<EOF
     "dbsize" : ${dbsize},
     "mem_limit" : ${mem_limit},
     "cpuset_cpus" : "0,1,4,5",
-    "threads" : 4
+    "threads" : 8
 }
 EOF
 }
