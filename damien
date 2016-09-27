@@ -10,14 +10,14 @@ collector_parser = main_subparsers.add_parser('collector')
 def collector(db, args):
     import docker, threading
     def collect(db, clt, Id):
-        try:
-            db.dockercontainers.insert_one(clt.inspect_container(Id))
-        except Exception as e:
-            print(e)
         count = 0
         for stat in clt.stats(Id, decode=True):
             count += 1
             stat['Id'] = Id
+            try:
+                db.dockercontainers.insert_one(clt.inspect_container(Id))
+            except Exception as e:
+                pass
             db.dockerstats.insert_one(stat)
             print(Id, count)
     def spawn_worker(Id):
