@@ -53,6 +53,7 @@ class Sysbench(object):
             raise Exception()
     def bench(self, db, threads, duration):
         p = self.sysbench(['--report-interval=1',
+                           '--max-requests=0',
                            '--max-time=%d' % duration, 
                            '--num-threads=%d' % threads, 'run'], stdout=subprocess.PIPE)
         for line in p.stdout:
