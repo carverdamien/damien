@@ -1,40 +1,52 @@
-import pymongo, itertools, datetime
-
+import pymongo, itertools, datetime, time
+import numpy as np
 import plotly.offline # import download_plotlyjs, init_notebook_mode, iplot, plot
 import plotly.graph_objs # import Scatter, Layout, Figure
 
 convert_read_to_datetime = lambda x : datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
-convert_timestamp_to_datetime = lambda x : datetime.datetime.fromtimestamp(float(x))
-do_not_convert = lambda y : y
+convert_datetime_to_timestamp = lambda x : time.mktime(x.timetuple())
+convert_timestamp_to_datetime = lambda x : datetime.datetime.utcfromtimestamp(float(x))
 
+containers = [{'$regex':'^8e700'}, {'$regex':'^ac133'}]
 curves = [{
-    'label' : 'tunesysbench/23e73b86bc2a/mem/cache',
-    'dbname' : 'tunesysbench',
-    'collection' : 'dockerstats',
-    'match' : {'Id' : {'$regex':'^23e73b86bc2a'}},
-    'project' : {'x' : '$read', 'y': "$memory_stats.stats.cache"},
-    'convert' : {'x' : convert_read_to_datetime, 'y' : do_not_convert}
-},
-{
-    'label' : 'tunesysbench/23e73b86bc2a/trps',
+    'label' : '%s.trps' % Id['$regex'],
     'dbname' : 'tunesysbench',
     'collection' : 'sysbench',
-    'match' : {'Id' : {'$regex':'^23e73b86bc2a'}},
+    'match' : {'Id' : Id},
     'project' : {'x' : '$timestamp', 'y': "$trps"},
-    'convert' : {'x' : convert_timestamp_to_datetime, 'y' : do_not_convert}
-}]
+    'convert' : lambda x,y : (convert_timestamp_to_datetime(x), y)
+} for Id in containers]
+curves += [{
+    'label' : '%s%s' % (Id['$regex'], metric),
+    'dbname' : 'tunesysbench',
+    'collection' : 'dockerstats',
+    'match' : {'Id' : Id},
+    'project' : {'x' : '$read', 'y': "$memory_stats%s" % metric},
+    'convert' : lambda x,y : (convert_read_to_datetime(x), y)
+} for Id in containers for metric in ['.usage','.limit', '.stats.cache', '.stats.active_file', '.stats.inactive_file']]
 
-def XY(collection, dbname, match, project, convert, **kwargs):
+curves += [{
+    'label' : '%s%s' % (Id['$regex'], metric),
+    'dbname' : 'tunesysbench',
+    'collection' : 'dockerstats',
+    'match' : {'Id' : Id},
+    'project' : {'x' : '$read', 'y': "$blkio_stats%s" % metric},
+    'convert' : lambda x,y : (convert_read_to_datetime(x),y[4]['value']),
+    'vector' : lambda X,Y : (X, np.gradient(Y, np.gradient([convert_datetime_to_timestamp(x) for x in X])))
+} for Id in containers for metric in ['.io_service_bytes_recursive']]
+
+def XY(collection, dbname, match, project, convert=lambda x,y : (x,y), **kwargs):
     X = []
     Y = []
     db = pymongo.MongoClient()[dbname]
     for e in db[collection].aggregate([{"$match" : match}, {"$project": project}]):
-        X.append(convert['x'](e['x']))
-        Y.append(convert['y'](e['y']))
+        x , y = convert(e['x'], e['y'])
+        X.append(x)
+        Y.append(y)
     return X, Y
 
-def Scatter(label, **kwargs):
-    X, Y = XY(**kwargs)
+def Scatter(label, vector=lambda X,Y : (X,Y), **kwargs):
+    X, Y = vector(*XY(**kwargs))
     return plotly.graph_objs.Scatter(x=X, y=Y, name=label, visible="legendonly")
 
 data = [Scatter(**curve) for curve in curves]
