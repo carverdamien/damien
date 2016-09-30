@@ -5,6 +5,7 @@ assert(db != None)
 assert(run != None)
 
 dbsize = config['dbsize']
+oltp_read_only = config['oltp_read_only']
 mem_limit = config['mem_limit']
 cpuset_cpus = config['cpuset_cpus']
 #cpuset_cpus ? cpu_group/cpu_period?
@@ -51,11 +52,14 @@ class Sysbench(object):
         p.wait()
         if p.returncode != 0:
             raise Exception()
-    def bench(self, db, threads, duration):
-        p = self.sysbench(['--report-interval=1',
-                           '--max-requests=0',
-                           '--max-time=%d' % duration, 
-                           '--num-threads=%d' % threads, 'run'], stdout=subprocess.PIPE)
+    def bench(self, db, threads, duration, oltp_read_only):
+        cmd = ['--report-interval=1',
+               '--max-requests=0',
+               '--max-time=%d' % duration,
+               '--num-threads=%d' % threads, 'run']
+        if oltp_read_only:
+            cmd = ['--oltp-read-only=on'] + cmd
+        p = self.sysbench(cmd, stdout=subprocess.PIPE)
         for line in p.stdout:
             res = parser.search(line)
             if res != None:
@@ -81,7 +85,7 @@ sysbench = Sysbench(container, getIp(client, container), dbsize)
 sysbench.wait_for_server_to_start()
 sysbench.create_db()
 sysbench.fill_db()
-sysbench.bench(db, threads=threads, duration=duration)
+sysbench.bench(db, threads=threads, duration=duration, oltp_read_only=oltp_read_only)
 client.stop(container)
 client.remove_container(container, v=True)
 db.run.update_one({'_id':run['_id']}, {'$set':{ 'container': container}})

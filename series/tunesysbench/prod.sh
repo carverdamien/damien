@@ -9,6 +9,7 @@ cat <<EOF
     "sourceId" : "${SOURCEID}",
     "duration" : 1800,
     "dbsize" : ${dbsize},
+    "oltp_read_only" : ${oltp_read_only},
     "mem_limit" : ${mem_limit},
     "cpuset_cpus" : "0,1,4,5",
     "threads" : 8
@@ -19,6 +20,7 @@ MB=$((2**20))
 GB=$((2**30))
 k=$((10**3))
 M=$((10**6))
+oltp_read_only='true'
 for mem_limit in $((512*MB)) $GB $((2*GB)) $((2*GB+512*MB)) $((3*GB))
 do
     for dbsize in $((100*k)) $((500*k)) $M $((2*M)) $((3*M)) $((4*M)) $((5*M)) $((6*M)) $((7*M)) $((8*M)) $((9*M)) $((10*M))
