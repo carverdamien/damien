@@ -82,7 +82,36 @@ def httpd(db, args):
         return "Not Found"
     @bottle.route('/dockerstats/<listId>/<stat>.csv')
     def dockerstats_csv(listId,stat):
-        return "x,y,label\n0,0,todo\n1,1,todo\n"
+        if stat not in ['memory']:
+            return "Oops"
+        directory = os.path.join('cache','dockerstats','listId')
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        filename = os.path.join(directory, stat + '.csv')
+        # cache miss
+        if not os.path.exists(filename):
+            with open(filename, 'w') as f:
+                csvwriter = csv.writer(f)
+                csvwriter.writerow(['x','y','label'])
+                for Id in listId.split(','):
+                    label = [Id[:4]]
+                    if stat == 'memory':
+                        for mem in db.dockerstats.find({'Id':Id},{'memory_stats':1,'read':1}):
+                            x = mem['read']
+                            x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+                            y = mem['memory_stats']
+                            def flat(key, y):
+                                if type(y) == dict:
+                                    for k, v in y.iteritems():
+                                        flat(key+[k], v)
+                                elif type(y) == list:
+                                    print(y)
+                                else:
+                                    csvwriter.writerow([x,y,".".join(key)])
+                            flat(label,y)
+        with open(filename) as f:
+            return f.read()
+        return "x,y,label\n0,0,oops\n1,1,oops\n"
     @bottle.route('/sysbench/<listId>/perf.csv')
     def sysbench_csv(listId):
         return "x,y,label\n0,0,todo\n1,1,todo\n"
