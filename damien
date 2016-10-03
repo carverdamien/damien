@@ -42,7 +42,7 @@ collector_parser.set_defaults(func=collector)
 httpd_parser = main_subparsers.add_parser('httpd')
 def httpd(db, args):
     import lib.HTML as HTML
-    import bottle, csv, StringIO, datetime
+    import bottle, csv, StringIO, datetime, itertools
     import pandas as pd
     import numpy as np
     import plotly.offline
@@ -82,7 +82,7 @@ def httpd(db, args):
         return "Not Found"
     @bottle.route('/dockerstats/<listId>/<stat>.csv')
     def dockerstats_csv(listId,stat):
-        if stat not in ['memory']:
+        if stat not in ['memory', 'blkio']:
             return "Oops"
         directory = os.path.join('cache','dockerstats','listId')
         if not os.path.exists(directory):
@@ -96,10 +96,10 @@ def httpd(db, args):
                 for Id in listId.split(','):
                     label = [Id[:4]]
                     if stat == 'memory':
-                        for mem in db.dockerstats.find({'Id':Id},{'memory_stats':1,'read':1}):
-                            x = mem['read']
+                        for entry in db.dockerstats.find({'Id':Id},{'memory_stats':1,'read':1}):
+                            x = entry['read']
                             x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
-                            y = mem['memory_stats']
+                            y = entry['memory_stats']
                             def flat(key, y):
                                 if type(y) == dict:
                                     for k, v in y.iteritems():
@@ -109,6 +109,30 @@ def httpd(db, args):
                                 else:
                                     csvwriter.writerow([x,y,".".join(key)])
                             flat(label,y)
+                    elif stat == 'blkio':
+                        X = []
+                        YREAD = []
+                        YWRITE = []
+                        for entry in db.dockerstats.find({'Id':Id},{'blkio_stats':1,'read':1}):
+                            x = entry['read']
+                            x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+                            yr = 0
+                            yw = 0
+                            for data in entry['blkio_stats']['io_service_bytes_recursive']:
+                                if data['op'] == 'Write':
+                                    yw += data['value']
+                                elif data['op'] == 'Read':
+                                    yr += data['value']
+                            X.append(x)
+                            YWRITE.append(yw)
+                            YREAD.append(yr)
+                        dx = np.gradient([time.mktime(x.timetuple()) for x in X])
+                        YWRITE = np.gradient(YWRITE, dx)
+                        YREAD = np.gradient(YREAD, dx)
+                        for x,y in itertools.izip(X,YWRITE):
+                            csvwriter.writerow([x,y,".".join(label+['w'])])
+                        for x,y in itertools.izip(X,YREAD):
+                            csvwriter.writerow([x,y,".".join(label+['r'])])
         with open(filename) as f:
             return f.read()
         return "x,y,label\n0,0,oops\n1,1,oops\n"
