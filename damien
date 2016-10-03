@@ -84,7 +84,7 @@ def httpd(db, args):
     def dockerstats_csv(listId,stat):
         if stat not in ['memory', 'blkio']:
             return "Oops"
-        directory = os.path.join('cache','dockerstats','listId')
+        directory = os.path.join('cache','dockerstats',listId)
         if not os.path.exists(directory):
             os.makedirs(directory)
         filename = os.path.join(directory, stat + '.csv')
@@ -93,12 +93,17 @@ def httpd(db, args):
             with open(filename, 'w') as f:
                 csvwriter = csv.writer(f)
                 csvwriter.writerow(['x','y','label'])
+                x0 = datetime.datetime.now()
                 for Id in listId.split(','):
                     label = [Id[:4]]
                     if stat == 'memory':
+                        myx0 = None
                         for entry in db.dockerstats.find({'Id':Id},{'memory_stats':1,'read':1}):
                             x = entry['read']
                             x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+                            if myx0 == None:
+                                myx0 = x
+                            x = x0 + (x-myx0)
                             y = entry['memory_stats']
                             def flat(key, y):
                                 if type(y) == dict:
@@ -113,9 +118,13 @@ def httpd(db, args):
                         X = []
                         YREAD = []
                         YWRITE = []
+                        myx0 = None
                         for entry in db.dockerstats.find({'Id':Id},{'blkio_stats':1,'read':1}):
                             x = entry['read']
                             x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+                            if myx0 == None:
+                                myx0 = x
+                            x = x0 + (x-myx0)
                             yr = 0
                             yw = 0
                             for data in entry['blkio_stats']['io_service_bytes_recursive']:
@@ -127,12 +136,15 @@ def httpd(db, args):
                             YWRITE.append(yw)
                             YREAD.append(yr)
                         dx = np.gradient([time.mktime(x.timetuple()) for x in X])
+                        Y = np.gradient(np.array(YREAD)+np.array(YWRITE),dx)
                         YWRITE = np.gradient(YWRITE, dx)
                         YREAD = np.gradient(YREAD, dx)
                         for x,y in itertools.izip(X,YWRITE):
                             csvwriter.writerow([x,y,".".join(label+['w'])])
                         for x,y in itertools.izip(X,YREAD):
                             csvwriter.writerow([x,y,".".join(label+['r'])])
+                        for x,y in itertools.izip(X,Y):
+                            csvwriter.writerow([x,y,".".join(label+['total'])])
         with open(filename) as f:
             return f.read()
         return "x,y,label\n0,0,oops\n1,1,oops\n"
