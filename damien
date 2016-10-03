@@ -43,23 +43,50 @@ httpd_parser = main_subparsers.add_parser('httpd')
 def httpd(db, args):
     import lib.HTML as HTML
     import bottle, csv, StringIO, datetime
+    fs = gridfs.GridFS(db)
     @bottle.route('/run')
     def run_list():
-        table = [['runId', 'configId']] + \
-            [[run['runId'],
-              HTML.link(run['configId'],'/config/%s' % run['configId'])] for run in db.run.find({'status':'done'})]
+        table = [['runId', 'configId', 'config']]
+        for run in db.run.find({'status':'done'}):
+            runId = run['runId']
+            configId = run['configId']
+            link_runId = HTML.link(runId[-4:],'/run/%s' % runId)
+            link_configId = HTML.link(configId[:4],'/config/%s' % configId)
+            config = next(db.config.find({'configId':configId},{'_id':0, 'sourceId':0, 'configId':0}))
+            table.append([link_runId, link_configId, str(config)])
         return HTML.table(table)
+    @bottle.route('/run/<runId>')
+    def run_show(runId):
+        return "TODO"
     @bottle.route('/config')
     def config_list():
-        table = [['configId']] + \
-        [[HTML.link(config['configId'], '/config/%s' % config['configId'])] for config in db.config.find({})]
+        table = [['configId', 'sourceId', 'values']]
+        for config in db.config.find({},{'_id':0}):
+            configId = config['configId']
+            del config['configId']
+            sourceId = config['sourceId']
+            del config['sourceId']
+            values = str(config)
+            link_configId = HTML.link(configId[:4], '/config/%s' % configId)
+            link_sourceId = HTML.link(sourceId[:4], '/source/%s' % sourceId)
+            table.append([link_configId, link_sourceId, str(config)])
         return HTML.table(table)
     @bottle.route('/config/<configId>')
     def config_show(configId):
-        for config in db.config.find({'configId':configId}):
-            del config['_id']
-            return json.dumps(config, sort_keys=True, indent=1)
-        return "Not Found"
+        table = [['runId', 'status', 'extra']]
+        for run in db.run.find({'configId':configId}, {'_id':0, 'configId':0}):
+            runId = run['runId']
+            del run['runId']
+            status = run['status']
+            del run['status']
+            extra = str(run)
+            link_runId = HTML.link(runId[-4:], '/run/%s' % runId)
+            table.append([link_runId, status, extra])
+        return HTML.table(table)
+    @bottle.route('/source/<sourceId>')
+    def source_show(sourceId):
+        source = matches_only_one_source(fs, sourceId)
+        return source.read()[:-1]
     bottle.run(host='0.0.0.0', port=8080, debug=True)
 httpd_parser.set_defaults(func=httpd)
 
