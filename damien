@@ -43,6 +43,10 @@ httpd_parser = main_subparsers.add_parser('httpd')
 def httpd(db, args):
     import lib.HTML as HTML
     import bottle, csv, StringIO, datetime
+    import pandas as pd
+    import numpy as np
+    import plotly.offline
+    import plotly.graph_objs
     fs = gridfs.GridFS(db)
     @bottle.route('/run')
     def run_list():
@@ -57,7 +61,53 @@ def httpd(db, args):
         return HTML.table(table)
     @bottle.route('/run/<runId>')
     def run_show(runId):
-        return "TODO"
+        table = []
+        run = next(db.run.find({'runId':runId}))
+        if 'container' in run:
+            container = run['container']
+            row = ['container', HTML.link('inspect', '/dockercontainers/%s' % container['Id'])]
+            for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
+                row += [HTML.link("%s.%s" % (stat, ext),
+                        '/dockerstats/%s/%s.%s' % (container['Id'], stat, ext) )
+                        for ext in ['csv', 'html']
+                        for stat in ['cpu','memory','blkio', 'netio']]
+            for d in db.sysbench.find({'Id':container['Id']}).limit(1):
+                row += [HTML.link('sysbench.%s' % ext, '/sysbench/%s/perf.%s' % (container['Id'], ext)) for ext in ['csv', 'html']]
+            table.append(row)
+        return HTML.table(table)
+    @bottle.route('/dockercontainers/<Id>')
+    def dockercontainers(Id):
+        for container in db.dockercontainers.find({'Id':Id}).limit(1):
+            return str(container)
+        return "Not Found"
+    @bottle.route('/dockerstats/<listId>/<stat>.csv')
+    def dockerstats_csv(listId,stat):
+        return "x,y,label\n0,0,todo\n1,1,todo\n"
+    @bottle.route('/sysbench/<listId>/perf.csv')
+    def sysbench_csv(listId):
+        return "x,y,label\n0,0,todo\n1,1,todo\n"
+    @bottle.route('/<collection>/<selector>/<path>.html')
+    def plot_any(collection, selector, path):
+        environ = {'REQUEST_METHOD' : 'GET', 'PATH_INFO' : '/%s/%s/%s.csv' % (collection, selector, path)}
+        target, args = bottle.default_app().router.match(environ)
+        csv = target(**args)
+        df = pd.read_csv(StringIO.StringIO(csv))
+        def label_sel_generator(df):
+            for label in np.unique(df['label']):
+                sel = df['label'] == label
+                yield label, sel
+        def X_Y_label_generator(df):
+            for label, sel in label_sel_generator(df):
+                X = df['x'][sel]
+                Y = df['y'][sel]
+                yield X, Y, label
+        data = [plotly.graph_objs.Scatter(x=X, y=Y, name=label, visible="legendonly") for (X,Y,label) in X_Y_label_generator(df)]
+        layout = plotly.graph_objs.Layout(showlegend=True)
+        figure = plotly.graph_objs.Figure(data=data, layout=layout)
+        plotly.offline.plot(figure, filename='toto.html', auto_open=False)
+        with open('toto.html') as f:
+            return f.read()
+        return "Oops"
     @bottle.route('/config')
     def config_list():
         table = [['configId', 'sourceId', 'values']]
