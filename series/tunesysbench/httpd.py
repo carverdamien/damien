@@ -3,55 +3,65 @@ def httpd_tunesysbench():
     # x = dbsize
     # y = metric (perf, ressource)
     # label = [readonly, memlimit, aggregator, metric]
-    alldbsize = [e['_id']['dbsize']
+    alldbsize = sorted([e['_id']['dbsize']
                  for e in db.config.aggregate([{
                          '$group': {
                              '_id': {
                                  'dbsize':'$dbsize'
                              }
                          }
-                 }])]
-    allmem_limit = [e['_id']['mem_limit']
+                 }])])
+    allmem_limit = sorted([e['_id']['mem_limit']
                  for e in db.config.aggregate([{
                          '$group': {
                              '_id': {
                                  'mem_limit':'$mem_limit'
                              }
                          }
-                 }])]
-    def rtps(run):
-        return [0,1] , [10,100]
-    allmetric = [rtps]
+                 }])])
+    def gen_func(key):
+        def func(run):
+            T = []
+            Y = []
+            for e in db.sysbench.find({'Id':run['container']['Id']}):
+                T.append(float(e['timestamp']))
+                Y.append(float(e[key]))
+            return T, Y
+        func.func_name = key
+        return func
+    allmetric = [gen_func('rtps'), gen_func('trps')]
     def max(T,M):
         return np.amax(M)
     def mean(T,M):
         return np.mean(M)
-    allaggregator = [mean,max]
+    allaggregator = [mean]
     directory = os.path.join(cache_dir, 'tunesysbench/global')
     if not os.path.exists(directory):
         os.makedirs(directory)
     filename = os.path.join(directory, 'view.csv')
-    with open(filename, 'w') as f:
-        csvwriter = csv.writer(f)
-        csvwriter.writerow(['x','y','label'])
-        for dbsize in alldbsize:
-            x = dbsize
-            for mem_limit in allmem_limit:
-                for readonly, match_config in [('r',{'oltp_read_only':True, 'mem_limit' : mem_limit}), ('rw',{'mem_limit':mem_limit})]:
-                    match_config['dbsize'] = dbsize
-                    for config in db.config.find(match_config):
-                        configId = config['configId']
-                        for run in db.run.find({'configId':configId}):
-                            for metric in allmetric:
-                                T,M = metric(run)
-                                for aggregate in allaggregator:
-                                    y = aggregate(T,M)
-                                    label = '.'.join([readonly,
-                                                      ''.join([aggregate.func_name,
-                                                               '(',
-                                                               metric.func_name,
-                                                               ')']),])
-                                    csvwriter.writerow([x,y,label])
+    if not os.path.exists(filename):
+        with open(filename, 'w') as f:
+            csvwriter = csv.writer(f)
+            csvwriter.writerow(['x','y','label'])
+            for dbsize in alldbsize:
+                x = dbsize
+                for mem_limit in allmem_limit:
+                    for readonly, match_config in [('r',{'oltp_read_only':{'$exists':True}, 'mem_limit' : mem_limit}), ('rw',{'oltp_read_only':{'$exists':False}, 'mem_limit':mem_limit})]:
+                        match_config['dbsize'] = dbsize
+                        for config in db.config.find(match_config):
+                            configId = config['configId']
+                            for run in db.run.find({'configId':configId}):
+                                for metric in allmetric:
+                                    T,M = metric(run)
+                                    for aggregate in allaggregator:
+                                        y = aggregate(T,M)
+                                        label = '.'.join([readonly,
+                                                          str(mem_limit/(2**20))+'MB',
+                                                          ''.join([aggregate.func_name,
+                                                                   '(',
+                                                                   metric.func_name,
+                                                                   ')']),])
+                                        csvwriter.writerow([x,y,label])
     with open(filename) as f:
         return f.read()
     return "oops"
