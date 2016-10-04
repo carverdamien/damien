@@ -159,6 +159,8 @@ def httpd(db, args):
         if os.path.exists(filename_html):
             with open(filename_html) as f:
                 return f.read()
+        elif not os.path.exists(directory_html):
+            os.makedirs(directory_html)
         if not os.path.exists(filename_csv):
             environ = {'REQUEST_METHOD' : 'GET', 'PATH_INFO' : '/%s/%s/%s.csv' % (collection, selector, filename)}
             target, args = bottle.default_app().router.match(environ)
@@ -178,8 +180,8 @@ def httpd(db, args):
         data = [plotly.graph_objs.Scatter(x=X, y=Y, name=label, visible="legendonly") for (X,Y,label) in X_Y_label_generator(df)]
         layout = plotly.graph_objs.Layout(showlegend=True)
         figure = plotly.graph_objs.Figure(data=data, layout=layout)
-        plotly.offline.plot(figure, filename='toto.html', auto_open=False)
-        with open('toto.html') as f:
+        plotly.offline.plot(figure, filename=filename_html, auto_open=False)
+        with open(filename_html) as f:
             return f.read()
         return "Oops"
     @bottle.route('/config')
