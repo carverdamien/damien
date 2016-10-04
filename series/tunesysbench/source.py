@@ -8,6 +8,8 @@ dbsize = config['dbsize']
 oltp_read_only = config['oltp_read_only']
 mem_limit = config['mem_limit']
 cpuset_cpus = config['cpuset_cpus']
+device_read_bps = config['device_read_bps']
+device_write_bps = config['device_write_bps']
 #cpuset_cpus ? cpu_group/cpu_period?
 #device_read_bps/device_write_bps? device_read_iops/device_write_iops?
 threads = config['threads']
@@ -78,7 +80,7 @@ def getIp(client, container):
 client = docker.Client()
 assert(len([c for c in client.containers(all=True)]) == 0)
 for line in client.pull(image, stream=True): print(line)
-host_config = client.create_host_config(mem_limit=mem_limit, oom_kill_disable=True, cpuset_cpus=cpuset_cpus)
+host_config = client.create_host_config(mem_limit=mem_limit, oom_kill_disable=True, cpuset_cpus=cpuset_cpus, device_write_bps=device_write_bps, device_read_bps=device_read_bps)
 container = client.create_container(image=image, host_config=host_config, environment=environment)
 client.start(container)
 sysbench = Sysbench(container, getIp(client, container), dbsize)
