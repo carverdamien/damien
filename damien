@@ -40,6 +40,7 @@ def collector(db, args):
 collector_parser.set_defaults(func=collector)
 
 httpd_parser = main_subparsers.add_parser('httpd')
+httpd_parser.add_argument('--cache_dir', type=str, nargs='?', default='./httpd')
 def httpd(db, args):
     import lib.HTML as HTML
     import bottle, csv, StringIO, datetime, itertools
@@ -48,6 +49,7 @@ def httpd(db, args):
     import plotly.offline
     import plotly.graph_objs
     fs = gridfs.GridFS(db)
+    cache_dir = args.cache_dir
     @bottle.route('/run')
     def run_list():
         table = [['runId', 'configId', 'config']]
@@ -67,9 +69,11 @@ def httpd(db, args):
             container = run['container']
             row = ['container', HTML.link('inspect', '/dockercontainers/%s' % container['Id'])]
             for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
-                row += [HTML.link("%s.%s" % (stat, ext),
-                        '/plot/Scatter/dockerstats/%s/%s.%s' % (container['Id'], stat, ext) )
-                        for ext in ['csv', 'html']
+                row += [HTML.link("%s.html" % stat,
+                        '/plotly/Scatter/dockerstats/%s/%s.html' % (container['Id'], stat))
+                        for stat in ['cpu','memory','blkio', 'netio']]
+                row += [HTML.link("%s.csv" % stat,
+                        '/dockerstats/%s/%s.csv' % (container['Id'], stat))
                         for stat in ['cpu','memory','blkio', 'netio']]
             table.append(row)
         return HTML.table(table)
@@ -82,7 +86,7 @@ def httpd(db, args):
     def dockerstats_csv(listId,stat):
         if stat not in ['memory', 'blkio']:
             return "Oops"
-        directory = os.path.join('cache','dockerstats',listId)
+        directory = os.path.join(cache_dir,'dockerstats',listId)
         if not os.path.exists(directory):
             os.makedirs(directory)
         filename = os.path.join(directory, stat + '.csv')
@@ -146,12 +150,22 @@ def httpd(db, args):
         with open(filename) as f:
             return f.read()
         return "x,y,label\n0,0,oops\n1,1,oops\n"
-    @bottle.route('/plot/<plottype>/<collection>/<selector>/<path>.html')
-    def plot_any(plottype, collection, selector, path):
-        environ = {'REQUEST_METHOD' : 'GET', 'PATH_INFO' : '/%s/%s/%s.csv' % (collection, selector, path)}
-        target, args = bottle.default_app().router.match(environ)
-        csv = target(**args)
-        df = pd.read_csv(StringIO.StringIO(csv))
+    @bottle.route('/plotly/<plottype>/<collection>/<selector>/<filename>.html')
+    def plot_any(plottype, collection, selector, filename):
+        directory_csv = os.path.join(cache_dir, collection, selector)
+        filename_csv = os.path.join(directory_csv, filename + '.csv')
+        directory_html = os.path.join(cache_dir, 'plotly', plottype, collection, selector)
+        filename_html = os.path.join(directory_html, filename + '.html')
+        if os.path.exists(filename_html):
+            with open(filename_html) as f:
+                return f.read()
+        if not os.path.exists(filename_csv):
+            environ = {'REQUEST_METHOD' : 'GET', 'PATH_INFO' : '/%s/%s/%s.csv' % (collection, selector, filename)}
+            target, args = bottle.default_app().router.match(environ)
+            csv = target(**args)
+            df = pd.read_csv(StringIO.StringIO(csv))
+        else:
+            df = pd.read_csv(filename_csv)
         def label_sel_generator(df):
             for label in np.unique(df['label']):
                 sel = df['label'] == label
