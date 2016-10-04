@@ -43,13 +43,30 @@ httpd_parser = main_subparsers.add_parser('httpd')
 httpd_parser.add_argument('--cache_dir', type=str, nargs='?', default='./httpd')
 def httpd(db, args):
     import lib.HTML as HTML
-    import bottle, csv, StringIO, datetime, itertools
+    import bottle, csv, StringIO, datetime, itertools, shutil
     import pandas as pd
     import numpy as np
     import plotly.offline
     import plotly.graph_objs
     fs = gridfs.GridFS(db)
     cache_dir = args.cache_dir
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+    # @bottle.route('/clearCache')
+    # def clearCache():
+    #     shutil.rmtree(cache_dir)
+    #     os.makedirs(cache_dir)
+    #     return cache_index()
+    @bottle.route('/')
+    def cache_index():
+        clear = HTML.link('clearCache', 'clearCache')
+        table = [['cache', clear]]
+        for dirName, subdirList, fileList in os.walk(cache_dir):
+            for fname in fileList:
+                link = os.path.join(os.path.join(*dirName.split('/')[2:]), fname)
+                link = HTML.link(link, link)
+                table += [[link]]
+        return HTML.table(table)
     @bottle.route('/run')
     def run_list():
         table = [['runId', 'configId', 'config']]
