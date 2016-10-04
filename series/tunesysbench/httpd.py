@@ -35,8 +35,19 @@ def httpd_tunesysbench():
         for e in db.dockerstats.find({'Id':run['container']['Id']}):
             T.append(e['read']) #datetime
             Y.append(e['memory_stats']['usage'])
-        return Y, Y
-    allmetric = [gen_perf_func('rtps'), gen_perf_func('trps'), memusage]
+        return T, Y
+    def diskio(run):
+        T = []
+        Y = []
+        for e in db.dockerstats.find({'Id':run['container']['Id']}):
+            t = e['read']
+            t = datetime.datetime.strptime(t[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+            T.append(t)
+            Y.append(sum([data['value'] for data in e['blkio_stats']['io_service_bytes_recursive'] if data['op'] == 'Total']))
+        dt = np.gradient([time.mktime(t.timetuple()) for t in T])
+        Y = np.gradient(Y, dt)
+        return T, Y
+    allmetric = [gen_perf_func('rtps'), gen_perf_func('trps'), memusage, diskio]
     def max(T,M):
         return np.amax(M)
     def mean(T,M):
