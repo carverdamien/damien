@@ -68,11 +68,9 @@ def httpd(db, args):
             row = ['container', HTML.link('inspect', '/dockercontainers/%s' % container['Id'])]
             for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
                 row += [HTML.link("%s.%s" % (stat, ext),
-                        '/dockerstats/%s/%s.%s' % (container['Id'], stat, ext) )
+                        '/plot/Scatter/dockerstats/%s/%s.%s' % (container['Id'], stat, ext) )
                         for ext in ['csv', 'html']
                         for stat in ['cpu','memory','blkio', 'netio']]
-            for d in db.sysbench.find({'Id':container['Id']}).limit(1):
-                row += [HTML.link('sysbench.%s' % ext, '/sysbench/%s/perf.%s' % (container['Id'], ext)) for ext in ['csv', 'html']]
             table.append(row)
         return HTML.table(table)
     @bottle.route('/dockercontainers/<Id>')
@@ -148,11 +146,8 @@ def httpd(db, args):
         with open(filename) as f:
             return f.read()
         return "x,y,label\n0,0,oops\n1,1,oops\n"
-    @bottle.route('/sysbench/<listId>/perf.csv')
-    def sysbench_csv(listId):
-        return "x,y,label\n0,0,todo\n1,1,todo\n"
-    @bottle.route('/<collection>/<selector>/<path>.html')
-    def plot_any(collection, selector, path):
+    @bottle.route('/plot/<plottype>/<collection>/<selector>/<path>.html')
+    def plot_any(plottype, collection, selector, path):
         environ = {'REQUEST_METHOD' : 'GET', 'PATH_INFO' : '/%s/%s/%s.csv' % (collection, selector, path)}
         target, args = bottle.default_app().router.match(environ)
         csv = target(**args)
