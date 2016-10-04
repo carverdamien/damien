@@ -19,7 +19,7 @@ def httpd_tunesysbench():
                              }
                          }
                  }])])
-    def gen_func(key):
+    def gen_perf_func(key):
         def func(run):
             T = []
             Y = []
@@ -29,7 +29,14 @@ def httpd_tunesysbench():
             return T, Y
         func.func_name = key
         return func
-    allmetric = [gen_func('rtps'), gen_func('trps')]
+    def memusage(run):
+        T = []
+        Y = []
+        for e in db.dockerstats.find({'Id':run['container']['Id']}):
+            T.append(e['read']) #datetime
+            Y.append(e['memory_stats']['usage'])
+        return Y, Y
+    allmetric = [gen_perf_func('rtps'), gen_perf_func('trps'), memusage]
     def max(T,M):
         return np.amax(M)
     def mean(T,M):
