@@ -24,18 +24,21 @@ def httpd_tunesysbench():
             T = []
             Y = []
             for e in db.sysbench.find({'Id':run['container']['Id']}):
-                T.append(float(e['timestamp']))
+                t = datetime.datetime.utcfromtimestamp(float(e['timestamp']))
+                T.append(t)
                 Y.append(float(e[key]))
-            return T, Y
+            return np.array(T,dtype='datetime64[s]'), np.array(Y)
         func.func_name = key
         return func
     def memusage(run):
         T = []
         Y = []
         for e in db.dockerstats.find({'Id':run['container']['Id']}):
-            T.append(e['read']) #datetime
+            t = e['read']
+            t = datetime.datetime.strptime(t[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+            T.append(t)
             Y.append(e['memory_stats']['usage'])
-        return T, Y
+        return np.array(T,dtype='datetime64[ms]'), np.array(Y)
     def diskio(run):
         T = []
         Y = []
@@ -45,9 +48,17 @@ def httpd_tunesysbench():
             T.append(t)
             Y.append(sum([data['value'] for data in e['blkio_stats']['io_service_bytes_recursive'] if data['op'] == 'Total']))
         dt = np.gradient([time.mktime(t.timetuple()) for t in T])
+        #dt = np.gradient(T)
         Y = np.gradient(Y, dt)
-        return T, Y
-    allmetric = [gen_perf_func('rtps'), gen_perf_func('trps'), memusage, diskio]
+        return np.array(T, dtype='datetime64[ms]'), Y
+    allmetric = [gen_perf_func('rtps') , gen_perf_func('trps'), memusage, diskio]
+    time_filter = lambda T,M : (T,M)
+    def time_filter(T,M):
+        end = T[-1]
+        t0 = end - np.timedelta64(20, 'm')
+        t1 = end - np.timedelta64(10, 'm')
+        sel = np.logical_and(t0 < T, T < t1)
+        return T[sel],M[sel]
     def max(T,M):
         return np.amax(M)
     def mean(T,M):
@@ -71,6 +82,7 @@ def httpd_tunesysbench():
                             for run in db.run.find({'configId':configId}):
                                 for metric in allmetric:
                                     T,M = metric(run)
+                                    T,M = time_filter(T,M)
                                     for aggregate in allaggregator:
                                         y = aggregate(T,M)
                                         label = '.'.join([readonly,
