@@ -78,8 +78,12 @@ def httpd_run_list():
 def httpd_run_show(runId):
     table = []
     run = next(db.run.find({'runId':runId}))
+    containers = []
     if 'container' in run:
-        container = run['container']
+        containers = [run['container']]
+    elif 'containers' in run:
+        containers = run['containers']
+    for container in containers:
         row = ['container', HTML.link('inspect', '/dockercontainers/%s' % container['Id'])]
         for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
             row += [HTML.link("%s.html" % stat,
