@@ -5,7 +5,7 @@ assert(db != None)
 assert(run != None)
 
 total_mem_limit = config['total_mem_limit']
-docker_containers = config['docker_containers']
+containers = config['containers']
 sysbench_ctl = config['sysbench_ctl']
 cassandra_clt = config['cassandra_clt']
 
@@ -18,6 +18,7 @@ parser = parse.compile(expected_v05_intermediate_output)
 class Sysbench(threading.Thread):
     def __init__(self, container, duration, dbsize, oltp_read_only, threads):
         super(Sysbench, self).__init__()
+        docker.Client().start(container)
         self.container = docker.Client().inspect_container(container)
         self.host = self.container['NetworkSettings']['IPAddress']
         self.duration = duration
@@ -86,11 +87,12 @@ class Cassandra(threading.Thread):
 client = docker.Client()        
 assert(len([c for c in client.containers(all=True)]) == 0)
 try:
-    if os.path.isdir('/sys/fs/cgroup/memory/docker'):
-        os.mkdir('/sys/fs/cgroup/memory/docker')
-    with open('/sys/fs/cgroup/memory/docker/memory.limit_in_bytes', w) as f:
+    if os.path.exists('/sys/fs/cgroup/memory/docker'):
+        os.rmdir('/sys/fs/cgroup/memory/docker')
+    os.mkdir('/sys/fs/cgroup/memory/docker')
+    with open('/sys/fs/cgroup/memory/docker/memory.limit_in_bytes', 'w') as f:
         f.write("%d\n" % total_mem_limit)
-    with open('/sys/fs/cgroup/memory/docker/memory.use_hierarchy', w) as f:
+    with open('/sys/fs/cgroup/memory/docker/memory.use_hierarchy', 'w') as f:
         f.write("1\n")
 except Exception as e:
     print(e)
@@ -104,7 +106,7 @@ def create_container(containers):
     for container in containers:
         if 'host_config' in  container:
                 container['host_config'] = client.create_host_config(
-                    container['host_config'])
+                    **container['host_config'])
         client.pull(container['image'])
         yield client.create_container(**container)
 containers = [c for c in create_container(containers)]

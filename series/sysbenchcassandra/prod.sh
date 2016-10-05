@@ -8,7 +8,7 @@ cat <<EOF
 { 
     "sourceId" : "${SOURCEID}",
     "total_mem_limit" : ${total_mem_limit},
-    "docker_containers" : [
+    "containers" : [
         {
             "name" : "mysql1",
             "image" : "mysql:latest",
