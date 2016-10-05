@@ -45,7 +45,7 @@ cat <<EOF
     "cassandra_clt" : [
         {
             "container" : "cassandra",
-            "start" : 900,
+            "start_delay" : 900,
             "duration" : 900
         }
     ],

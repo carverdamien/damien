@@ -74,13 +74,13 @@ class Sysbench(threading.Thread):
             raise Exception()
 
 class Cassandra(threading.Thread):
-    def __init__(self, container, start, duration, **kwargs):
+    def __init__(self, container, start_delay, duration, **kwargs):
         super(Cassandra, self).__init__()
         self.container = container
-        self.start = start
+        self.start_delay = start_delay
         self.duration = duration
     def run(self):
-        time.sleep(self.start)
+        time.sleep(self.start_delay)
         docker.Client().start(self.container)
         time.sleep(self.duration)
 
