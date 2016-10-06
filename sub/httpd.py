@@ -85,9 +85,13 @@ def httpd_dockerstats_csv(listId,stat):
             for Id in listId.split(','):
                 label = [Id[:4]]
                 if stat == 'memory':
+                    X = []
+                    YPGPGIN = []
+                    YPGPGOUT = []
                     for entry in db.dockerstats.find({'Id':Id},{'memory_stats':1,'read':1}):
                         x = entry['read']
                         x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+                        X.append(x)
                         y = entry['memory_stats']
                         def flat(key, y):
                             if type(y) == dict:
@@ -96,8 +100,27 @@ def httpd_dockerstats_csv(listId,stat):
                             elif type(y) == list:
                                 print(y)
                             else:
+                                if key[-1] == 'pgpgin':
+                                    YPGPGIN.append(y)
+                                elif key[-1] == 'pgpgout':
+                                    YPGPGOUT.append(y)
                                 csvwriter.writerow([x,y,".".join(key)])
                         flat(label,y)
+                    dt = np.gradient([time.mktime(x.timetuple()) for x in X])
+                    dindt = np.gradient(YPGPGIN, dt)
+                    for x,y in itertools.izip(X,dindt):
+                        csvwriter.writerow([x,y,".".join(label + ['dpgpgin/dt'])])
+                    doutdt = np.gradient(YPGPGOUT, dt)
+                    for x,y in itertools.izip(X,doutdt):
+                        csvwriter.writerow([x,y,".".join(label + ['dpgpgout/dt'])])
+                    din = np.gradient(YPGPGIN)
+                    doutdin = np.gradient(YPGPGOUT,din)
+                    for x,y in itertools.izip(X,doutdin):
+                        csvwriter.writerow([x,y,".".join(label + ['dpgpgout/dpgpgin'])])
+                    dout = np.gradient(YPGPGOUT)
+                    dindout = np.gradient(YPGPGIN,dout)
+                    for x,y in itertools.izip(X,dindout):
+                        csvwriter.writerow([x,y,".".join(label + ['dpgpgin/dpgpgout'])])
                 elif stat == 'blkio':
                     X = []
                     YREAD = []
