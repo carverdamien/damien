@@ -2,8 +2,8 @@ import bottle
 import lib.HTML as HTML
 import csv
 import StringIO
-import datetime
 import itertools
+import datetime
 import shutil
 import os
 import time
@@ -82,17 +82,12 @@ def httpd_dockerstats_csv(listId,stat):
         with open(filename, 'w') as f:
             csvwriter = csv.writer(f)
             csvwriter.writerow(['x','y','label'])
-            x0 = datetime.datetime.now()
             for Id in listId.split(','):
                 label = [Id[:4]]
                 if stat == 'memory':
-                    myx0 = None
                     for entry in db.dockerstats.find({'Id':Id},{'memory_stats':1,'read':1}):
                         x = entry['read']
                         x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
-                        if myx0 == None:
-                            myx0 = x
-                        x = x0 + (x-myx0)
                         y = entry['memory_stats']
                         def flat(key, y):
                             if type(y) == dict:
@@ -107,13 +102,9 @@ def httpd_dockerstats_csv(listId,stat):
                     X = []
                     YREAD = []
                     YWRITE = []
-                    myx0 = None
                     for entry in db.dockerstats.find({'Id':Id},{'blkio_stats':1,'read':1}):
                         x = entry['read']
                         x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
-                        if myx0 == None:
-                            myx0 = x
-                        x = x0 + (x-myx0)
                         yr = 0
                         yw = 0
                         for data in entry['blkio_stats']['io_service_bytes_recursive']:
