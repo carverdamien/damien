@@ -16,11 +16,12 @@ expected_v05_intermediate_output = \
 parser = parse.compile(expected_v05_intermediate_output)
 
 class Sysbench(threading.Thread):
-    def __init__(self, container, duration, dbsize, oltp_read_only, threads):
+    def __init__(self, container, duration, dbsize, oltp_read_only, threads, start_delay=0):
         super(Sysbench, self).__init__()
         docker.Client().start(container)
         self.container = docker.Client().inspect_container(container)
         self.host = self.container['NetworkSettings']['IPAddress']
+        self.start_delay = start_delay
         self.duration = duration
         self.oltp_read_only = oltp_read_only
         self.threads = threads
@@ -55,6 +56,7 @@ class Sysbench(threading.Thread):
         if p.returncode != 0:
             raise Exception()
     def run(self):
+        time.sleep(self.start_delay)
         cmd = ['--report-interval=1',
                '--max-requests=0',
                '--max-time=%d' % self.duration,
