@@ -1,3 +1,5 @@
+import pymongo
+
 def argparser(parser):
     parser = parser.add_parser('collector')
     parser.set_defaults(func=collect)
