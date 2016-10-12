@@ -2,3 +2,6 @@
 	path = submodules/sysbench
 	url = https://github.com/carverdamien/sysbench
 	branch = libctl
+[submodule "filebench"]
+	path = submodules/filebench
+	url = https://github.com/carverdamien/filebench
