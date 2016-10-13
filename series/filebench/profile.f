@@ -1,7 +1,7 @@
-set $dir=/tmp
-set $nfiles=2048
+set $dir=/data
+set $nfiles=65536
 set $meandirwidth=20
-set $meanfilesize=512k
+set $meanfilesize=16k
 set $nthreads=100
 set $iosize=1m
 set $meanappendsize=16k
@@ -43,6 +43,6 @@ define process name=filereader,instances=1
     flowop openfile name=openfile10,filesetname=bigfileset,fd=1
     flowop readwholefile name=readfile10,fd=1,iosize=$iosize
     flowop closefile name=closefile10,fd=1
-    flowop appendfilerand name=appendlog,filesetname=logfiles,iosize=$meanappendsize,fd=2
+#    flowop appendfilerand name=appendlog,filesetname=logfiles,iosize=$meanappendsize,fd=2
   }
 }
