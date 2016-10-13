@@ -8,17 +8,20 @@ assert(run != None)
 total_mem_limit = config['total_mem_limit']
 containers = config['containers']
 filebench_ctl = config['filebench_ctl']
+anon_ctl = config['anon_ctl']
 """   25: 11.435: 1476286201,IO Summary,357052,35702.493751,178.786448,,,11515.627115,1156.012374,190.331897"""
 exepected_output = """   {:S}: {:S}: {timestamp},{flowop},{ops},{opsPs},{mbPs},{msPsop},{usPop-cpu},{r},{w},{uscpuPop}\n"""
 parser = parse.compile(exepected_output)
 
 class Filebench(threading.Thread):
-    def __init__(self, container, duration, start_delay=0, **kwargs):
+    def __init__(self, container, duration, pause_delay=None, pause_duration=None, start_delay=0, **kwargs):
         super(Filebench, self).__init__()
         docker.Client().start(container)
         self.container = docker.Client().inspect_container(container)
         self.start_delay = start_delay
         self.duration = duration
+        self.pause_duration = pause_duration
+        self.pause_delay = pause_delay
         self.create_profile()
         self.create_fileset()
     def create_profile(self):
@@ -43,6 +46,15 @@ class Filebench(threading.Thread):
         cmd = ['bash', '-c', "echo -e '%s' | filebench" % fbcmd]
         print(cmd)
         dockerexec = docker.Client().exec_create(container=self.container, cmd=cmd)
+        if self.pause_delay:
+            def target():
+                time.sleep(self.pause_delay)
+                docker.Client().pause(container=self.container)
+                time.sleep(self.pause_duration)
+                docker.Client().unpause(container=self.container)
+            t = threading.Thread(target=target)
+            t.daemon = True
+            t.start()
         for line in docker.Client().exec_start(dockerexec, stream=True):
             print(line)
         dockerexec = docker.Client().exec_create(container=self.container, cmd=['cat','statsdump.csv'])
@@ -53,6 +65,23 @@ class Filebench(threading.Thread):
             data = { header[i]:row[i] for i in range(len(header))}
             data['Id'] = self.container['Id']
             db.filebench.insert_one(data)
+
+class Anon(threading.Thread):
+    def __init__(self, container, memory_in_bytes, duration=0, start_delay=0, **kwarg):
+        super(Anon, self).__init__()
+        docker.Client().start(container)
+        self.container = docker.Client().inspect_container(container)
+        self.start_delay = start_delay
+        self.duration = duration
+        self.memory_in_bytes = memory_in_bytes
+
+    def run(self):
+        time.sleep(self.start_delay)
+        cmd = ['./anon', str(self.memory_in_bytes), str(self.duration)]
+        dockerexec = docker.Client().exec_create(container=self.container, cmd=cmd)
+        for line in docker.Client().exec_start(dockerexec, stream=True):
+            print(line)
+        pass
 
 client = docker.Client()        
 assert(len([c for c in client.containers(all=True)]) == 0)
@@ -80,7 +109,7 @@ def create_container(containers):
         client.pull(container['image'])
         yield client.create_container(**container)
 containers = [c for c in create_container(containers)]
-clt = [Filebench(**conf) for conf in filebench_ctl]
+clt = [Filebench(**conf) for conf in filebench_ctl] + [Anon(**conf) for conf in anon_ctl]
 for c in clt: c.start()
 for c in clt: c.join()
 for c in containers:
