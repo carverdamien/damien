@@ -51,7 +51,8 @@ class Filebench(threading.Thread):
         header = next(csvreader)
         for row in csvreader:
             data = { header[i]:row[i] for i in range(len(header))}
-            print(data)
+            data['Id'] = self.container['Id']
+            db.filebench.insert_one(data)
 
 client = docker.Client()        
 assert(len([c for c in client.containers(all=True)]) == 0)
