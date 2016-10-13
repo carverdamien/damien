@@ -43,7 +43,6 @@ def show(db, fs, args):
 def rm(db, fs, args):
     run = matches_only_one_run(db, args.runId)
     runId = run['runId']
-    fs = gridfs.GridFS(db)
     fs.delete({'runId':runId})
     db.run.delete_one({'runId' : runId})
     print(runId)
