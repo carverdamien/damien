@@ -1,93 +1,13 @@
 #!/bin/bash
 set -e -x
 DBNAME=filebench
-echo mongo<<EOF
+mongo<<EOF
 use ${DBNAME}
 db.dropDatabase()
 EOF
 damien() { ./damien --dbname ${DBNAME} $@; }
 SOURCEID=$( damien source add ./series/${DBNAME}/source.py)
-cat_config_prod() {
-python <<EOF
-import json
-true = True
-print(json.dumps({ 
-    "sourceId" : "${SOURCEID}",
-    "total_mem_limit" : ${total_mem_limit},
-    "containers" : [
-        {
-            "name" : "filebench0",
-            "image" : "filebench:latest",
-            "entrypoint" : "bash",
-            "command" : [ "-c", "while : ; do sleep 1; done" ],
-            "volumes" : [ "/data" ],
-            "host_config" : {
-                "oom_kill_disable" : true,
-                "mem_limit" : ${mem_limit},
-                "mem_swappiness" : ${mem_swappiness},
-                "cpuset_cpus" : "0",
-                "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
-                "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : ${rrate} } ]
-            }
-        },
-        {
-            "name" : "filebench1",
-            "image" : "filebench:latest",
-            "entrypoint" : "bash",
-            "command" : [ "-c", "while : ; do sleep 1; done" ],
-            "volumes" : [ "/data" ],
-            "host_config" : {
-                "oom_kill_disable" : true,
-                "mem_limit" : ${mem_limit},
-                "mem_swappiness" : ${mem_swappiness},
-                "cpuset_cpus" : "2",
-                "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
-                "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : ${rrate} } ]
-            }
-        },
-        {
-            "name" : "anon",
-            "image" : "anon:latest",
-            "entrypoint" : "bash",
-            "command" : [ "-c", "while : ; do sleep 1; done" ],
-            "host_config" : {
-                "oom_kill_disable" : true,
-                "mem_limit" : $((8*GB)),
-                "mem_swappiness" : ${mem_swappiness},
-                "cpuset_cpus" : "2",
-                "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
-                "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : ${rrate} } ]
-            }
-        }
-    ],
-    "filebench_ctl" : [
-        {
-            "container" : "filebench0",
-            "start_delay" : 0,
-            "duration" : 2000,
-            "profile" : open('./series/filebench/profile.f').read()
-        },
-        {
-            "container" : "filebench1",
-            "start_delay" : 0,
-            "duration" : 1600,
-            "pause_delay" : 800,
-            "pause_duration" : 400,
-            "profile" : open('./series/filebench/profile.f').read()
-        }
-    ],
-    "anon_ctl" : [
-        {
-            "container" : "anon",
-            "start_delay" : 900,
-            "memory_in_bytes" : ${memory_in_bytes},
-            "duration" : 300
-        }
-    ]
-}))
-EOF
-}
-cat_config_debug() {
+cat_config() {
 python <<EOF
 import json
 true = True
@@ -133,7 +53,6 @@ mem_swappiness=100
 rrate=$((1024*GB))
 wrate=$((1024*GB))
 rrate=$((80*MB))
-cat_config() { cat_config_prod; }
 cat_config
 damien run new $(damien config add <(cat_config))
-# damien daemon || true
+damien daemon || true
