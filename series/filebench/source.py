@@ -1,4 +1,4 @@
-import docker, time, subprocess, parse, threading, os, StringIO, csv
+import docker, time, subprocess, parse, threading, os, StringIO, csv, tarfile, tempfile
 # from submodules.filebench.Filebench import Filebench # TODO: move class Filebench here
 
 assert(config != None)
@@ -14,7 +14,7 @@ exepected_output = """   {:S}: {:S}: {timestamp},{flowop},{ops},{opsPs},{mbPs},{
 parser = parse.compile(exepected_output)
 
 class Filebench(threading.Thread):
-    def __init__(self, container, duration, pause_delay=None, pause_duration=None, start_delay=0, **kwargs):
+    def __init__(self, container, duration, profile, pause_delay=None, pause_duration=None, start_delay=0, **kwargs):
         super(Filebench, self).__init__()
         docker.Client().start(container)
         self.container = docker.Client().inspect_container(container)
@@ -22,12 +22,18 @@ class Filebench(threading.Thread):
         self.duration = duration
         self.pause_duration = pause_duration
         self.pause_delay = pause_delay
+        self.profile = profile
         self.create_profile()
         self.create_fileset()
     def create_profile(self):
         path = '/usr/local/share/filebench/workloads/'
-        with open('./series/filebench/profile.tar') as f:
-            data = f.read()
+        with tempfile.TemporaryFile() as fileobj:
+            with tarfile.open(mode='w', fileobj=fileobj) as tar:
+                tarinfo = tarfile.TarInfo('profile.f')
+                tarinfo.size = len(self.profile)
+                tar.addfile(tarinfo, StringIO.StringIO(self.profile))
+            fileobj.seek(0)
+            data = fileobj.read()
             docker.Client().put_archive(container=self.container, path=path, data=data)
     def create_fileset(self):
         fbcmd = "load profile\n create fileset\n"

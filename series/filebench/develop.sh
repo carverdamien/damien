@@ -7,9 +7,11 @@ db.dropDatabase()
 EOF
 damien() { ./damien --dbname ${DBNAME} $@; }
 SOURCEID=$( damien source add ./series/${DBNAME}/source.py)
-cat_config() {
-cat <<EOF
-{ 
+cat_config_prod() {
+python <<EOF
+import json
+true = True
+print(json.dumps({ 
     "sourceId" : "${SOURCEID}",
     "total_mem_limit" : ${total_mem_limit},
     "containers" : [
@@ -62,14 +64,16 @@ cat <<EOF
         {
             "container" : "filebench0",
             "start_delay" : 0,
-            "duration" : 2000
+            "duration" : 2000,
+            "profile" : open('./series/filebench/profile.f').read()
         },
         {
             "container" : "filebench1",
             "start_delay" : 0,
             "duration" : 1600,
             "pause_delay" : 800,
-            "pause_duration" : 400
+            "pause_duration" : 400,
+            "profile" : open('./series/filebench/profile.f').read()
         }
     ],
     "anon_ctl" : [
@@ -80,12 +84,14 @@ cat <<EOF
             "duration" : 300
         }
     ]
-}
+}))
 EOF
 }
-cat_config_() {
-cat <<EOF
-{ 
+cat_config_debug() {
+python <<EOF
+import json
+true = True
+print(json.dumps({
     "sourceId" : "${SOURCEID}",
     "total_mem_limit" : ${total_mem_limit},
     "containers" : [
@@ -108,11 +114,12 @@ cat <<EOF
         {
             "container" : "filebench0",
             "start_delay" : 0,
-            "duration" : 60
+            "duration" : 60,
+            "profile" : open('./series/filebench/profile.f').read()
         }
     ],
     "anon_ctl" : []
-}
+}))
 EOF
 }
 MB=$((2**20))
@@ -126,6 +133,7 @@ mem_swappiness=100
 rrate=$((1024*GB))
 wrate=$((1024*GB))
 rrate=$((80*MB))
+cat_config() { cat_config_prod; }
 cat_config
 damien run new $(damien config add <(cat_config))
-#damien daemon || true
+# damien daemon || true
