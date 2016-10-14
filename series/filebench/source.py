@@ -74,6 +74,7 @@ class Filebench(threading.Thread):
         for row in csvreader:
             data = { header[i]:row[i] for i in range(len(header))}
             data['Id'] = self.container['Id']
+            data['profile'] = self.profile['name']
             db.filebench.insert_one(data)
 
 class Anon(threading.Thread):
