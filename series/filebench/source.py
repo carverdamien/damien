@@ -79,8 +79,12 @@ class Filebench(threading.Thread):
 class Anon(threading.Thread):
     def __init__(self, container, memory_in_bytes, duration=0, start_delay=0, **kwarg):
         super(Anon, self).__init__()
-        docker.Client().start(container)
-        self.container = docker.Client().inspect_container(container)
+        container = docker.Client().inspect_container(container)
+        while not container['State']['Running']:
+            print('Starting %s' % (container))
+            docker.Client().start(container)
+            container = docker.Client().inspect_container(container)
+        self.container = container
         self.start_delay = start_delay
         self.duration = duration
         self.memory_in_bytes = memory_in_bytes

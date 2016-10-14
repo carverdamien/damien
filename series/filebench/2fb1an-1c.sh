@@ -16,8 +16,8 @@ print(json.dumps({
     "total_mem_limit" : ${total_mem_limit},
     "containers" : [
         {
-            "name" : "filebench",
-            "image" : "filebench:latest",
+            "name" : "common",
+            "image" : "fban:latest",
             "entrypoint" : "bash",
             "command" : [ "-c", "while : ; do sleep 1; done" ],
             "volumes" : [ "/data" ],
@@ -29,25 +29,11 @@ print(json.dumps({
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
                 "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : ${rrate} } ]
             }
-        },
-        {
-            "name" : "anon",
-            "image" : "anon:latest",
-            "entrypoint" : "bash",
-            "command" : [ "-c", "while : ; do sleep 1; done" ],
-            "host_config" : {
-                "oom_kill_disable" : true,
-                "mem_limit" : $((8*GB)),
-                "mem_swappiness" : ${mem_swappiness},
-                "cpuset_cpus" : "2",
-                "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
-                "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : ${rrate} } ]
-            }
         }
     ],
     "filebench_ctl" : [
         {
-            "container" : "filebench",
+            "container" : "common",
             "start_delay" : 0,
             "duration" : 2000,
             "profile" : {
@@ -56,7 +42,7 @@ print(json.dumps({
             }
         },
         {
-            "container" : "filebench",
+            "container" : "common",
             "start_delay" : 0,
             "duration" : 1600,
             "pause_delay" : 800,
@@ -69,7 +55,7 @@ print(json.dumps({
     ],
     "anon_ctl" : [
         {
-            "container" : "anon",
+            "container" : "common",
             "start_delay" : 900,
             "memory_in_bytes" : ${memory_in_bytes},
             "duration" : 300
@@ -85,10 +71,11 @@ M=$((10**6))
 mem_limit=$((1460*MB))
 memory_in_bytes=$(( mem_limit - (128 * MB) ))
 total_mem_limit=$((2 * mem_limit))
+mem_limit=$total_mem_limit
 mem_swappiness=100
 rrate=$((1024*GB))
 wrate=$((1024*GB))
 rrate=$((80*MB))
 cat_config
 damien run new $(damien config add <(cat_config))
-# damien daemon || true
+damien daemon || true
