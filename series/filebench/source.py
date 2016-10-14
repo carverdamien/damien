@@ -16,8 +16,12 @@ parser = parse.compile(exepected_output)
 class Filebench(threading.Thread):
     def __init__(self, container, duration, profile, pause_delay=None, pause_duration=None, start_delay=0, **kwargs):
         super(Filebench, self).__init__()
-        docker.Client().start(container)
-        self.container = docker.Client().inspect_container(container)
+        container = docker.Client().inspect_container(container)
+        while not container['State']['Running']:
+            print('Starting %s' % (container))
+            docker.Client().start(container)
+            container = docker.Client().inspect_container(container)
+        self.container = container
         self.start_delay = start_delay
         self.duration = duration
         self.pause_duration = pause_duration
