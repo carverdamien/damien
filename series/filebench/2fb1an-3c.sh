@@ -65,7 +65,10 @@ print(json.dumps({
             "container" : "filebench0",
             "start_delay" : 0,
             "duration" : 2000,
-            "profile" : open('./series/filebench/profile.f').read()
+            "profile" : {
+                "name" : "web0",
+                "value" : open('./series/filebench/web0.f').read()
+            }
         },
         {
             "container" : "filebench1",
@@ -73,7 +76,10 @@ print(json.dumps({
             "duration" : 1600,
             "pause_delay" : 800,
             "pause_duration" : 400,
-            "profile" : open('./series/filebench/profile.f').read()
+            "profile" : {
+                "name" : "web1",
+                "value" : open('./series/filebench/web1.f').read()
+            }
         }
     ],
     "anon_ctl" : [

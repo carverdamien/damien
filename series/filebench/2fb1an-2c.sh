@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -x
 DBNAME=filebench
-mongo<<EOF
+echo mongo<<EOF
 use ${DBNAME}
 db.dropDatabase()
 EOF
@@ -11,15 +11,16 @@ cat_config() {
 python <<EOF
 import json
 true = True
-print(json.dumps({
+print(json.dumps({ 
     "sourceId" : "${SOURCEID}",
     "total_mem_limit" : ${total_mem_limit},
     "containers" : [
         {
-            "name" : "filebench0",
+            "name" : "filebench",
             "image" : "filebench:latest",
             "entrypoint" : "bash",
             "command" : [ "-c", "while : ; do sleep 1; done" ],
+            "volumes" : [ "/data" ],
             "host_config" : {
                 "oom_kill_disable" : true,
                 "mem_limit" : ${mem_limit},
@@ -28,20 +29,52 @@ print(json.dumps({
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
                 "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : ${rrate} } ]
             }
+        },
+        {
+            "name" : "anon",
+            "image" : "anon:latest",
+            "entrypoint" : "bash",
+            "command" : [ "-c", "while : ; do sleep 1; done" ],
+            "host_config" : {
+                "oom_kill_disable" : true,
+                "mem_limit" : $((8*GB)),
+                "mem_swappiness" : ${mem_swappiness},
+                "cpuset_cpus" : "2",
+                "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
+                "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : ${rrate} } ]
+            }
         }
     ],
     "filebench_ctl" : [
         {
-            "container" : "filebench0",
+            "container" : "filebench",
             "start_delay" : 0,
-            "duration" : 60,
+            "duration" : 2000,
             "profile" : {
                 "name" : "web0",
                 "value" : open('./series/filebench/web0.f').read()
             }
+        },
+        {
+            "container" : "filebench",
+            "start_delay" : 0,
+            "duration" : 1600,
+            "pause_delay" : 800,
+            "pause_duration" : 400,
+            "profile" : {
+                "name" : "web1",
+                "value" : open('./series/filebench/web1.f').read()
+            }
         }
     ],
-    "anon_ctl" : []
+    "anon_ctl" : [
+        {
+            "container" : "anon",
+            "start_delay" : 900,
+            "memory_in_bytes" : ${memory_in_bytes},
+            "duration" : 300
+        }
+    ]
 }))
 EOF
 }
@@ -58,4 +91,4 @@ wrate=$((1024*GB))
 rrate=$((80*MB))
 cat_config
 damien run new $(damien config add <(cat_config))
-damien daemon || true
+# damien daemon || true

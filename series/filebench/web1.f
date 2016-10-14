@@ -1,4 +1,4 @@
-set $dir=/data
+set $dir=/data/web1
 set $nfiles=65536
 set $meandirwidth=20
 set $meanfilesize=16k

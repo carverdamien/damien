@@ -29,14 +29,14 @@ class Filebench(threading.Thread):
         path = '/usr/local/share/filebench/workloads/'
         with tempfile.TemporaryFile() as fileobj:
             with tarfile.open(mode='w', fileobj=fileobj) as tar:
-                tarinfo = tarfile.TarInfo('profile.f')
-                tarinfo.size = len(self.profile)
-                tar.addfile(tarinfo, StringIO.StringIO(self.profile))
+                tarinfo = tarfile.TarInfo(self.profile['name']+'.f')
+                tarinfo.size = len(self.profile['value'])
+                tar.addfile(tarinfo, StringIO.StringIO(self.profile['value']))
             fileobj.seek(0)
             data = fileobj.read()
             docker.Client().put_archive(container=self.container, path=path, data=data)
     def create_fileset(self):
-        fbcmd = "load profile\n create fileset\n"
+        fbcmd = "load %s\n create fileset\n" % (self.profile['name'])
         cmd = ['bash', '-c', 'echo \'%s\' | filebench' % fbcmd]
         print(cmd)
         dockerexec = docker.Client().exec_create(container=self.container, cmd=cmd)
@@ -45,7 +45,7 @@ class Filebench(threading.Thread):
         pass
     def run(self):
         time.sleep(self.start_delay)
-        fbcmd = ["load profile", "create fileset", "create processes"]
+        fbcmd = ["load %s" % (self.profile['name']), "create fileset", "create processes"]
         fbcmd += ["stats clear", "sleep 10", "stats snap", 'stats dump "statsdump.csv"'] * (self.duration/10)
         fbcmd += ["shutdown processes", "quit"]
         fbcmd = "\n".join(fbcmd)
