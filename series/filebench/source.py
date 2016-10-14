@@ -40,8 +40,10 @@ class Filebench(threading.Thread):
             data = fileobj.read()
             docker.Client().put_archive(container=self.container, path=path, data=data)
     def create_fileset(self):
+        frozencmd = "CG=/sys/fs/cgroup/freezer/%s && mkdir $CG && echo $$ > $CG/tasks" % (self.profile['name'])
         fbcmd = "load %s\n create fileset\n" % (self.profile['name'])
-        cmd = ['bash', '-c', 'echo \'%s\' | filebench' % fbcmd]
+        bashcmd = "%s && echo '%s' | filebench" % (frozencmd, fbcmd)
+        cmd = ['bash', '-c', bashcmd]
         print(cmd)
         dockerexec = docker.Client().exec_create(container=self.container, cmd=cmd)
         for line in docker.Client().exec_start(dockerexec, stream=True):
@@ -53,15 +55,21 @@ class Filebench(threading.Thread):
         fbcmd += ["stats clear", "sleep 10", "stats snap", 'stats dump "statsdump.csv"'] * (self.duration/10)
         fbcmd += ["shutdown processes", "quit"]
         fbcmd = "\n".join(fbcmd)
-        cmd = ['bash', '-c', "echo -e '%s' | filebench" % fbcmd]
+        cmd = ['bash', '-c', "echo $$ >> /sys/fs/cgroup/freezer/%s/tasks && echo -e '%s' | filebench" % (self.profile['name'],fbcmd)]
         print(cmd)
         dockerexec = docker.Client().exec_create(container=self.container, cmd=cmd)
         if self.pause_delay:
             def target():
+                pausecmd = "echo FROZEN > /sys/fs/cgroup/freezer/%s/freezer.state" % (self.profile['name'])
+                unpausecmd = "echo THAWED > /sys/fs/cgroup/freezer/%s/freezer.state" % (self.profile['name'])
                 time.sleep(self.pause_delay)
-                docker.Client().pause(container=self.container)
+                dockerexec = docker.Client().exec_create(container=self.container, cmd=['bash', '-c', pausecmd])
+                for line in docker.Client().exec_start(dockerexec, stream=True):
+                    print(line)
                 time.sleep(self.pause_duration)
-                docker.Client().unpause(container=self.container)
+                dockerexec = docker.Client().exec_create(container=self.container, cmd=['bash', '-c', unpausecmd])
+                for line in docker.Client().exec_start(dockerexec, stream=True):
+                    print(line)
             t = threading.Thread(target=target)
             t.daemon = True
             t.start()
