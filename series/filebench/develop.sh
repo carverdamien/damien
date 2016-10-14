@@ -20,12 +20,6 @@ cat <<EOF
             "command" : [ "-c", "while : ; do sleep 1; done" ],
             "volumes" : [ "/data" ],
             "host_config" : {
-                "binds" : {
-                    "/home/fb0" : {
-                        "bind" : "/data",
-                        "mode" : "rw"
-                    }
-                },
                 "oom_kill_disable" : true,
                 "mem_limit" : ${mem_limit},
                 "mem_swappiness" : ${mem_swappiness},
@@ -41,12 +35,6 @@ cat <<EOF
             "command" : [ "-c", "while : ; do sleep 1; done" ],
             "volumes" : [ "/data" ],
             "host_config" : {
-                "binds" : {
-                    "/home/fb1" : {
-                        "bind" : "/data",
-                        "mode" : "rw"
-                    }
-                },
                 "oom_kill_disable" : true,
                 "mem_limit" : ${mem_limit},
                 "mem_swappiness" : ${mem_swappiness},
@@ -74,20 +62,20 @@ cat <<EOF
         {
             "container" : "filebench0",
             "start_delay" : 0,
-            "duration" : 800
+            "duration" : 2000
         },
         {
             "container" : "filebench1",
             "start_delay" : 0,
-            "duration" : 400,
-            "pause_delay" : 200,
+            "duration" : 1600,
+            "pause_delay" : 800,
             "pause_duration" : 400
         }
     ],
     "anon_ctl" : [
         {
             "container" : "anon",
-            "start_delay" : 300,
+            "start_delay" : 900,
             "memory_in_bytes" : ${memory_in_bytes},
             "duration" : 300
         }
@@ -137,7 +125,7 @@ total_mem_limit=$((2 * mem_limit))
 mem_swappiness=100
 rrate=$((1024*GB))
 wrate=$((1024*GB))
-rrate=$((10*MB))
+rrate=$((80*MB))
 cat_config
 damien run new $(damien config add <(cat_config))
 #damien daemon || true
