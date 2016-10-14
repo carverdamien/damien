@@ -25,7 +25,7 @@ print(json.dumps({
                 "oom_kill_disable" : true,
                 "mem_limit" : ${mem_limit},
                 "mem_swappiness" : ${mem_swappiness},
-                "cpuset_cpus" : "0",
+                "cpuset_cpus" : "0,2",
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
                 "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : ${rrate} } ]
             }
