@@ -22,6 +22,7 @@ print(json.dumps({
             "command" : [ "-c", "while : ; do sleep 1; done" ],
             "volumes" : [ "/data" ],
             "host_config" : {
+                "privileged" : true,
                 "oom_kill_disable" : true,
                 "mem_limit" : ${mem_limit},
                 "mem_swappiness" : ${mem_swappiness},
@@ -35,7 +36,7 @@ print(json.dumps({
         {
             "container" : "common",
             "start_delay" : 0,
-            "duration" : 2000,
+            "duration" : 500,
             "profile" : {
                 "name" : "web0",
                 "value" : open('./series/filebench/web0.f').read()
@@ -44,9 +45,9 @@ print(json.dumps({
         {
             "container" : "common",
             "start_delay" : 0,
-            "duration" : 1600,
-            "pause_delay" : 800,
-            "pause_duration" : 400,
+            "duration" : 200,
+            "pause_delay" : 100,
+            "pause_duration" : 300,
             "profile" : {
                 "name" : "web1",
                 "value" : open('./series/filebench/web1.f').read()
@@ -56,9 +57,9 @@ print(json.dumps({
     "anon_ctl" : [
         {
             "container" : "common",
-            "start_delay" : 900,
+            "start_delay" : 200,
             "memory_in_bytes" : ${memory_in_bytes},
-            "duration" : 300
+            "duration" : 100
         }
     ]
 }))
@@ -78,4 +79,4 @@ wrate=$((1024*GB))
 rrate=$((80*MB))
 cat_config
 damien run new $(damien config add <(cat_config))
-damien daemon || true
+#damien daemon || true
