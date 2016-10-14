@@ -38,13 +38,15 @@ def httpd_filebench_perf(Id):
                     del entry['Id']
                     del entry['_id']
                     del entry['flowop']
+                    profile = entry['profile']
+                    del entry['profile']
                     x = datetime.datetime.utcfromtimestamp(float(entry['timestamp']))
                     for key in entry:
                         if key == 'timestamp':
                             continue
                         y = entry[key]
                         if y != '':
-                            label = '.'.join([Id[:4],flowop,key])
+                            label = '.'.join([Id[:4],profile,flowop,key])
                             csvwriter.writerow([x,y,label])
     with open(filename) as f:
         return f.read()
