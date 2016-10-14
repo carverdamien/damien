@@ -52,7 +52,7 @@ class Filebench(threading.Thread):
     def run(self):
         time.sleep(self.start_delay)
         fbcmd = ["load %s" % (self.profile['name']), "create fileset", "create processes"]
-        fbcmd += ["stats clear", "sleep 10", "stats snap", 'stats dump "statsdump.csv"'] * (self.duration/10)
+        fbcmd += ["stats clear", "sleep 10", "stats snap", 'stats dump "statsdump-%s.csv"' % (self.profile['name'])] * (self.duration/10)
         fbcmd += ["shutdown processes", "quit"]
         fbcmd = "\n".join(fbcmd)
         cmd = ['bash', '-c', "echo $$ >> /sys/fs/cgroup/freezer/%s/tasks && echo -e '%s' | filebench" % (self.profile['name'],fbcmd)]
@@ -75,7 +75,7 @@ class Filebench(threading.Thread):
             t.start()
         for line in docker.Client().exec_start(dockerexec, stream=True):
             print(line)
-        dockerexec = docker.Client().exec_create(container=self.container, cmd=['cat','statsdump.csv'])
+        dockerexec = docker.Client().exec_create(container=self.container, cmd=['cat','statsdump-%s.csv' % (self.profile['name'])])
         f = StringIO.StringIO(docker.Client().exec_start(dockerexec))
         csvreader = csv.reader(f)
         header = next(csvreader)
