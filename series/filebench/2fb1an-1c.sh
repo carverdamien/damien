@@ -36,7 +36,7 @@ print(json.dumps({
         {
             "container" : "common",
             "start_delay" : 0,
-            "duration" : 500,
+            "duration" : $((5 * time_scale)),
             "profile" : {
                 "name" : "web0",
                 "value" : open('./series/filebench/web0.f').read()
@@ -45,9 +45,9 @@ print(json.dumps({
         {
             "container" : "common",
             "start_delay" : 0,
-            "duration" : 200,
-            "pause_delay" : 100,
-            "pause_duration" : 300,
+            "duration" : $((2 * time_scale)),
+            "pause_delay" : $((time_scale)),
+            "pause_duration" : $((3 * time_scale)),
             "profile" : {
                 "name" : "web1",
                 "value" : open('./series/filebench/web1.f').read()
@@ -57,9 +57,9 @@ print(json.dumps({
     "anon_ctl" : [
         {
             "container" : "common",
-            "start_delay" : 200,
+            "start_delay" : $((2 * time_scale)),
             "memory_in_bytes" : ${memory_in_bytes},
-            "duration" : 100
+            "duration" : $((time_scale))
         }
     ]
 }))
@@ -77,6 +77,7 @@ mem_swappiness=100
 rrate=$((1024*GB))
 wrate=$((1024*GB))
 rrate=$((80*MB))
+time_scale=300
 cat_config
 damien run new $(damien config add <(cat_config))
 #damien daemon || true
