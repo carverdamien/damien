@@ -22,6 +22,7 @@ print(json.dumps({
             "command" : [ "-c", "while : ; do sleep 1; done" ],
             "volumes" : [ "/data" ],
             "host_config" : {
+                "privileged" : true,
                 "oom_kill_disable" : true,
                 "mem_limit" : ${mem_limit},
                 "mem_swappiness" : ${mem_swappiness},
@@ -37,6 +38,7 @@ print(json.dumps({
             "command" : [ "-c", "while : ; do sleep 1; done" ],
             "volumes" : [ "/data" ],
             "host_config" : {
+                "privileged" : true,
                 "oom_kill_disable" : true,
                 "mem_limit" : ${mem_limit},
                 "mem_swappiness" : ${mem_swappiness},
