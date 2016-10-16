@@ -19,7 +19,7 @@ print(json.dumps({
             "name" : "filebench0",
             "image" : "filebench:latest",
             "entrypoint" : "bash",
-            "command" : [ "-c", "while : ; do sleep 1; done" ],
+            "command" : [ "-c", "sysctl -w vm.dirty_background_bytes=${dirty_background_bytes} -w vm.dirty_bytes=${dirty_bytes} -w vm.dirty_expire_centisecs=${dirty_expire_centisecs} -w vm.dirty_writeback_centisecs=${dirty_writeback_centisecs} && while : ; do sleep 1; done" ],
             "volumes" : [ "/data" ],
             "host_config" : {
                 "privileged" : true,
@@ -95,10 +95,15 @@ print(json.dumps({
 }))
 EOF
 }
+KB=$((2**10))
 MB=$((2**20))
 GB=$((2**30))
 k=$((10**3))
 M=$((10**6))
+dirty_background_bytes=$((32*KB))
+dirty_bytes=$((64*MB))
+dirty_expire_centisecs=200
+dirty_writeback_centisecs=100
 mem_limit=$((1460*MB))
 memory_in_bytes=$(( mem_limit - (128 * MB) ))
 total_mem_limit=$((2 * mem_limit))
