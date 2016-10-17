@@ -82,6 +82,7 @@ mem_swappiness=100
 rrate=$((1024*GB))
 wrate=$((1024*GB))
 rrate=$((80*MB))
+rrate=$((2*rrate))
 time_scale=300
 cat_config
 damien run new $(damien config add <(cat_config))
