@@ -12,8 +12,7 @@ define process name=hugereader,instances=1
 {
   thread name=hugereaderthread,memsize=1m,instances=1
   {
-    flowop read name=readhugefile,filename=hugefile,iosize=$iosize
-    flowop delay name=delay,value=1
+    flowop read name=readhugefile,filename=hugefile,iosize=$meanfilesize
   }
 }
 
