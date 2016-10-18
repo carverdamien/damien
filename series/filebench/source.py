@@ -41,7 +41,7 @@ class Filebench(threading.Thread):
             docker.Client().put_archive(container=self.container, path=path, data=data)
     def create_fileset(self):
         frozencmd = "CG=/sys/fs/cgroup/freezer/%s && mkdir $CG && echo $$ > $CG/tasks" % (self.profile['name'])
-        fbcmd = "load %s\n create fileset\n" % (self.profile['name'])
+        fbcmd = "load %s\n create files\n" % (self.profile['name'])
         bashcmd = "%s && echo '%s' | filebench" % (frozencmd, fbcmd)
         cmd = ['bash', '-c', bashcmd]
         print(cmd)
@@ -51,7 +51,7 @@ class Filebench(threading.Thread):
         pass
     def run(self):
         time.sleep(self.start_delay)
-        fbcmd = ["load %s" % (self.profile['name']), "create fileset", "create processes"]
+        fbcmd = ["load %s" % (self.profile['name']), "create files", "create processes"]
         fbcmd += ["stats clear", "sleep 10", "stats snap", 'stats dump "statsdump-%s.csv"' % (self.profile['name'])] * (self.duration/10)
         fbcmd += ["shutdown processes", "quit"]
         fbcmd = "\n".join(fbcmd)
