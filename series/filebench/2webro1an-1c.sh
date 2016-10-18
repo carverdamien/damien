@@ -38,8 +38,8 @@ print(json.dumps({
             "start_delay" : 0,
             "duration" : $((5 * time_scale)),
             "profile" : {
-                "name" : "web0",
-                "value" : open('./series/filebench/web0.f').read()
+                "name" : "webro0",
+                "value" : open('./series/filebench/webro0.f').read()
             }
         },
         {
@@ -49,8 +49,8 @@ print(json.dumps({
             "pause_delay" : $((time_scale)),
             "pause_duration" : $((3 * time_scale)),
             "profile" : {
-                "name" : "web1",
-                "value" : open('./series/filebench/web1.f').read()
+                "name" : "webro1",
+                "value" : open('./series/filebench/webro1.f').read()
             }
         }
     ],
@@ -82,6 +82,7 @@ mem_swappiness=100
 rrate=$((1024*GB))
 wrate=$((1024*GB))
 rrate=$((80*MB))
+rrate=$((2*rrate))
 time_scale=300
 cat_config
 damien run new $(damien config add <(cat_config))
