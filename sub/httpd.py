@@ -42,6 +42,18 @@ def httpd_run_list():
         table.append([link_runId, link_configId, HTML.json(config)])
     return HTML.table(table)
 
+PLOTABLES = {
+    'dockerstats' : [
+        {'plottype':'Scatter', 'name':'cpu'},
+        {'plottype':'Scatter', 'name':'memory'},
+        {'plottype':'Scatter', 'name':'blkio'},
+        {'plottype':'Scatter', 'name':'netio'}
+    ]
+}
+#    'filebench' : ['perf'],
+#    'sysbench' : ['perf']
+#}
+
 @bottle.route('/run/<runId>')
 def httpd_run_show(runId):
     res = ""
@@ -59,12 +71,12 @@ def httpd_run_show(runId):
     for container in containers:
         row = [HTML.link(container['Id'][:4], '/dockercontainers/%s' % container['Id'])]
         for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
-            row += [HTML.link("%s.html" % stat,
-                    '/plotly/Scatter/dockerstats/%s/%s.html' % (container['Id'], stat))
-                    for stat in ['cpu','memory','blkio', 'netio']]
-            row += [HTML.link("%s.csv" % stat,
-                    '/dockerstats/%s/%s.csv' % (container['Id'], stat))
-                    for stat in ['cpu','memory','blkio', 'netio']]
+            for collection in PLOTABLES:
+                for plotable in PLOTABLES[collection]:
+                    plottype = plotable['plottype']
+                    name = plotable['name']
+                    row.append(HTML.link("%s.html" % name, '/plotly/%s/%s/%s/%s.html' % (plottype, collection, container['Id'], name)))
+                    row.append(HTML.link("%s.csv" % name, '/%s/%s/%s/%s.csv' % (plottype, collection, container['Id'], name)))
         table.append(row)
     res += HTML.table(table)
     res += '<h1>All plots</h1>'
@@ -72,8 +84,11 @@ def httpd_run_show(runId):
     for container in containers:
         row = []
         for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
-            row += [httpd_plot_any('Scatter','dockerstats', container['Id'], stat)
-                    for stat in ['cpu','memory','blkio', 'netio']]
+            for collection in PLOTABLES:
+                for plotable in PLOTABLES[collection]:
+                    plottype = plotable['plottype']
+                    name = plotable['name']
+                    row.append(httpd_plot_any(plottype, collection, container['Id'], name))
         table.append(row)
     res += HTML.table(table)
     return res
