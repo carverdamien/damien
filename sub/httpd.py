@@ -11,6 +11,7 @@ import time
 def argparser(parser):
     parser = parser.add_parser('httpd')
     parser.add_argument('--cache_dir', type=str, nargs='?', default='./httpd')
+    parser.add_argument('--plugins', type=str, nargs='*', default=[])
     parser.set_defaults(func=httpd)
 
 # @bottle.route('/clearCache')
@@ -256,11 +257,12 @@ def httpd(_db, fs, args):
     import plotly as _plotly
     global plotly
     plotly = _plotly
-    for dirName, subdirList, fileList in os.walk('./series'):
-        for fname in fileList:
-            if fname == 'httpd.py':
-                with open(os.path.join(dirName, fname)) as f:
-                    exec(f.read())
+    for plugin in args.plugins:
+        for dirName, subdirList, fileList in os.walk(plugin):
+            for fname in fileList:
+                if fname == 'httpd.py':
+                    with open(os.path.join(dirName, fname)) as f:
+                        exec(f.read())
     global cache_dir
     global db
     db = _db
