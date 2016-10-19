@@ -44,18 +44,21 @@ def httpd_run_list():
 
 @bottle.route('/run/<runId>')
 def httpd_run_show(runId):
-    table = []
+    res = ""
     run = next(db.run.find({'runId':runId}))
+    res += '<h1>Config</h1>'
+    config = next(db.config.find({'configId':run['configId']}, {'_id':0, 'sourceId':0, 'configId':0}))
+    res += HTML.json(config)
     containers = []
     if 'container' in run:
         containers = [run['container']]
     elif 'containers' in run:
         containers = run['containers']
+    res += '<h1>Quick links</h1>'
+    table = []
     for container in containers:
-        row = ['container', HTML.link('inspect', '/dockercontainers/%s' % container['Id'])]
+        row = [HTML.link(container['Id'][:4], '/dockercontainers/%s' % container['Id'])]
         for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
-            row += [httpd_plot_any('Scatter','dockerstats', container['Id'], stat)
-                    for stat in ['cpu','memory','blkio', 'netio']]
             row += [HTML.link("%s.html" % stat,
                     '/plotly/Scatter/dockerstats/%s/%s.html' % (container['Id'], stat))
                     for stat in ['cpu','memory','blkio', 'netio']]
@@ -63,7 +66,17 @@ def httpd_run_show(runId):
                     '/dockerstats/%s/%s.csv' % (container['Id'], stat))
                     for stat in ['cpu','memory','blkio', 'netio']]
         table.append(row)
-    return HTML.table(table)
+    res += HTML.table(table)
+    res += '<h1>All plots</h1>'
+    table = []
+    for container in containers:
+        row = []
+        for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
+            row += [httpd_plot_any('Scatter','dockerstats', container['Id'], stat)
+                    for stat in ['cpu','memory','blkio', 'netio']]
+        table.append(row)
+    res += HTML.table(table)
+    return res
 
 @bottle.route('/dockercontainers/<Id>')
 def httpd_dockercontainers(Id):
