@@ -1,3 +1,4 @@
+import pymongo
 import bottle
 import lib.HTML as HTML
 import csv
@@ -34,7 +35,7 @@ def httpd_cache_index():
 
 def httpd_run_list():
     table = [['runId', 'configId', 'config']]
-    for run in db.run.find({'status':'done'}):
+    for run in db.run.find({'status':'done'}).sort([('_id',pymongo.DESCENDING)]):
         runId = run['runId']
         configId = run['configId']
         link_runId = HTML.link(runId[-4:],'/run/%s' % runId)
