@@ -11,6 +11,7 @@ import time
 def argparser(parser):
     parser = parser.add_parser('httpd')
     parser.add_argument('--cache_dir', type=str, nargs='?', default='./httpd')
+    parser.add_argument('--plugins', type=str, nargs='*', default=[])
     parser.set_defaults(func=httpd)
 
 # @bottle.route('/clearCache')
@@ -42,26 +43,53 @@ def httpd_run_list():
         table.append([link_runId, link_configId, HTML.json(config)])
     return HTML.table(table)
 
+PLOTABLES = {
+    'dockerstats' : [
+        {'plottype':'Scatter', 'name':'cpu'},
+        {'plottype':'Scatter', 'name':'memory'},
+        {'plottype':'Scatter', 'name':'blkio'},
+        {'plottype':'Scatter', 'name':'netio'}
+    ]
+}
+
 @bottle.route('/run/<runId>')
 def httpd_run_show(runId):
-    table = []
+    res = ""
     run = next(db.run.find({'runId':runId}))
+    res += '<h1>Config</h1>'
+    config = next(db.config.find({'configId':run['configId']}, {'_id':0, 'sourceId':0, 'configId':0}))
+    res += HTML.json(config)
     containers = []
     if 'container' in run:
         containers = [run['container']]
     elif 'containers' in run:
         containers = run['containers']
+    res += '<h1>Quick links</h1>'
+    table = []
     for container in containers:
-        row = ['container', HTML.link('inspect', '/dockercontainers/%s' % container['Id'])]
+        row = [HTML.link(container['Id'][:4], '/dockercontainers/%s' % container['Id'])]
         for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
-            row += [HTML.link("%s.html" % stat,
-                    '/plotly/Scatter/dockerstats/%s/%s.html' % (container['Id'], stat))
-                    for stat in ['cpu','memory','blkio', 'netio']]
-            row += [HTML.link("%s.csv" % stat,
-                    '/dockerstats/%s/%s.csv' % (container['Id'], stat))
-                    for stat in ['cpu','memory','blkio', 'netio']]
+            for collection in sorted(PLOTABLES.keys()):
+                for plotable in PLOTABLES[collection]:
+                    plottype = plotable['plottype']
+                    name = plotable['name']
+                    row.append(HTML.link("%s/%s.html" % (collection, name), '/plotly/%s/%s/%s/%s.html' % (plottype, collection, container['Id'], name)))
+                    row.append(HTML.link("%s/%s.csv" % (collection, name), '/%s/%s/%s/%s.csv' % (plottype, collection, container['Id'], name)))
         table.append(row)
-    return HTML.table(table)
+    res += HTML.table(table)
+    res += '<h1>All plots</h1>'
+    table = []
+    for container in containers:
+        row = []
+        for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
+            for collection in sorted(PLOTABLES.keys()):
+                for plotable in PLOTABLES[collection]:
+                    plottype = plotable['plottype']
+                    name = plotable['name']
+                    row.append(httpd_plot_any(plottype, collection, container['Id'], name))
+        table.append(row)
+    res += HTML.table(table)
+    return res
 
 @bottle.route('/dockercontainers/<Id>')
 def httpd_dockercontainers(Id):
@@ -72,7 +100,7 @@ def httpd_dockercontainers(Id):
 @bottle.route('/dockerstats/<listId>/<stat>.csv')
 def httpd_dockerstats_csv(listId,stat):
     if stat not in ['memory', 'blkio']:
-        return "Oops"
+        return "x,y,label\n0,0,Oops:%s not implemented" % stat
     directory = os.path.join(cache_dir,'dockerstats',listId)
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -229,11 +257,12 @@ def httpd(_db, fs, args):
     import plotly as _plotly
     global plotly
     plotly = _plotly
-    for dirName, subdirList, fileList in os.walk('./series'):
-        for fname in fileList:
-            if fname == 'httpd.py':
-                with open(os.path.join(dirName, fname)) as f:
-                    exec(f.read())
+    for plugin in args.plugins:
+        for dirName, subdirList, fileList in os.walk(plugin):
+            for fname in fileList:
+                if fname == 'httpd.py':
+                    with open(os.path.join(dirName, fname)) as f:
+                        exec(f.read())
     global cache_dir
     global db
     db = _db

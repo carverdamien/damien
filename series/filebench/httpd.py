@@ -1,3 +1,5 @@
+PLOTABLES['filebench'] = [{'plottype':'Scatter', 'name':'perf'}]
+
 @bottle.route('/filebench')
 def httpd_filebench_listId():
     table = []
@@ -33,6 +35,7 @@ def httpd_filebench_perf(Id):
         with open(filename, 'w') as f:
             csvwriter = csv.writer(f)
             csvwriter.writerow(['x','y','label'])
+            haveData = False
             for flowop in [f['_id']['flowop'] for f in db.filebench.aggregate([{'$match':{'Id':Id}}, {'$group': {'_id': {'flowop':'$flowop'}}}])]:
                 for entry in db.filebench.find({'Id':Id, 'flowop':flowop}):
                     del entry['Id']
@@ -48,5 +51,8 @@ def httpd_filebench_perf(Id):
                         if y != '':
                             label = '.'.join([Id[:4],profile,flowop,key])
                             csvwriter.writerow([x,y,label])
+                            haveData = True
+            if not haveData:
+                csvwriter.writerow([0,0,'No Data'])
     with open(filename) as f:
         return f.read()
