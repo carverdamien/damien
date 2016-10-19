@@ -1,4 +1,4 @@
-#PLOTABLES['sysbench'] = [{'plottype':'Scatter', 'name':'perf'}]
+PLOTABLES['sysbench'] = [{'plottype':'Scatter', 'name':'perf'}]
 
 @bottle.route('/tunesysbench/global/view.csv')
 def httpd_tunesysbench():
@@ -126,6 +126,7 @@ def httpd_sysbench_perf(Id):
         with open(filename, 'w') as f:
             csvwriter = csv.writer(f)
             csvwriter.writerow(['x','y','label'])
+            haveData = False
             for entry in db.sysbench.find({'Id':Id}):
                 del entry['Id']
                 del entry['_id']
@@ -136,5 +137,8 @@ def httpd_sysbench_perf(Id):
                     y = entry[key]
                     label = '.'.join([Id[:4],key])
                     csvwriter.writerow([x,y,label])
+                    haveData = True
+            if not haveData:
+                csvwriter.writerow([0,0,'No Data'])
     with open(filename) as f:
         return f.read()
