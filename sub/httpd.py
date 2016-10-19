@@ -39,7 +39,7 @@ def httpd_run_list():
         link_runId = HTML.link(runId[-4:],'/run/%s' % runId)
         link_configId = HTML.link(configId[:4],'/config/%s' % configId)
         config = next(db.config.find({'configId':configId},{'_id':0, 'sourceId':0, 'configId':0}))
-        table.append([link_runId, link_configId, str(config)])
+        table.append([link_runId, link_configId, HTML.json(config)])
     return HTML.table(table)
 
 @bottle.route('/run/<runId>')

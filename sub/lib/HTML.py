@@ -420,6 +420,15 @@ def list(*args, **kwargs):
     'return HTML code for a list as a string. See List class for parameters.'
     return str(List(*args, **kwargs))
 
+def json(j):
+    if type(j) == str:
+        return "<br />".join(j.split("\n"))
+    elif type(j) == type([]):
+        return table([[json(e) for e in j]])
+    elif type(j) == type({}):
+        return table([[k,json(j[k])] for k in sorted(j.keys())])
+    else:
+        return json(str(j))
 
 #=== MAIN =====================================================================
 
