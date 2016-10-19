@@ -86,7 +86,8 @@ def httpd_run_show(runId):
                 for plotable in PLOTABLES[collection]:
                     plottype = plotable['plottype']
                     name = plotable['name']
-                    row.append(httpd_plot_any(plottype, collection, container['Id'], name))
+                    row.append('<iframe src="%s" width=1200 height=600></iframe>' % '/plotly/%s/%s/%s/%s.html' % (plottype, collection, container['Id'], name))
+                    #row.append(httpd_plot_any(plottype, collection, container['Id'], name))
         table.append(row)
     res += HTML.table(table)
     return res
