@@ -54,6 +54,8 @@ def httpd_run_show(runId):
     for container in containers:
         row = ['container', HTML.link('inspect', '/dockercontainers/%s' % container['Id'])]
         for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
+            row += [httpd_plot_any('Scatter','dockerstats', container['Id'], stat)
+                    for stat in ['cpu','memory','blkio', 'netio']]
             row += [HTML.link("%s.html" % stat,
                     '/plotly/Scatter/dockerstats/%s/%s.html' % (container['Id'], stat))
                     for stat in ['cpu','memory','blkio', 'netio']]
@@ -72,7 +74,7 @@ def httpd_dockercontainers(Id):
 @bottle.route('/dockerstats/<listId>/<stat>.csv')
 def httpd_dockerstats_csv(listId,stat):
     if stat not in ['memory', 'blkio']:
-        return "Oops"
+        return "x,y,label\n0,0,Oops:%s not implemented" % stat
     directory = os.path.join(cache_dir,'dockerstats',listId)
     if not os.path.exists(directory):
         os.makedirs(directory)
