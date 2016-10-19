@@ -1,3 +1,5 @@
+#PLOTABLES['sysbench'] = [{'plottype':'Scatter', 'name':'perf'}]
+
 @bottle.route('/tunesysbench/global/view.csv')
 def httpd_tunesysbench():
     # x = dbsize

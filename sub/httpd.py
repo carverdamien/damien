@@ -50,9 +50,6 @@ PLOTABLES = {
         {'plottype':'Scatter', 'name':'netio'}
     ]
 }
-#    'filebench' : ['perf'],
-#    'sysbench' : ['perf']
-#}
 
 @bottle.route('/run/<runId>')
 def httpd_run_show(runId):
@@ -71,12 +68,12 @@ def httpd_run_show(runId):
     for container in containers:
         row = [HTML.link(container['Id'][:4], '/dockercontainers/%s' % container['Id'])]
         for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
-            for collection in PLOTABLES:
+            for collection in sorted(PLOTABLES.keys()):
                 for plotable in PLOTABLES[collection]:
                     plottype = plotable['plottype']
                     name = plotable['name']
-                    row.append(HTML.link("%s.html" % name, '/plotly/%s/%s/%s/%s.html' % (plottype, collection, container['Id'], name)))
-                    row.append(HTML.link("%s.csv" % name, '/%s/%s/%s/%s.csv' % (plottype, collection, container['Id'], name)))
+                    row.append(HTML.link("%s/%s.html" % (collection, name), '/plotly/%s/%s/%s/%s.html' % (plottype, collection, container['Id'], name)))
+                    row.append(HTML.link("%s/%s.csv" % (collection, name), '/%s/%s/%s/%s.csv' % (plottype, collection, container['Id'], name)))
         table.append(row)
     res += HTML.table(table)
     res += '<h1>All plots</h1>'
@@ -84,7 +81,7 @@ def httpd_run_show(runId):
     for container in containers:
         row = []
         for d in db.dockerstats.find({'Id':container['Id']}).limit(1):
-            for collection in PLOTABLES:
+            for collection in sorted(PLOTABLES.keys()):
                 for plotable in PLOTABLES[collection]:
                     plottype = plotable['plottype']
                     name = plotable['name']
