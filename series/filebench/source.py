@@ -14,7 +14,7 @@ exepected_output = """   {:S}: {:S}: {timestamp},{flowop},{ops},{opsPs},{mbPs},{
 parser = parse.compile(exepected_output)
 
 class Filebench(threading.Thread):
-    def __init__(self, container, duration, profile, pause_delay=None, pause_duration=None, start_delay=0, **kwargs):
+    def __init__(self, container, duration, profile, pause_delay=None, pause_duration=None, start_delay=0, eventgen=1000, **kwargs):
         super(Filebench, self).__init__()
         container = docker.Client().inspect_container(container)
         while not container['State']['Running']:
@@ -27,6 +27,7 @@ class Filebench(threading.Thread):
         self.pause_duration = pause_duration
         self.pause_delay = pause_delay
         self.profile = profile
+        self.eventgen = eventgen
         self.create_profile()
         self.create_fileset()
     def create_profile(self):
@@ -51,7 +52,7 @@ class Filebench(threading.Thread):
         pass
     def run(self):
         time.sleep(self.start_delay)
-        fbcmd = ["load %s" % (self.profile['name']), "create files", "create processes"]
+        fbcmd = ["load %s" % (self.profile['name']), "create files", "create processes", "eventgen rate = %d" % self.eventgen]
         fbcmd += ["stats clear", "sleep 10", "stats snap", 'stats dump "statsdump-%s.csv"' % (self.profile['name'])] * (self.duration/10)
         fbcmd += ["shutdown processes", "quit"]
         fbcmd = "\n".join(fbcmd)
