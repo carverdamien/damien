@@ -210,7 +210,7 @@ def httpd_plot_any(plottype, collection, selector, filename):
             Y = df['y'][sel]
             yield X, Y, label
     data = [plotly.graph_objs.Scatter(x=X, y=Y, name=label, visible="legendonly") for (X,Y,label) in X_Y_label_generator(df)]
-    layout = plotly.graph_objs.Layout(showlegend=True)
+    layout = plotly.graph_objs.Layout(showlegend=True, yaxis={'rangemode':'tozero'})
     figure = plotly.graph_objs.Figure(data=data, layout=layout)
     plotly.offline.plot(figure, filename=filename_html, auto_open=False)
     with open(filename_html) as f:
