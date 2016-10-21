@@ -11,6 +11,8 @@ import time
 
 def argparser(parser):
     parser = parser.add_parser('httpd')
+    parser.add_argument('--host', type=str, nargs='?', default='0.0.0.0')
+    parser.add_argument('--port', type=int, nargs='?', default=8080)
     parser.add_argument('--cache_dir', type=str, nargs='?', default='./httpd')
     parser.add_argument('--plugins', type=str, nargs='*', default=[])
     parser.set_defaults(func=httpd)
@@ -312,4 +314,4 @@ def httpd(_db, fs, args):
     cache_dir = args.cache_dir
     if not os.path.exists(cache_dir):
         os.makedirs(cache_dir)
-    bottle.run(host='0.0.0.0', port=8080, debug=True)
+    bottle.run(host=args.host, port=args.port, debug=True)
