@@ -55,6 +55,9 @@ PLOTABLES = {
 
 @bottle.route('/run/<runId>')
 def httpd_run_show(runId):
+    split = runId.split(',')
+    if len(split) > 1:
+        return "".join([httpd_run_show(runId) for runId in split])
     res = ""
     run = next(db.run.find({'runId':runId}))
     res += '<h1>Config</h1>'
