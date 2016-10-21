@@ -11,6 +11,8 @@ import time
 
 def argparser(parser):
     parser = parser.add_parser('httpd')
+    parser.add_argument('--host', type=str, nargs='?', default='0.0.0.0')
+    parser.add_argument('--port', type=int, nargs='?', default=8080)
     parser.add_argument('--cache_dir', type=str, nargs='?', default='./httpd')
     parser.add_argument('--plugins', type=str, nargs='*', default=[])
     parser.set_defaults(func=httpd)
@@ -191,7 +193,7 @@ def httpd_plot_any(plottype, collection, selector, filename):
     filename_csv = os.path.join(directory_csv, filename + '.csv')
     directory_html = os.path.join(cache_dir, 'plotly', plottype, collection, selector)
     filename_html = os.path.join(directory_html, filename + '.html')
-    if os.path.exists(filename_html):
+    if os.path.exists(filename_html) and collection not in ['analytics']:
         with open(filename_html) as f:
             return f.read()
     elif not os.path.exists(directory_html):
@@ -265,6 +267,31 @@ def httpd_source_show(sourceId):
     source = matches_only_one_source(fs, sourceId)
     return source.read()[:-1]
 
+@bottle.route('/analytics/<name>/<view>.csv')
+def httpd_analytics(name, view):
+    directory_csv = os.path.join(cache_dir, 'analytics', name)
+    if not os.path.exists(directory_csv):
+        os.makedirs(directory_csv)
+    filename_csv = os.path.join(directory_csv, view + '.csv.tmp') # TODO: cachable?
+    analytics = next(db.analytics.find({'name':name}))
+    dataref = analytics['dataref']
+    view = analytics['view'][view]
+    _globals = globals().copy()
+    exec(view, _globals, _globals)
+    view = _globals['view']
+    with open(filename_csv, 'w') as f:
+        csvwriter = csv.writer(f)
+        header = None
+        for data in dataref:
+            res = view(data)
+            if header == None:
+                header = res.keys()
+                csvwriter.writerow(header)
+            csvwriter.writerow([res[h] for h in header])
+    with open(filename_csv) as f:
+        return f.read()
+    return "x,y,label\n0,0,oops\n"
+
 def httpd(_db, fs, args):
     import pandas
     global pd
@@ -287,4 +314,4 @@ def httpd(_db, fs, args):
     cache_dir = args.cache_dir
     if not os.path.exists(cache_dir):
         os.makedirs(cache_dir)
-    bottle.run(host='0.0.0.0', port=8080, debug=True)
+    bottle.run(host=args.host, port=args.port, debug=True)
