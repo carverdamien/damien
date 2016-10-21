@@ -191,7 +191,7 @@ def httpd_plot_any(plottype, collection, selector, filename):
     filename_csv = os.path.join(directory_csv, filename + '.csv')
     directory_html = os.path.join(cache_dir, 'plotly', plottype, collection, selector)
     filename_html = os.path.join(directory_html, filename + '.html')
-    if os.path.exists(filename_html):
+    if os.path.exists(filename_html) and collection not in ['analytics']:
         with open(filename_html) as f:
             return f.read()
     elif not os.path.exists(directory_html):
