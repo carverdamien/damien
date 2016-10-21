@@ -43,5 +43,5 @@ def view(db, fs, args):
 
 def rm(db, fs, args):
     name =  args.name
-    result = db.analytic.delete_one({'name' : name})
+    result = db.analytics.delete_one({'name' : name})
     print(name)
