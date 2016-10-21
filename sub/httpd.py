@@ -265,6 +265,31 @@ def httpd_source_show(sourceId):
     source = matches_only_one_source(fs, sourceId)
     return source.read()[:-1]
 
+@bottle.route('/analytics/<name>/<view>.csv')
+def httpd_analytics(name, view):
+    directory_csv = os.path.join(cache_dir, 'analytics', name)
+    if not os.path.exists(directory_csv):
+        os.makedirs(directory_csv)
+    filename_csv = os.path.join(directory_csv, view + '.csv.tmp') # TODO: cachable?
+    analytics = next(db.analytics.find({'name':name}))
+    dataref = analytics['dataref']
+    view = analytics['view'][view]
+    _globals = globals().copy()
+    exec(view, _globals, _globals)
+    view = _globals['view']
+    with open(filename_csv, 'w') as f:
+        csvwriter = csv.writer(f)
+        header = None
+        for data in dataref:
+            res = view(data)
+            if header == None:
+                header = res.keys()
+                csvwriter.writerow(header)
+            csvwriter.writerow([res[h] for h in header])
+    with open(filename_csv) as f:
+        return f.read()
+    return "x,y,label\n0,0,oops\n"
+
 def httpd(_db, fs, args):
     import pandas
     global pd

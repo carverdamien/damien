@@ -14,6 +14,7 @@ daemon.argparser(main_subparsers)
 config.argparser(main_subparsers)
 source.argparser(main_subparsers)
 run.argparser(main_subparsers)
+analytics.argparser(main_subparsers)
 
 argcomplete.autocomplete(main_parser)
 args = main_parser.parse_args()
