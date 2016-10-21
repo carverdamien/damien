@@ -208,9 +208,22 @@ def httpd_plot_any(plottype, collection, selector, filename):
         for label, sel in label_sel_generator(df):
             X = df['x'][sel]
             Y = df['y'][sel]
-            yield X, Y, label
-    data = [plotly.graph_objs.Scatter(x=X, y=Y, name=label, visible="legendonly") for (X,Y,label) in X_Y_label_generator(df)]
-    layout = plotly.graph_objs.Layout(showlegend=True, yaxis={'rangemode':'tozero'})
+            text = None
+            if 'text' in df:
+                text = df['text'][sel]
+            yield X, Y, text, label
+    data = [plotly.graph_objs.Scatter(x=X, y=Y, text=text, name=label, visible="legendonly") for (X,Y,text,label) in X_Y_label_generator(df)]
+    annotations = None
+    if 'annotation' in df:
+        annotations = [ {'x':x,
+                         'y': y,
+                         'xref':'x',
+                         'yref':'y',
+                         'text':annotation,
+                         'showarrow':False,
+                         'arrowhead':0
+                     } for x, y, annotation in itertools.izip(df['x'], df['y'], df['annotation'])]
+    layout = plotly.graph_objs.Layout(annotations=annotations, showlegend=True, yaxis={'rangemode':'tozero'})
     figure = plotly.graph_objs.Figure(data=data, layout=layout)
     plotly.offline.plot(figure, filename=filename_html, auto_open=False)
     with open(filename_html) as f:
