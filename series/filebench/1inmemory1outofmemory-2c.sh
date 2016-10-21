@@ -48,6 +48,7 @@ print(json.dumps({
             "container" : "filebench0",
             "start_delay" : 0,
             "duration" : $((5 * time_scale)),
+            "eventgen" : 10,
             "profile" : {
                 "name" : "inmemory",
                 "value" : open('./series/filebench/inmemory.f').read()
@@ -83,7 +84,7 @@ mem_swappiness=100
 rrate=$((1024*GB))
 wrate=$((1024*GB))
 rrate=$((80*MB))
-time_scale=60
+time_scale=10
 cat_config
 damien run new $(damien config add <(cat_config))
 # damien daemon || true

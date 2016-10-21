@@ -32,6 +32,7 @@ print(json.dumps({
             "container" : "filebench",
             "start_delay" : 0,
             "duration" : $((5 * time_scale)),
+            "eventgen" : 10,
             "profile" : {
                 "name" : "inmemory",
                 "value" : open('./series/filebench/inmemory.f').read()
@@ -39,9 +40,8 @@ print(json.dumps({
         },
         {
             "container" : "filebench",
-            "start_delay" : 0,
-            "duration" : $((5 * time_scale)),
-            "eventgen" : 100,
+            "start_delay" : $(( time_scale )),
+            "duration" : $((4 * time_scale)),
             "profile" : {
                 "name" : "outofmemory",
                 "value" : open('./series/filebench/outofmemory.f').read()
@@ -70,7 +70,7 @@ rrate=$((1024*GB))
 wrate=$((1024*GB))
 rrate=$((80*MB))
 rrate=$((2*rrate))
-time_scale=60
+time_scale=20
 cat_config
 damien run new $(damien config add <(cat_config))
 #damien daemon || true
