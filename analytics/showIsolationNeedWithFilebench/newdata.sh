@@ -16,8 +16,10 @@ export rrate=$((1024*GB))
 export wrate=$((1024*GB))
 export rrate=$((80*MB))
 export time_scale=60
-export mem_limit=$((1460*MB + 1600*KB))
-export total_mem_limit=$((2 * mem_limit))
+export mem_limit_0=$((1460*MB + 1600*KB))
+#export mem_limit_1=$mem_limit_0
+export mem_limit_1=$((128*MB))
+export total_mem_limit=$((mem_limit_0 + mem_limit_1))
 cat_config_isolated() {
 python <<EOF
 import json
@@ -35,7 +37,7 @@ print(json.dumps({
             "host_config" : {
                 "privileged" : true,
                 "oom_kill_disable" : true,
-                "mem_limit" : ${mem_limit},
+                "mem_limit" : ${mem_limit_0},
                 "mem_swappiness" : ${mem_swappiness},
                 "cpuset_cpus" : "0",
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
@@ -51,7 +53,7 @@ print(json.dumps({
             "host_config" : {
                 "privileged" : true,
                 "oom_kill_disable" : true,
-                "mem_limit" : ${mem_limit},
+                "mem_limit" : ${mem_limit_1},
                 "mem_swappiness" : ${mem_swappiness},
                 "cpuset_cpus" : "2",
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],
@@ -85,7 +87,6 @@ print(json.dumps({
 EOF
 }
 cat_config_grouped() {
-mem_limit=$total_mem_limit
 rrate=$((2*rrate))
 python <<EOF
 import json
@@ -103,7 +104,7 @@ print(json.dumps({
             "host_config" : {
                 "privileged" : true,
                 "oom_kill_disable" : true,
-                "mem_limit" : ${mem_limit},
+                "mem_limit" : ${total_mem_limit},
                 "mem_swappiness" : ${mem_swappiness},
                 "cpuset_cpus" : "0,2",
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : ${wrate} } ],

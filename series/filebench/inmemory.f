@@ -1,14 +1,25 @@
 set $dir=/data/inmemory
-set $filesize=1g
-set $iosize=512k
-set $nthreads=1
+set $iosize=1m
 
-define file name=data,path=$dir,size=$filesize,reuse,prealloc
+define file name=hotfile,path=$dir,size=1g,reuse,prealloc
+define file name=coldfile,path=$dir,size=5g,reuse,prealloc
 
-define process name=imreader,instances=1
+# 2 hit for 2 seq miss
+
+define process name=process1, instances=1
 {
-  thread name=imthread,memsize=100m,instances=$nthreads
+  thread name=HotThread, memsize=1m, instances=1
   {
-    flowop read name=read,filename=data,iosize=$iosize,directio=0,fd=1,iters=1
+    flowop semblock name=hotsemblock, value=1, highwater=1
+    flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+    flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+    flowop sempost name=hotsempost, target=hotsemblockdone, value=1
+  }
+  thread name=ColdThread, memsize=1m, instances=1
+  {
+    flowop read name=cold, filename=coldfile, iosize=$iosize, fd=2
+    flowop read name=cold, filename=coldfile, iosize=$iosize, fd=2
+    flowop sempost name=coldsempost, target=hotsemblock, value=1
+    flowop semblock name=hotsemblockdone, value=1, highwater=1
   }
 }
