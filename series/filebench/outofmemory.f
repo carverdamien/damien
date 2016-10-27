@@ -1,31 +1,46 @@
 set $dir=/data/outmemory
 set $iosize=1m
+set $thrash=2
 
-define fileset name=coldfile1,path=$dir/filesets,size=5g,reuse,prealloc,entries=1,dirwidth=1
-define file name=coldfile2,path=$dir/files,size=5g,reuse,prealloc
+define file name=hotfile,path=$dir,size=1g,reuse,prealloc
+define file name=coldfile1,path=$dir,size=5g,reuse,prealloc
+define file name=coldfile2,path=$dir,size=5g,reuse,prealloc
 
-# One hit for 2 miss
+# 16 hit for 2 parallel miss
 
-define process name=process2,instances=1
+define process name=process2, instances=1
 {
-thread name=firstAccess, memsize=1m, instances=1
+thread name=HotThread, memsize=1m, instances=1
 {
-flowop semblock name=firstsemblock, value=1, highwater=1
-flowop read name=first, filesetname=coldfile1, iosize=$iosize, fd=1
-flowop sempost name=firstsempost, target=firstsemblockdone, value=1
+flowop semblock name=hotsemblock, value=$thrash, highwater=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop read name=hot, filename=hotfile, iosize=$iosize, fd=1
+flowop sempost name=hotsempost, target=hotsemblockdone, value=$thrash
 }
-thread name=secondAccess, memsize=1m, instances=1
+thread name=ColdThread1, memsize=1m, instances=1
 {
-flowop semblock name=secondsemblock, value=1, highwater=1
-flowop read name=second, filesetname=coldfile1, iosize=$iosize, fd=2
-flowop sempost name=secondsempost, target=secondsemblockdone, value=1
+flowop read name=cold1, filename=coldfile1, iosize=$iosize, fd=2
+flowop sempost name=coldsempost, target=hotsemblock, value=1
+flowop semblock name=hotsemblockdone, value=1, highwater=1
 }
-thread name=thrashAccess, memsize=1m, instances=1
+thread name=ColdThread2, memsize=1m, instances=1
 {
-flowop sempost name=thrashsempost, target=firstsemblock, value=1
-flowop semblock name=firstsemblockdone, value=1, highwater=1
-flowop read name=trash, filename=coldfile2, iosize=$iosize, fd=3
-flowop sempost name=thrashsempost, target=secondsemblock, value=1
-flowop semblock name=secondsemblockdone, value=1, highwater=1
+flowop read name=cold2, filename=coldfile2, iosize=$iosize, fd=3
+flowop sempost name=coldsempost, target=hotsemblock, value=1
+flowop semblock name=hotsemblockdone, value=1, highwater=1
 }
 }
