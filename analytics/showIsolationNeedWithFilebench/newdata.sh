@@ -17,7 +17,7 @@ export wrate=$((1024*GB))
 export rrate=$((80*MB))
 export time_scale=60
 export mem_limit_0=$((1460*MB + 1600*KB))
-#export mem_limit_1=$mem_limit_0
+export mem_limit_1=$mem_limit_0
 export mem_limit_1=$((128*MB))
 export total_mem_limit=$((mem_limit_0 + mem_limit_1))
 cat_config_isolated() {
