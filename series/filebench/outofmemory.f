@@ -164,6 +164,7 @@ define process name=p2-aT,instances=1
 {
 thread name=thrashAccess, memsize=1m, instances=1
 {
+flowop eventlimit name=eventlimit
 flowop sempost name=thrashsempost, target=semblock1, value=1
 flowop semblock name=semblock1done, value=1, highwater=1
 flowop read name=trash, filename=coldfile2, iosize=$iosize, fd=18

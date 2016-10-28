@@ -15,7 +15,7 @@ export mem_swappiness=100
 export rrate=$((1024*GB))
 export wrate=$((1024*GB))
 export rrate=$((80*MB))
-export time_scale=60
+export time_scale=120
 export mem_limit_0=$((1460*MB + 1600*KB))
 export mem_limit_1=$mem_limit_0
 export mem_limit_1=$((128*MB))
@@ -66,7 +66,7 @@ print(json.dumps({
             "container" : "filebench0",
             "start_delay" : 0,
             "duration" : $((5 * time_scale)),
-            "eventgen" : 10,
+            "eventgen" : 40,
             "profile" : {
                 "name" : "inmemory",
                 "value" : open('./series/filebench/inmemory.f').read()
@@ -76,6 +76,7 @@ print(json.dumps({
             "container" : "filebench1",
             "start_delay" : 0,
             "duration" : $((5 * time_scale)),
+            "eventgen" : 40,
             "profile" : {
                 "name" : "outofmemory",
                 "value" : open('./series/filebench/outofmemory.f').read()
@@ -117,7 +118,7 @@ print(json.dumps({
             "container" : "filebench",
             "start_delay" : 0,
             "duration" : $((5 * time_scale)),
-            "eventgen" : 10,
+            "eventgen" : 40,
             "profile" : {
                 "name" : "inmemory",
                 "value" : open('./series/filebench/inmemory.f').read()
@@ -127,6 +128,7 @@ print(json.dumps({
             "container" : "filebench",
             "start_delay" : $(( time_scale )),
             "duration" : $((4 * time_scale)),
+            "eventgen" : 40,
             "profile" : {
                 "name" : "outofmemory",
                 "value" : open('./series/filebench/outofmemory.f').read()
