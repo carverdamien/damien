@@ -80,7 +80,7 @@ def httpd_run_show(runId):
                     plottype = plotable['plottype']
                     name = plotable['name']
                     row.append(HTML.link("%s/%s.html" % (collection, name), '/plotly/%s/%s/%s/%s.html' % (plottype, collection, container['Id'], name)))
-                    row.append(HTML.link("%s/%s.csv" % (collection, name), '/%s/%s/%s/%s.csv' % (plottype, collection, container['Id'], name)))
+                    row.append(HTML.link("%s/%s.csv" % (collection, name), '/%s/%s/%s.csv' % (collection, container['Id'], name)))
         table.append(row)
     res += HTML.table(table)
     res += '<h1>All plots</h1>'
