@@ -3,7 +3,7 @@
 ## Show that consolidation works when we don't need cgroups.
 Choose A and B such that there is no need for cgroups.
 Run A and B. Pause B. Start C.
-- [ ] using filebench and malloc, show that C can reclaim B's memory.
+- [ ] [using filebench and malloc, show that C can reclaim B's memory](./showThatConsolidation/works).
 
 ## Show the need for cgroups.
 Choose A and B such that there is a need for cgroups.
@@ -19,5 +19,5 @@ Run A and B in same cgroup and compare with A and B running in different cgroups
 
 ## Show that consolidation does not works when we need/use cgroups.
 Run A and B. Pause B. Start C.
-- [ ] using filebench and malloc, show that C cannot reclaim B's memory.
+- [ ] [using filebench and malloc, show that C cannot reclaim B's memory](./showThatConsolidation/doesnotwork).
 - [ ] using sysbench and cassandra, show that C cannot reclaim B's memory.
