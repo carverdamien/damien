@@ -1,0 +1,61 @@
+{
+ "anon_ctl": [], 
+ "configId": "ff8dc4fbb544ea9542fc67898f9bc146b46ea1527e4e200593c93a27", 
+ "containers": [
+  {
+   "command": [
+    "-c", 
+    "sysctl -w vm.dirty_background_bytes=32768 -w vm.dirty_bytes=67108864 -w vm.dirty_expire_centisecs=200 -w vm.dirty_writeback_centisecs=100 && while : ; do sleep 1; done"
+   ], 
+   "entrypoint": "bash", 
+   "host_config": {
+    "cpuset_cpus": "0,2", 
+    "device_read_bps": [
+     {
+      "Path": "/dev/sda", 
+      "Rate": 167772160
+     }
+    ], 
+    "device_write_bps": [
+     {
+      "Path": "/dev/sda", 
+      "Rate": 1099511627776
+     }
+    ], 
+    "mem_limit": 1675165696, 
+    "mem_swappiness": 100, 
+    "oom_kill_disable": true, 
+    "privileged": true
+   }, 
+   "image": "filebench:latest", 
+   "name": "filebench", 
+   "volumes": [
+    "/data"
+   ]
+  }
+ ], 
+ "filebench_ctl": [
+  {
+   "container": "filebench", 
+   "duration": 600, 
+   "eventgen": 40, 
+   "profile": {
+    "name": "inmemory", 
+    "value": "set $dir=/data/inmemory\nset $iosize=1m\n\ndefine file name=hotfile,path=$dir,size=1g,reuse,prealloc\ndefine file name=coldfile,path=$dir,size=5g,reuse,prealloc\n\n# 16 hit for 2 seq miss\n\ndefine process name=process1, instances=1\n{\nthread name=HotThread, memsize=1m, instances=1\n{\nflowop semblock name=hotsemblock, value=1, highwater=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop sempost name=hotsempost, target=hotsemblockdone, value=1\n}\nthread name=ColdThread, memsize=1m, instances=1\n{\nflowop eventlimit name=eventlimit\nflowop read name=cold, filename=coldfile, iosize=$iosize, fd=2\nflowop read name=cold, filename=coldfile, iosize=$iosize, fd=2\nflowop sempost name=coldsempost, target=hotsemblock, value=1\nflowop semblock name=hotsemblockdone, value=1, highwater=1\n}\n}\n"
+   }, 
+   "start_delay": 0
+  }, 
+  {
+   "container": "filebench", 
+   "duration": 360, 
+   "eventgen": 1000000, 
+   "profile": {
+    "name": "outofmemory", 
+    "value": "set $dir=/data/outmemory\nset $iosize=1m\n\ndefine file name=coldfile1,path=$dir/files,size=5g,reuse,prealloc\ndefine file name=coldfile2,path=$dir/files,size=5g,reuse,prealloc\n\n# 8 hit for 2 miss\n\ndefine process name=p2-a1,instances=1\n{\nthread name=access1, memsize=1m, instances=1\n{\nflowop semblock name=semblock1, value=1, highwater=1\nflowop read name=readfile1,fd=1,iosize=$iosize,filename=coldfile1\nflowop sempost name=sempost1, target=semblock1done, value=1\nflowop sempost name=sempost1, target=semblock2, value=1\n}\n}\ndefine process name=p2-a2,instances=1\n{\nthread name=access2, memsize=1m, instances=1\n{\nflowop semblock name=semblock2, value=1, highwater=1\nflowop read name=readfile2,fd=2,iosize=$iosize,filename=coldfile1\nflowop sempost name=sempost2, target=semblock3, value=1\n}\n}\ndefine process name=p2-a3,instances=1\n{\nthread name=access3, memsize=1m, instances=1\n{\nflowop semblock name=semblock3, value=1, highwater=1\nflowop read name=readfile3,fd=3,iosize=$iosize,filename=coldfile1\nflowop sempost name=sempost3, target=semblock4, value=1\n}\n}\ndefine process name=p2-a4,instances=1\n{\nthread name=access4, memsize=1m, instances=1\n{\nflowop semblock name=semblock4, value=1, highwater=1\nflowop read name=readfile4,fd=4,iosize=$iosize,filename=coldfile1\nflowop sempost name=sempost4, target=semblock5, value=1\n}\n}\ndefine process name=p2-a5,instances=1\n{\nthread name=access5, memsize=1m, instances=1\n{\nflowop semblock name=semblock5, value=1, highwater=1\nflowop read name=readfile5,fd=5,iosize=$iosize,filename=coldfile1\nflowop sempost name=sempost5, target=semblock6, value=1\n}\n}\ndefine process name=p2-a6,instances=1\n{\nthread name=access6, memsize=1m, instances=1\n{\nflowop semblock name=semblock6, value=1, highwater=1\nflowop read name=readfile6,fd=6,iosize=$iosize,filename=coldfile1\nflowop sempost name=sempost6, target=semblock7, value=1\n}\n}\ndefine process name=p2-a7,instances=1\n{\nthread name=access7, memsize=1m, instances=1\n{\nflowop semblock name=semblock7, value=1, highwater=1\nflowop read name=readfile7,fd=7,iosize=$iosize,filename=coldfile1\nflowop sempost name=sempost7, target=semblock8, value=1\n}\n}\ndefine process name=p2-a8,instances=1\n{\nthread name=access8, memsize=1m, instances=1\n{\nflowop semblock name=semblock8, value=1, highwater=1\nflowop read name=readfile8,fd=8,iosize=$iosize,filename=coldfile1\nflowop sempost name=sempost8, target=semblock9, value=1\n}\n}\ndefine process name=p2-a9,instances=1\n{\nthread name=access9, memsize=1m, instances=1\n{\nflowop semblock name=semblock9, value=1, highwater=1\nflowop read name=readfile9,fd=9,iosize=$iosize,filename=coldfile1\nflowop sempost name=sempost9, target=semblock10, value=1\n}\n}\ndefine process name=p2-aT,instances=1\n{\nthread name=thrashAccess, memsize=1m, instances=1\n{\nflowop eventlimit name=eventlimit\nflowop sempost name=thrashsempost, target=semblock1, value=1\nflowop semblock name=semblock1done, value=1, highwater=1\nflowop read name=trash, filename=coldfile2, iosize=$iosize, fd=18\nflowop semblock name=semblock10, value=1, highwater=1\n}\n}\n"
+   }, 
+   "start_delay": 120
+  }
+ ], 
+ "sourceId": "1d6d0b8c7ff325c912c40654dca225204528a81dd7a8cb7ded63dbf6", 
+ "total_mem_limit": 1675165696
+}
