@@ -21,3 +21,6 @@ Run A and B in same cgroup and compare with A and B running in different cgroups
 Run A and B. Pause B. Start C.
 - [ ] [using filebench and malloc, show that C cannot reclaim B's memory](./showThatConsolidation/doesnotwork). [detailed here](http://indium.rsr.lip6.fr/run/581a2a445369e14db265b07f)
 - [ ] using sysbench and cassandra, show that C cannot reclaim B's memory.
+
+## Performance/Resource tunning
+- [ ] for any application, show performance as function of resource
