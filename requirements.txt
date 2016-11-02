@@ -8,3 +8,4 @@ parse
 graphviz
 numpy
 docker-py
+seaborn
