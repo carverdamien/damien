@@ -35,7 +35,7 @@
  "anon_ctl": [
   {
    "container" : "filebench",
-   "memory_in_bytes" : 1073741824,
+   "memory_in_bytes" : 1518741824,
    "duration" : 120,
    "start_delay" : 360 
   }
