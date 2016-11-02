@@ -15,10 +15,10 @@ export mem_swappiness=100
 export rrate=$((1024*GB))
 export wrate=$((1024*GB))
 export rrate=$((80*MB))
-export time_scale=60
+export time_scale=120
 export mem_limit_0=$((1460*MB + 1600*KB))
 export mem_limit_1=$mem_limit_0
-export mem_limit_1=$((128*MB))
+export mem_limit_1=$((136*MB))
 export total_mem_limit=$((mem_limit_0 + mem_limit_1))
 cat_config_isolated() {
 python <<EOF
@@ -66,19 +66,20 @@ print(json.dumps({
             "container" : "filebench0",
             "start_delay" : 0,
             "duration" : $((5 * time_scale)),
-            "eventgen" : 10,
+            "eventgen" : 40,
             "profile" : {
                 "name" : "inmemory",
-                "value" : open('./series/filebench/inmemory.f').read()
+                "value" : open('${PROFILE_DIR}/inmemory.f').read()
             }
         },
         {
             "container" : "filebench1",
-            "start_delay" : 0,
-            "duration" : $((5 * time_scale)),
+            "start_delay" : $(( time_scale )),
+            "duration" : $((3 * time_scale)),
+            "eventgen" : 1000000,
             "profile" : {
                 "name" : "outofmemory",
-                "value" : open('./series/filebench/outofmemory.f').read()
+                "value" : open('${PROFILE_DIR}/outofmemory.f').read()
             }
         }
     ],
@@ -117,19 +118,20 @@ print(json.dumps({
             "container" : "filebench",
             "start_delay" : 0,
             "duration" : $((5 * time_scale)),
-            "eventgen" : 10,
+            "eventgen" : 40,
             "profile" : {
                 "name" : "inmemory",
-                "value" : open('./series/filebench/inmemory.f').read()
+                "value" : open('${PROFILE_DIR}/inmemory.f').read()
             }
         },
         {
             "container" : "filebench",
             "start_delay" : $(( time_scale )),
-            "duration" : $((4 * time_scale)),
+            "duration" : $((3 * time_scale)),
+            "eventgen" : 1000000,
             "profile" : {
                 "name" : "outofmemory",
-                "value" : open('./series/filebench/outofmemory.f').read()
+                "value" : open('${PROFILE_DIR}/outofmemory.f').read()
             }
         }
     ],
@@ -138,6 +140,7 @@ print(json.dumps({
 EOF
 }
 
+export PROFILE_DIR=./analytics/showMemoryCgroupNeedWithFilebench
 RUN_ID_ISOLATED=$(damien run new $(damien config add <(cat_config_isolated)))
 RUN_ID_GROUPED=$(damien run new $(damien config add <(cat_config_grouped)))
-damien analytics --name showIsolationNeedWithFilebench data "${RUN_ID_ISOLATED},${RUN_ID_GROUPED}"
+#damien analytics --name showMemoryCgroupNeedWithFilebench data "${RUN_ID_ISOLATED},${RUN_ID_GROUPED}"

@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e -x
-DBNAME=filebench
+DBNAME=prod
 echo mongo<<EOF
 use ${DBNAME}
 db.dropDatabase()
 EOF
 damien() { ./damien --dbname ${DBNAME} $@; }
-SOURCEID=$( damien source add ./series/${DBNAME}/source.py)
+SOURCEID=$( damien source add ./series/filebench/source.py)
 cat_config() {
 python <<EOF
 import json
