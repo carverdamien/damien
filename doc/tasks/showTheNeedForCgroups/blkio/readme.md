@@ -1,11 +1,10 @@
 # 2 Cgroups
-## Perf P1
-![2CGperfP1][2CGperfP1]
-## Perf P2
-![2CGperfP2][2CGperfP2]
+![2CGperf][2CGperf]
+[2CGperf]: http://indium.rsr.lip6.fr:3000/carverdamien/damien/raw/doc/doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/perf.png "2CGperf"
 
-[2CGperfP1]: http://indium.rsr.lip6.fr:3000/carverdamien/damien/raw/doc/doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/06ef/perf.png "2CGperfP1"
-[2CGperfP2]: http://indium.rsr.lip6.fr:3000/carverdamien/damien/raw/doc/doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/3f71/perf.png "2CGperfP2"
+# 1 Cgroup
+![1CGperf][1CGperf]
+[1CGperf]: http://indium.rsr.lip6.fr:3000/carverdamien/damien/raw/doc/doc/tasks/showTheNeedForCgroups/blkio/data/SingleCgroup/perf.png "1CGperf"
 
 # Memo
 ## Run
@@ -15,6 +14,12 @@ damien config add doc/tasks/showTheNeedForCgroups/blkio/configSingleCgroup.json
 damien run new 52faa270add75b2b01dc9f906178b6c327e613e04452594bad4ede89
 damien config add doc/tasks/showTheNeedForCgroups/blkio/config2Cgroups.json
 damien run new 2d8383eee5fd9421ada6da19f094d03a770a7fe377274e98efd5810d
+```
+
+## Generate perfs plot
+```
+./csv2img.py <(grep -E 'IO.*mb' <(cat doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/*/perf.csv) | cat <(echo 'x,y,label') -) doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/perf.png
+./csv2img.py <(grep -E 'IO.*mb' <(cat doc/tasks/showTheNeedForCgroups/blkio/data/SingleCgroup/*/perf.csv) | cat <(echo 'x,y,label') -) doc/tasks/showTheNeedForCgroups/blkio/data/SingleCgroup/perf.png
 ```
 
 ## Generate images
