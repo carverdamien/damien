@@ -6,7 +6,7 @@ import numpy as np
 import sys
 
 csv = sys.argv[1]
-svg = sys.argv[2]
+img = sys.argv[2]
 
 df = pd.read_csv(csv)
 
@@ -33,4 +33,4 @@ for (X,Y,text,label) in X_Y_label_generator(df):
 		pass
 	plt.plot(X,Y,label=label)
 plt.legend()
-plt.savefig(svg, format='svg')
+plt.savefig(img)
