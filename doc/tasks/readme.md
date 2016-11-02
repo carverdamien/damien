@@ -3,7 +3,7 @@
 ## Show that consolidation works when we don't need cgroups.
 Choose A and B such that there is no need for cgroups.
 Run A and B. Pause B. Start C.
-- [ ] [using filebench and malloc, show that C can reclaim B's memory](./showThatConsolidation/works).
+- [ ] [using filebench and malloc, show that C can reclaim B's memory](./showThatConsolidation/works). [detailed here](http://indium.rsr.lip6.fr/run/581a20db5369e14301b88b30)
 
 ## Show the need for cgroups.
 Choose A and B such that there is a need for cgroups.
