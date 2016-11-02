@@ -15,4 +15,8 @@ damien run new 2d8383eee5fd9421ada6da19f094d03a770a7fe377274e98efd5810d
 Reference-style: 
 ![alt text][logo]
 
+![alt text][test]
+
 [logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+
+[test]: http://indium.rsr.lip6.fr:3000/carverdamien/damien/raw/doc/doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/06ef/blkio.svg "test"
