@@ -10,11 +10,11 @@ Choose A and B such that there is a need for cgroups.
 Run A and B in same cgroup and compare with A and B running in different cgroups.
 
 ### Show the need for blkio cgroup
-- [x] using filebench.
+- [x] [using filebench](./showTheNeedForCgroups/blkio).
 - [ ] using sysbench.
 
 ### Show the need for memory cgroup
-- [x] using filebench.
+- [x] [using filebench](./showTheNeedForCgroups/memory).
 - [ ] using sysbench.
 
 ## Show that consolidation does not works when we need/use cgroups.
