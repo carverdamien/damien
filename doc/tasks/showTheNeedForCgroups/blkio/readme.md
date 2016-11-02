@@ -19,4 +19,4 @@ Reference-style:
 
 [logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
 
-[test]: http://indium.rsr.lip6.fr:3000/carverdamien/damien/raw/doc/doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/06ef/blkio.svg "test"
+[test]: http://indium.rsr.lip6.fr:3000/carverdamien/damien/raw/doc/doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/06ef/blkio.png "test"
