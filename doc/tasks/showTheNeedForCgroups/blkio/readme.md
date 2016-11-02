@@ -11,3 +11,8 @@ damien run new 2d8383eee5fd9421ada6da19f094d03a770a7fe377274e98efd5810d
 ./csv2svg.py <(grep -E '\.cache|\.limit|\.active_file|\.inactive_file' doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/06ef/memory.csv | cat <(echo 'x,y,label') -) doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/06ef/memory.svg
 ./csv2svg.py <(grep -E 'IO.*mb' doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/06ef/perf.csv | cat <(echo 'x,y,label') -) doc/tasks/showTheNeedForCgroups/blkio/data/2Cgroups/06ef/perf.svg
 ```
+
+Reference-style: 
+![alt text][logo]
+
+[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
