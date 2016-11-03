@@ -47,7 +47,7 @@
             }
         }
     ],
-    "boot_clt" : [
+    "boot_ctl" : [
         {
             "container" : "cassandra",
             "start_delay" : 900,
