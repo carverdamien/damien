@@ -19,7 +19,7 @@
             "image" : "mysql:latest",
             "environment" : { "MYSQL_ALLOW_EMPTY_PASSWORD" : "yes" },
             "host_config" : {
-		"binds" : ['db1-10000000:/var/lib/mysql'],
+		"binds" : ["db1-10000000:/var/lib/mysql"],
                 "oom_kill_disable" : true,
                 "mem_limit" : 1073741824,
                 "cpuset_cpus" : "0,1,4,5",
@@ -32,7 +32,7 @@
             "image" : "mysql:latest",
             "environment" : { "MYSQL_ALLOW_EMPTY_PASSWORD" : "yes" },
             "host_config" : {
-		"binds" : ['db2-10000000:/var/lib/mysql'],
+		"binds" : ["db2-10000000:/var/lib/mysql"],
                 "oom_kill_disable" : true,
                 "mem_limit" : 1073741824,
                 "cpuset_cpus" : "2,3,6,7",
