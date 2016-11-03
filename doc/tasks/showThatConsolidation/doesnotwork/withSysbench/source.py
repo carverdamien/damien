@@ -152,8 +152,8 @@ class Sysbench(threading.Thread):
         self.dbsize = dbsize
         self.dbname = dbname
         self.wait_for_server_to_start()
-        self.create_db()
-        self.fill_db()
+        if self.create_db():
+            self.fill_db()
     def mysql(self, cmd):
         cmd = ['mysql', '--host', '127.0.0.1', '-u', 'root'] + cmd
         return docker.Client().exec_create(container=self.server_container, cmd=cmd)
@@ -175,6 +175,8 @@ class Sysbench(threading.Thread):
         dockerexec = self.mysql(['-e', 'CREATE DATABASE %s' % self.dbname])
         for line in docker.Client().exec_start(dockerexec, stream=True):
             print(line)
+        inspect = docker.Client().exec_inspect(dockerexec)
+        return inspect['ExitCode'] == 0
     def sysbench(self, cmd):
         cmd = [sysbench_bin_path, '--test=%s' % sysbench_lua_path, '--oltp-table-size=%d' % self.dbsize, '--mysql-db=%s' % self.dbname, '--mysql-host=%s' % self.host, '--mysql-user=root', '--mysql-password='] + cmd
         return docker.Client().exec_create(container=self.client_container, cmd=cmd)
