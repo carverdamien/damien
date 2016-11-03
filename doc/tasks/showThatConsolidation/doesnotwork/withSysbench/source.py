@@ -193,7 +193,7 @@ class Sysbench(threading.Thread):
         for line in docker.Client().exec_start(dockerexec, stream=True):
             res = sysbench_parser.search(line)
             if res != None:
-                res.named['Id'] = self.container['Id']
+                res.named['Id'] = self.client_container['Id']
                 db.sysbench.insert_one(res.named)
             elif line not in ['','\n']:
                 print(line[:-1])
