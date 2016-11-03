@@ -168,8 +168,8 @@ class Sysbench(threading.Thread):
                     break
             except Exception as e:
                 print(e)
-                print('Waiting for %s to start' % self.server_container)
-                time.sleep(10)
+            print('Waiting for %s to start' % self.server_container)
+            time.sleep(10)
     def create_db(self):
         dockerexec = self.mysql(['-e', 'CREATE DATABASE sysbench'])
         for line in docker.Client().exec_start(dockerexec, stream=True):
