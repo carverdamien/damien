@@ -58,6 +58,7 @@
         {
             "client_container" : "sysbench1",
             "server_container" : "mysql1",
+	    "dbname" : "db1",
             "duration" : 1800,
             "dbsize" : 10000000,
             "oltp_read_only" : true,
@@ -66,6 +67,7 @@
         {
             "client_container" : "sysbench2",
             "server_container" : "mysql2",
+	    "dbname" : "db2",
             "duration" : 600,
             "dbsize" : 10000000,
             "oltp_read_only" : true,

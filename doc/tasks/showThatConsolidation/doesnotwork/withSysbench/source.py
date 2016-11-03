@@ -130,7 +130,7 @@ sysbench_lua_path = './sysbench/tests/db/oltp.lua'
 sysbench_expected_v05_intermediate_output = """[{}] timestamp: {timestamp}, threads: {threads}, tps: {trps}, reads: {rdps}, writes: {wrps}, response time: {rtps}ms ({}%), errors: {errps}, reconnects:  {recops}"""
 sysbench_parser = parse.compile(sysbench_expected_v05_intermediate_output)
 class Sysbench(threading.Thread):
-    def __init__(self, client_container, server_container, duration, dbsize, oltp_read_only, threads, start_delay=0):
+    def __init__(self, client_container, server_container, duration, dbsize, oltp_read_only, threads, dbname='sysbench', start_delay=0):
         super(Sysbench, self).__init__()
         client_container = docker.Client().inspect_container(client_container)
         while not client_container['State']['Running']:
@@ -150,6 +150,7 @@ class Sysbench(threading.Thread):
         self.oltp_read_only = oltp_read_only
         self.threads = threads
         self.dbsize = dbsize
+        self.dbname = dbname
         self.wait_for_server_to_start()
         self.create_db()
         self.fill_db()
@@ -171,11 +172,11 @@ class Sysbench(threading.Thread):
             print('Waiting for %s to start' % self.server_container)
             time.sleep(10)
     def create_db(self):
-        dockerexec = self.mysql(['-e', 'CREATE DATABASE sysbench'])
+        dockerexec = self.mysql(['-e', 'CREATE DATABASE %s' % self.dbname])
         for line in docker.Client().exec_start(dockerexec, stream=True):
             print(line)
     def sysbench(self, cmd):
-        cmd = [sysbench_bin_path, '--test=%s' % sysbench_lua_path, '--oltp-table-size=%d' % self.dbsize, '--mysql-db=sysbench', '--mysql-host=%s' % self.host, '--mysql-user=root', '--mysql-password='] + cmd
+        cmd = [sysbench_bin_path, '--test=%s' % sysbench_lua_path, '--oltp-table-size=%d' % self.dbsize, '--mysql-db=%s' % self.dbname, '--mysql-host=%s' % self.host, '--mysql-user=root', '--mysql-password='] + cmd
         return docker.Client().exec_create(container=self.client_container, cmd=cmd)
     def fill_db(self):
         dockerexec = self.sysbench(['prepare'])
