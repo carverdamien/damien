@@ -1,5 +1,5 @@
 { 
-    "sourceId" : "cca3b13d1002596a4bdf705a2864051a4c72c160f25b9281638349a4",
+    "sourceId" : "e11bec970528b0646d797068e0de49281dbfb77287b32a6f30f4a343",
     "total_mem_limit" : 3896508416,
     "containers" : [
         {
@@ -8,7 +8,7 @@
             "entrypoint" : "bash",
             "command" : [ "-c", "while : ; do sleep 1; done" ],
 	    "host_config" : {
-		"cpuset_cpus" : "4,5"
+		"cpuset_cpus" : "0,1,4,5"
 	    }
         },
         {
@@ -17,7 +17,7 @@
             "entrypoint" : "bash",
             "command" : [ "-c", "while : ; do sleep 1; done" ],
 	    "host_config" : {
-		"cpuset_cpus" : "6,7"
+		"cpuset_cpus" : "2,3,6,7"
 	    }
         },
         {
@@ -28,7 +28,7 @@
 		"binds" : ["db1-10000000:/var/lib/mysql"],
                 "oom_kill_disable" : true,
                 "mem_limit" : 1073741824,
-                "cpuset_cpus" : "0,1",
+                "cpuset_cpus" : "0,1,4,5",
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : 524288000 } ],
                 "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : 20971520 } ]
             }
@@ -41,7 +41,7 @@
 		"binds" : ["db2-10000000:/var/lib/mysql"],
                 "oom_kill_disable" : true,
                 "mem_limit" : 1073741824,
-                "cpuset_cpus" : "2,3",
+                "cpuset_cpus" : "2,3,6,7",
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : 524288000 } ],
                 "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : 20971520 } ]
             }
@@ -51,15 +51,15 @@
             "image" : "cassandra:latest",
             "host_config" : {
                 "oom_kill_disable" : true,
-                "cpuset_cpus" : "2,3"
+                "cpuset_cpus" : "2,3,6,7"
             }
         }
     ],
     "boot_ctl" : [
         {
             "container" : "cassandra",
-            "start_delay" : 900,
-            "duration" : 900
+            "start_delay" : 360,
+            "duration" : 120
         }
     ],
     "sysbench_ctl" : [
@@ -67,7 +67,7 @@
             "client_container" : "sysbench1",
             "server_container" : "mysql1",
 	    "dbname" : "db1",
-            "duration" : 1800,
+	    "schedule" : [[0,840]],
             "dbsize" : 10000000,
             "oltp_read_only" : true,
             "threads" : 8
@@ -76,7 +76,7 @@
             "client_container" : "sysbench2",
             "server_container" : "mysql2",
 	    "dbname" : "db2",
-            "duration" : 600,
+	    "schedule" : [[0,120], [360,120]],
             "dbsize" : 10000000,
             "oltp_read_only" : true,
             "threads" : 8

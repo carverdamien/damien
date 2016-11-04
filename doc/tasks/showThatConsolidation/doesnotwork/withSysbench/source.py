@@ -124,13 +124,14 @@ class Boot(threading.Thread):
         time.sleep(self.start_delay)
         docker.Client().start(self.container)
         time.sleep(self.duration)
+        docker.Client().stop(self.container)
 
 sysbench_bin_path = './sysbench/sysbench'
 sysbench_lua_path = './sysbench/tests/db/oltp.lua'
 sysbench_expected_v05_intermediate_output = """[{}] timestamp: {timestamp}, threads: {threads}, tps: {trps}, reads: {rdps}, writes: {wrps}, response time: {rtps}ms ({}%), errors: {errps}, reconnects:  {recops}"""
 sysbench_parser = parse.compile(sysbench_expected_v05_intermediate_output)
 class Sysbench(threading.Thread):
-    def __init__(self, client_container, server_container, duration, dbsize, oltp_read_only, threads, dbname='sysbench', start_delay=0):
+    def __init__(self, client_container, server_container, dbsize, oltp_read_only, threads, schedule, dbname='sysbench'):
         super(Sysbench, self).__init__()
         client_container = docker.Client().inspect_container(client_container)
         while not client_container['State']['Running']:
@@ -145,8 +146,7 @@ class Sysbench(threading.Thread):
             server_container = docker.Client().inspect_container(server_container)
         self.server_container = server_container
         self.host = self.server_container['NetworkSettings']['IPAddress']
-        self.start_delay = start_delay
-        self.duration = duration
+        self.schedule = schedule
         self.oltp_read_only = oltp_read_only
         self.threads = threads
         self.dbsize = dbsize
@@ -185,21 +185,22 @@ class Sysbench(threading.Thread):
         for line in docker.Client().exec_start(dockerexec, stream=True):
             print(line)
     def run(self):
-        time.sleep(self.start_delay)
-        cmd = ['--report-interval=1',
-               '--max-requests=0',
-               '--max-time=%d' % self.duration,
-               '--num-threads=%d' % self.threads, 'run']
-        if self.oltp_read_only:
-            cmd = ['--oltp-read-only=on'] + cmd
-        dockerexec = self.sysbench(cmd)
-        for line in docker.Client().exec_start(dockerexec, stream=True):
-            res = sysbench_parser.search(line)
-            if res != None:
-                res.named['Id'] = self.client_container['Id']
-                db.sysbench.insert_one(res.named)
-            elif line not in ['','\n']:
-                print(line[:-1])
+        for delay, duration in self.schedule:
+            time.sleep(delay)
+            cmd = ['--report-interval=1',
+                   '--max-requests=0',
+                   '--max-time=%d' % duration,
+                   '--num-threads=%d' % self.threads, 'run']
+            if self.oltp_read_only:
+                cmd = ['--oltp-read-only=on'] + cmd
+                dockerexec = self.sysbench(cmd)
+                for line in docker.Client().exec_start(dockerexec, stream=True):
+                    res = sysbench_parser.search(line)
+                    if res != None:
+                        res.named['Id'] = self.client_container['Id']
+                        db.sysbench.insert_one(res.named)
+                    elif line not in ['','\n']:
+                        print(line[:-1])
 
 client = docker.Client()        
 assert(len([c for c in client.containers(all=True)]) == 0)
