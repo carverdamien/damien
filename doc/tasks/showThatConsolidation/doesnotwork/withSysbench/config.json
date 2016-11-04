@@ -76,7 +76,7 @@
             "client_container" : "sysbench2",
             "server_container" : "mysql2",
 	    "dbname" : "db2",
-	    "schedule" : [[0,120], [360,120]],
+	    "schedule" : [[0,240], [360,240]],
             "dbsize" : 10000000,
             "oltp_read_only" : true,
             "threads" : 8
