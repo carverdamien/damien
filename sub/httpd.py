@@ -106,7 +106,7 @@ def httpd_dockercontainers(Id):
 
 @bottle.route('/dockerstats/<listId>/<stat>.csv')
 def httpd_dockerstats_csv(listId,stat):
-    if stat not in ['memory', 'blkio']:
+    if stat not in ['memory', 'blkio', 'cpu']:
         return "x,y,label\n0,0,Oops:%s not implemented" % stat
     directory = os.path.join(cache_dir,'dockerstats',listId)
     if not os.path.exists(directory):
@@ -156,6 +156,21 @@ def httpd_dockerstats_csv(listId,stat):
                     dindout = np.gradient(YPGPGIN,dout)
                     for x,y in itertools.izip(X,dindout):
                         csvwriter.writerow([x,y,".".join(label + ['dpgpgin/dpgpgout'])])
+                elif stat == 'cpu':
+                    X = []
+                    YSYS = []
+                    YUSR = []
+                    for entry in db.dockerstats.find({'Id':Id},{'cpu_stats':1,'read':1}):
+                        x = entry['read']
+                        x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+                        X.append(x)
+                        YSYS.append(entry['cpu_stats']['system_cpu_usage'])
+                        YUSR.append(entry['cpu_stats']['cpu_usage']['total_usage'])
+                        ncpu = len(entry['cpu_stats']['cpu_usage']['percpu_usage'])
+                    dYSYS = np.gradient(YSYS)
+                    Y = 100. * ncpu * np.gradient(YUSR, dYSYS)
+                    for x,y in itertools.izip(X,Y):
+                        csvwriter.writerow([x,y,".".join(label + ['global','usage'])])
                 elif stat == 'blkio':
                     X = []
                     YREAD = []
