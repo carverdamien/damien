@@ -5,3 +5,6 @@
 [submodule "filebench"]
 	path = submodules/filebench
 	url = https://github.com/carverdamien/filebench
+[submodule "submodules/grub-list"]
+	path = submodules/grub-list
+	url = https://github.com/carverdamien/grub-list
