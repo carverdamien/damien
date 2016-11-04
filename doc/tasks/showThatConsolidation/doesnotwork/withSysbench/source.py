@@ -228,6 +228,11 @@ def create_container(containers):
         yield client.create_container(**container)
 containers = [c for c in create_container(containers)]
 clt = [Filebench(**conf) for conf in filebench_ctl] + [Anon(**conf) for conf in anon_ctl] + [Boot(**conf) for conf in boot_ctl] + [Sysbench(**conf) for conf in sysbench_ctl]
+try:
+    with open('/proc/sys/vm/drop_caches', 'w') as f:
+        f.write("3\n")
+except Exception as e:
+    print(e)
 for c in clt: c.start()
 for c in clt: c.join()
 for c in containers:
