@@ -6,13 +6,19 @@
             "name" : "sysbench1",
             "image" : "sysbench:latest",
             "entrypoint" : "bash",
-            "command" : [ "-c", "while : ; do sleep 1; done" ]
+            "command" : [ "-c", "while : ; do sleep 1; done" ],
+	    "host_config" : {
+		"cpuset_cpus" : "4,5"
+	    }
         },
         {
             "name" : "sysbench2",
             "image" : "sysbench:latest",
             "entrypoint" : "bash",
-            "command" : [ "-c", "while : ; do sleep 1; done" ]
+            "command" : [ "-c", "while : ; do sleep 1; done" ],
+	    "host_config" : {
+		"cpuset_cpus" : "6,7"
+	    }
         },
         {
             "name" : "mysql1",
@@ -22,7 +28,7 @@
 		"binds" : ["db1-10000000:/var/lib/mysql"],
                 "oom_kill_disable" : true,
                 "mem_limit" : 1073741824,
-                "cpuset_cpus" : "0,1,4,5",
+                "cpuset_cpus" : "0,1",
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : 524288000 } ],
                 "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : 20971520 } ]
             }
@@ -35,7 +41,7 @@
 		"binds" : ["db2-10000000:/var/lib/mysql"],
                 "oom_kill_disable" : true,
                 "mem_limit" : 1073741824,
-                "cpuset_cpus" : "2,3,6,7",
+                "cpuset_cpus" : "2,3",
                 "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : 524288000 } ],
                 "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : 20971520 } ]
             }
@@ -45,7 +51,7 @@
             "image" : "cassandra:latest",
             "host_config" : {
                 "oom_kill_disable" : true,
-                "cpuset_cpus" : "2,3,6,7"
+                "cpuset_cpus" : "2,3"
             }
         }
     ],
