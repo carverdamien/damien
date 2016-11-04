@@ -20,7 +20,11 @@ Run A and B in same cgroup and compare with A and B running in different cgroups
 ## Show that consolidation does not works when we need/use cgroups.
 Run A and B. Pause B. Start C.
 - [x] using filebench and malloc, show that C cannot reclaim B's memory. summarised [here](./showThatConsolidation/doesnotwork/withFilebench) detailed [here](http://indium.rsr.lip6.fr/run/581a2a445369e14db265b07f)
-- [ ] using sysbench and cassandra, show that C cannot reclaim B's memory. detailed [here](http://indium.rsr.lip6.fr/run/581b5b425369e1057b7b10d7)
+- [ ] using sysbench and cassandra, show that C cannot reclaim B's memory. detailed [here](http://indium.rsr.lip6.fr/run/581c49375369e15d19b89810)
+
+## Show that we can fix this with little overhead
+- [ ] Show that we can detect that A is active and B is inactive
+- [ ] Show that we can protect A
 
 ## Performance/Resource tunning
 - [ ] for any application, show performance as function of resource
