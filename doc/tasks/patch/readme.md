@@ -1,5 +1,13 @@
 # Patch
 ```
++---------------+---------------+
+| dpgout/dt = 0 | dpgout/dt > 0 |
++---------------+---------------+
+|    reclaim    |  do nothing   |
++---------------+---------------+
+```
+# Patch
+```
 +-------------------------------+-----------------------------------------------+
 |         dpgout/dt = 0         |                 dpgout/dt > 0                 |
 +---------------+---------------+---------------+-------------------------------+
@@ -18,4 +26,3 @@ Metric Test     | Meanning
 `dpg_in/dt > 0` | some pages were loaded in memory since last reclaim
 `dpgact/dt = 0` | no page was activated since last reclaim
 `dpgact/dt > 0` | some pages were activated since last reclaim
-
