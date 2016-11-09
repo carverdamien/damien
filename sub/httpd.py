@@ -142,6 +142,10 @@ def httpd_dockerstats_csv(listId,stat):
                                 csvwriter.writerow([x,y,".".join(key)])
                         flat(label,y)
                     dt = np.gradient([time.mktime(x.timetuple()) for x in X])
+                    # deltaPG = np.array(YPGPGIN) - np.array(YPGPGOUT)
+                    # deltaPGdt = np.gradient(deltaPG, dt)
+                    # for x,y in itertools.izip(X,deltaPGdt):
+                    #     csvwriter.writerow([x,y,".".join(label + ['dDpg/dt'])])
                     dindt = np.gradient(YPGPGIN, dt)
                     for x,y in itertools.izip(X,dindt):
                         csvwriter.writerow([x,y,".".join(label + ['dpgpgin/dt'])])
