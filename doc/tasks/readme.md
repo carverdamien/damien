@@ -10,7 +10,7 @@ Choose A and B such that there is a need for cgroups.
 Run A and B in same cgroup and compare with A and B running in different cgroups.
 
 ### Show the need for blkio cgroup
-- [x] using filebench. summarised [here](./showTheNeedForCgroups/blkio), detailed [here](http://indium.rsr.lip6.fr/run/5811fe3e5369e17479a138a3,5811fe3f5369e1748dab89d3) [cfq](http://indium.rsr.lip6.fr/run/58234dcd5369e136533c1fe2)
+- [x] using filebench. summarised [here](./showTheNeedForCgroups/blkio), detailed [here](http://indium.rsr.lip6.fr/run/5811fe3e5369e17479a138a3,5811fe3f5369e1748dab89d3), without local limits detailed [here](http://indium.rsr.lip6.fr/run/58234dcd5369e136533c1fe2)
 - [ ] using sysbench.
 
 ### Show the need for memory cgroup
