@@ -14,7 +14,7 @@ Run A and B in same cgroup and compare with A and B running in different cgroups
 - [ ] using sysbench.
 
 ### Show the need for memory cgroup
-- [x] using filebench. summarised [here](./showTheNeedForCgroups/memory), detailed [here](http://indium.rsr.lip6.fr/run/58137f045369e1372bb922d5,58137f055369e1373d0d6023)
+- [x] using filebench. summarised [here](./showTheNeedForCgroups/memory), detailed [here](http://indium.rsr.lip6.fr/run/58137f045369e1372bb922d5,58137f055369e1373d0d6023), without local limits and A start first detailed [here](http://indium.rsr.lip6.fr/run/582358d05369e13b79db5497), without local limits and both start together detailed [here](http://indium.rsr.lip6.fr/run/58235b3a5369e13c17d0f5e4)
 - [ ] using sysbench.
 
 ## Show that consolidation does not works when we need/use cgroups.
