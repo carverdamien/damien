@@ -23,6 +23,7 @@ Run A and B. Pause B. Start C.
 - [x] using sysbench and cassandra, show that C cannot reclaim B's memory. summarised [here](./showThatConsolidation/doesnotwork/withSysbench), detailed [here](http://indium.rsr.lip6.fr/run/581c91c55369e121413dd80b)
 
 ## Show that we can fix this with little overhead
+check [this](http://indium.rsr.lip6.fr/run/58210dbb5369e10f484a92d1)
 - [ ] Show that we can detect that A is active and B is inactive
 - [ ] Show that we can protect A
 
