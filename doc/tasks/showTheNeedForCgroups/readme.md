@@ -7,4 +7,4 @@ If performances scale linearly as a function of resources, you could argue:
 - on one hand that resources are globaly well used and thus that isolation is unnecessary  but
 - on the other hand you could argue that fairness between application is more important, or that the applications which are bad at increasing their resource consumption are more important and thus that isolation is necessary.
 
-But performances don't always scale linearly as a function of resources which means that isolation is the only way to specify how you want the resources to be spent. Without isolation you might not get what you paid for.
+But performances don't always scale linearly as a function of resources which means that isolation is the only way to specify how you want the resources to be spent. Without isolation you might not get the best out of what you paid for.
