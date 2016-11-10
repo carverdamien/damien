@@ -8,3 +8,10 @@ If performances scale linearly as a function of resources, you could argue:
 - on the other hand you could argue that fairness between application is more important, or that the applications which are bad at increasing their resource consumption are more important and thus that isolation is necessary.
 
 But performances don't always scale linearly as a function of resources which means that isolation is the only way to specify how you want the resources to be spent. Without isolation you might not get the best out of what you paid for.
+
+# Experiments
+# blkio cgroup
+In this first set of experiments, where performances scale linearly as a function of disk bandwidth, I will show you that cgroups can prevent a greedy application from consumming more than another application.
+
+# memory cgroup
+In this set of experiments, where performances do not scale linearly as a function of memory, I will show you that cgroups can obtain the same performances but with less total memory.
