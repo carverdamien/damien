@@ -58,6 +58,22 @@ In order to reach peak performances, we need XXXXX amount of total memory.
 ```
 Performances
 ^
+|     A_____________________________________
+|     /                               /.
+|    /                               / . 
+|   /                               /  . 
+|  /                               /   .  
+| /                               /    .
+|/_______________________________/ B   . 
++--------------------------------------+----> Total memory
+                                     XXXXX
+```
+
+### Setup with Isolation
+In order to reach peak performances, we need XXX amount of total memory.
+```
+Performances
+^
 |     A________________
 |     /            /.
 |    /            / . 
@@ -66,21 +82,5 @@ Performances
 | /            /    .
 |/____________/ B   . 
 +-------------------+--> Total memory
-                  XXXXX
-```
-
-### Setup with Isolation
-In order to reach peak performances, we need XXX amount of total memory.
-```
-Performances
-^
-|     A_________
-|     /     /.
-|    /     / . 
-|   /     /  . 
-|  /     /   .  
-| /     /    .
-|/_____/ B   . 
-+------------+--> Total memory
-            XXX
+                   XXX
 ```
