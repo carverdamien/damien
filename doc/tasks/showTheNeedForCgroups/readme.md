@@ -27,7 +27,10 @@ As we increase the total amount of disk bandwith, we can see that *A* and *B* al
 In this set of experiments, where performances do not scale linearly as a function of memory, I will show you that cgroups can obtain the same performances but with less total memory.
 
 ### Setup
+*A* and *B* have the same miss ratio (to avoid the disk bandwidth competition), but *A* has a huge static workingset where as *B* uses a very small but highly dynamic workingset.
 
 ### Setup without Isolation
+In order to reach peak performances, we need XXXX amount of total memory.
 
 ### Setup with Isolation
+In order to reach peak performances, we need XX amount of total memory.
