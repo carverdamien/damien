@@ -82,5 +82,5 @@ Performances
 | /     /    .
 |/_____/ B   . 
 +------------+--> Total memory
-              XXX
+            XXX
 ```
