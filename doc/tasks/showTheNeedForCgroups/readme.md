@@ -18,19 +18,69 @@ In this first set of experiments, where performances scale linearly as a functio
 
 ### Setup without Isolation
 As we increase the total amount of disk bandwith, we can see that *A* always have better performances than *B*.
+```
+Performances
+^
+|       A
+|     /
+|    /
+|   /   B
+|  / _/
+| /_/
+|//
++-----------> Total bandwidth
+```
 
 ### Setup with Isolation
-In the Isolation configuration, we will limit both bandwidth to half of the total bandwidth.
+*A*'s and *B*'s bandwidth are both limited to half of the total bandwidth.
 As we increase the total amount of disk bandwith, we can see that *A* and *B* always have the same performances.
+```
+Performances
+^
+|       A B
+|     /
+|    /
+|   /
+|  /
+| /
+|/
++-----------> Total bandwidth
+```
 
 ## memory cgroup
 In this set of experiments, where performances do not scale linearly as a function of memory, I will show you that cgroups can obtain the same performances but with less total memory.
 
 ### Setup
-*A* and *B* have the same miss ratio (to avoid the disk bandwidth competition), but *A* has a huge static workingset where as *B* uses a very small but highly dynamic workingset.
+*A* and *B* have the same miss ratio (to avoid the disk bandwidth competition), but *A* has a very small but highly dynamic workingset where as *B* uses a huge static workingset.
 
 ### Setup without Isolation
-In order to reach peak performances, we need XXXX amount of total memory.
+In order to reach peak performances, we need XXXXX amount of total memory.
+```
+Performances
+^
+|     A________________
+|     /            /.
+|    /            / . 
+|   /            /  . 
+|  /            /   .  
+| /            /    .
+|/____________/ B   . 
++-------------------+--> Total memory
+                  XXXXX
+```
 
 ### Setup with Isolation
-In order to reach peak performances, we need XX amount of total memory.
+In order to reach peak performances, we need XXX amount of total memory.
+```
+Performances
+^
+|     A_________
+|     /     /.
+|    /     / . 
+|   /     /  . 
+|  /     /   .  
+| /     /    .
+|/_____/ B   . 
++------------+--> Total memory
+              XXX
+```
