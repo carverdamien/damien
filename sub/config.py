@@ -33,6 +33,7 @@ def add(db, fs, args):
         matches_only_one_source(fs, sourceId)
         collection = db.config
         collection.create_index('configId', unique=True, sparse=True)
+        # if not collection.find({'configId':configId}).count() > 0: # WARNING
         collection.insert_one(config)
         print(configId)
 
