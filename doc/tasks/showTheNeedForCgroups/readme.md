@@ -17,7 +17,7 @@ In this first set of experiments, where performances scale linearly as a functio
 *A* and *B* are basicly the same. Except that *A* runs two threads in parallel to fetch the same amount of data from disk.
 
 ### Setup without Isolation
-As we increase the total amount of disk bandwith, we can see that *A* always have better performances than *B*.
+As we increase the total amount of disk bandwith, we can see that *A* always performs better than *B*.
 ```
 Performances
 ^
