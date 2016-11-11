@@ -53,7 +53,7 @@ Performances
 In this set of experiments, where performances do not scale linearly as a function of memory, I will show you that cgroups can obtain the same peak performances but with less total memory.
 
 ### Setup
-*A* and *B* sequentialy read from disk and have the same miss ratio (to try to avoid the disk bandwidth competition), but *A* has a very small but highly dynamic workingset where as *B* uses a huge static workingset.
+*A* and *B* sequentially read from disk and have the same miss ratio (to try to avoid the disk bandwidth competition), but *A* has a very small but highly dynamic workingset where as *B* uses a huge static workingset.
 
 ### Setup without Isolation
 In order to reach peak performances, we need XXXXX amount of total memory.
