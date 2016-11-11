@@ -20,7 +20,7 @@ base = {
                 "device_read_bps": [
                     {
                         "Path": "/dev/sda", 
-                        "Rate": 167772160
+                        "Rate": 200*2**20
                     }
                 ], 
                 "device_write_bps": [
@@ -46,7 +46,7 @@ base = {
                 "device_read_bps": [
                     {
                         "Path": "/dev/sda", 
-                        "Rate": 83886080
+                        "Rate": 100*2**20
                     }
                 ], 
                 "device_write_bps": [
@@ -72,7 +72,7 @@ base = {
                 "device_read_bps": [
                     {
                         "Path": "/dev/sda", 
-                        "Rate": 83886080
+                        "Rate": 100*2**20
                     }
                 ], 
                 "device_write_bps": [
@@ -122,7 +122,7 @@ def output(config):
     print(json.dumps(config))
 
 def setMemory(config, memA, memB):
-    config['total_mem_limit'] = memA + memB
+    config['total_mem_limit'] = 10*2**30 # Unlimited
     config['containers'][0]['host_config']['mem_limit'] = memA + memB
     config['containers'][1]['host_config']['mem_limit'] = memA
     config['containers'][2]['host_config']['mem_limit'] = memB
@@ -159,11 +159,11 @@ def conf_generator():
     wB = 1532559360
     memA = wA / 4
     memB = wB / 4
-    for memA in range(wA/4,wA,incA)+[wA]:
+    for memA in range(32*2**20,wA,incA)+[wA]:
         yield { 'memA' : memA, 'memB' : memB }
     for memB in range(wB/4,wB,incB)+[wB]:
         yield { 'memA' : memA, 'memB' : memB }
-    while memA + memB < 4 * (wA+wB):
+    while memA + memB < 2 * (wA+wB):
         memA += incA
         memB += incB
         yield { 'memA' : memA, 'memB' : memB }

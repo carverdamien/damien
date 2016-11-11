@@ -12,8 +12,8 @@ schedule_runs() {
 }
 
 ARGS='--isolation=yes'
-ANALYTICS=procAprocBWithMemoryIsolation
+ANALYTICS=procAprocBWithMemoryIsolation2
 schedule_runs
 ARGS='--isolation=no'
-ANALYTICS=procAprocBWithoutMemoryIsolation
+ANALYTICS=procAprocBWithoutMemoryIsolation2
 schedule_runs
