@@ -8,6 +8,7 @@ import datetime
 import shutil
 import os
 import time
+import types
 
 def argparser(parser):
     parser = parser.add_parser('httpd')
@@ -303,11 +304,14 @@ def httpd_analytics(name, view):
         header = None
         for data in dataref:
             try:
-                res = view(data)
-                if header == None:
-                    header = res.keys()
-                    csvwriter.writerow(header)
-                csvwriter.writerow([res[h] for h in header])
+                results = view(data)
+                if type(res) != types.GeneratorType or type(res) != list:
+                    results = [results]
+                for res in results:
+                    if header == None:
+                        header = res.keys()
+                        csvwriter.writerow(header)
+                    csvwriter.writerow([res[h] for h in header])
             except Exception as e:
                 print(e)
     with open(filename_csv) as f:
