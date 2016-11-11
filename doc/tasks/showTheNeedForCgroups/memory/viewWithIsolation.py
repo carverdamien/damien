@@ -18,6 +18,6 @@ def view(runId):
     perfB = perf(profiles[1], runId, flowop, key)
     memA = mem(profiles[0], runId, flowop, key)
     memB = mem(profiles[1], runId, flowop, key)
-    annotation = '<a href="http://indium.rsr.lip6.fr/run/%s,%s">X</a>' %  (runId)
+    annotation = '<a href="http://indium.rsr.lip6.fr/run/%s">X</a>' %  (runId)
     yield {'x':memA+memB, 'y':perfA, 'label':'.'.join(['procA.mean(%s in %s)' % (flowop,key)]), 'annotation':annotation}
     yield {'x':memA+memB, 'y':perfB, 'label':'.'.join(['procB.mean(%s in %s)' % (flowop,key)]), 'annotation':annotation}

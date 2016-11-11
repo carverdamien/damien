@@ -8,7 +8,6 @@ import datetime
 import shutil
 import os
 import time
-import types
 
 def argparser(parser):
     parser = parser.add_parser('httpd')
@@ -305,7 +304,7 @@ def httpd_analytics(name, view):
         for data in dataref:
             try:
                 results = view(data)
-                if type(res) != types.GeneratorType or type(res) != list:
+                if type(results) == dict:
                     results = [results]
                 for res in results:
                     if header == None:
