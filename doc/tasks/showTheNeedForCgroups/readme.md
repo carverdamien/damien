@@ -50,7 +50,7 @@ Performances
 ```
 
 ## memory cgroup
-In this set of experiments, where performances do not scale linearly as a function of memory, I will show you that cgroups can obtain the same performances but with less total memory.
+In this set of experiments, where performances do not scale linearly as a function of memory, I will show you that cgroups can obtain the same peak performances but with less total memory.
 
 ### Setup
 *A* and *B* have the same miss ratio (to avoid the disk bandwidth competition), but *A* has a very small but highly dynamic workingset where as *B* uses a huge static workingset.
