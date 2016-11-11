@@ -21,12 +21,14 @@ As we increase the total amount of disk bandwith, we can see that *A* always hav
 ```
 Performances
 ^
-|       A
+|        A 
+|       /
+|      / 
 |     /
 |    /
-|   /   B
-|  / _/
-| /_/
+|   /    B
+|  /  __/
+| /__/
 |//
 +-----------> Total bandwidth
 ```
@@ -37,13 +39,13 @@ As we increase the total amount of disk bandwith, we can see that *A* and *B* al
 ```
 Performances
 ^
-|       A B
-|     /
-|    /
-|   /
-|  /
+|             A B
+|          _/
+|        _/
+|      _/
+|    _/
+|  _/
 | /
-|/
 +-----------> Total bandwidth
 ```
 
