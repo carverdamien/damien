@@ -56,7 +56,7 @@ In this set of experiments, where performances do not scale linearly as a functi
 *A* and *B* sequentially read from disk and have the same miss ratio (to try to avoid the disk bandwidth competition), but *A* has a very small but highly dynamic workingset where as *B* uses a huge static workingset.
 
 ### Setup without Isolation
-In order to reach peak performances (defined by miss ratio and disk bandwidth), we need XXXXX amount of total memory.
+In order to reach peak performances (defined by miss ratio and disk bandwidth), we need WA+WB+EXTRA amount of total memory.
 ```
 Performances
 ^
@@ -68,11 +68,11 @@ Performances
 | /                               /    .
 |/_______________________________/ B   . 
 +--------------------------------------+----> Total memory
-                                     XXXXX
+                                 ~WA+WB+EXTRA
 ```
 
 ### Setup with Isolation
-In order to reach peak performances, we need XXX amount of total memory.
+In order to reach peak performances, we need WA+WB amount of total memory.
 ```
 Performances
 ^
@@ -84,5 +84,5 @@ Performances
 | /            /    .
 |/____________/ B   . 
 +-------------------+--> Total memory
-                   XXX
+                 ~WA+WB
 ```
