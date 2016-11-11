@@ -1,7 +1,7 @@
 # We need cgroups to enforce isolation
 ## What is isolation and why do we need it?
 
-Applications consume resources as they execute. Some application are better at increasing their resource consumption and can thus starve other applications. Isolation prenvent this resource "stealing" from happening by setting absolute or relative limits on how much resources can be consummed by an application.
+Applications consume resources as they execute. Some application are better at increasing their resource consumption and can thus starve other applications. Isolation prevent this resource "stealing" from happening by setting absolute or relative limits on how much resources can be consummed by an application.
 
 If performances scale linearly as a function of resources, you could argue:
 - on one hand that resources are globaly well used and thus that isolation is unnecessary  but
@@ -17,7 +17,7 @@ In this first set of experiments, where performances scale linearly as a functio
 *A* and *B* are basicly the same. Except that *A* runs two threads in parallel to fetch the same amount of data from disk.
 
 ### Setup without Isolation
-As we increase the total amount of disk bandwith, we can see that *A* always have better performances than *B*.
+As we increase the total amount of disk bandwith, we can see that *A* always performs better than *B*.
 ```
 Performances
 ^
@@ -50,13 +50,13 @@ Performances
 ```
 
 ## memory cgroup
-In this set of experiments, where performances do not scale linearly as a function of memory, I will show you that cgroups can obtain the same performances but with less total memory.
+In this set of experiments, where performances do not scale linearly as a function of memory, I will show you that cgroups can obtain the same peak performances but with less total memory.
 
 ### Setup
-*A* and *B* have the same miss ratio (to avoid the disk bandwidth competition), but *A* has a very small but highly dynamic workingset where as *B* uses a huge static workingset.
+*A* and *B* sequentially read from disk and have the same miss ratio (to try to avoid the disk bandwidth competition), but *A* has a very small but highly dynamic workingset where as *B* uses a huge static workingset.
 
 ### Setup without Isolation
-In order to reach peak performances, we need XXXXX amount of total memory.
+In order to reach peak performances (defined by miss ratio and disk bandwidth), we need WA+WB+EXTRA amount of total memory.
 ```
 Performances
 ^
@@ -68,11 +68,11 @@ Performances
 | /                               /    .
 |/_______________________________/ B   . 
 +--------------------------------------+----> Total memory
-                                     XXXXX
+                                 ~WA+WB+EXTRA
 ```
 
 ### Setup with Isolation
-In order to reach peak performances, we need XXX amount of total memory.
+In order to reach peak performances, we need WA+WB amount of total memory.
 ```
 Performances
 ^
@@ -84,5 +84,5 @@ Performances
 | /            /    .
 |/____________/ B   . 
 +-------------------+--> Total memory
-                   XXX
+                 ~WA+WB
 ```
