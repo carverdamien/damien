@@ -18,6 +18,7 @@ In this first set of experiments, where performances scale linearly as a functio
 
 ### Setup without Isolation
 As we increase the total amount of disk bandwith, we can see that *A* always performs better than *B*.
+![procAprocBWithoutBlkioIsolation](./blkio/data/procAprocBWithoutBlkioIsolation.png)
 ```
 Performances
 ^
