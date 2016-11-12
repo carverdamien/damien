@@ -37,6 +37,7 @@ Performances
 ### Setup with Isolation
 *A*'s and *B*'s bandwidth are both limited to half of the total bandwidth.
 As we increase the total amount of disk bandwith, we can see that *A* and *B* always have the same performances.
+![procAprocBWithBlkioIsolation](./blkio/data/procAprocBWithBlkioIsolation.png)
 ```
 Performances
 ^
@@ -58,6 +59,7 @@ In this set of experiments, where performances do not scale linearly as a functi
 
 ### Setup without Isolation
 In order to reach peak performances (defined by miss ratio and disk bandwidth), we need WA+WB+EXTRA amount of total memory.
+![procAprocBWithoutMemoryIsolation](./blkio/data/procAprocBWithoutMemoryIsolation.png)
 ```
 Performances
 ^
@@ -74,6 +76,7 @@ Performances
 
 ### Setup with Isolation
 In order to reach peak performances, we need WA+WB amount of total memory.
+![procAprocBWithMemoryIsolation](./blkio/data/procAprocBWithMemoryIsolation.png)
 ```
 Performances
 ^
