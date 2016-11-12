@@ -59,7 +59,7 @@ In this set of experiments, where performances do not scale linearly as a functi
 
 ### Setup without Isolation
 In order to reach peak performances (defined by miss ratio and disk bandwidth), we need WA+WB+EXTRA amount of total memory.
-![procAprocBWithoutMemoryIsolation](./blkio/data/procAprocBWithoutMemoryIsolation.png)
+![procAprocBWithoutMemoryIsolation](./memory/data/procAprocBWithoutMemoryIsolation.png)
 ```
 Performances
 ^
@@ -76,7 +76,7 @@ Performances
 
 ### Setup with Isolation
 In order to reach peak performances, we need WA+WB amount of total memory.
-![procAprocBWithMemoryIsolation](./blkio/data/procAprocBWithMemoryIsolation.png)
+![procAprocBWithMemoryIsolation](./memory/data/procAprocBWithMemoryIsolation.png)
 ```
 Performances
 ^
