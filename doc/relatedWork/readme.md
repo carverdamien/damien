@@ -1,5 +1,8 @@
 # Related Work
 todo: define the work scope
+Keywords:
+* resource partitioning
+* workload fitting
 ## Userspace
 ## Virtualization
 * Autoballooning
