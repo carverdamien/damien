@@ -32,3 +32,4 @@ Keywords:
 image. Each workload partition is a secure and isolated environment for the
 application it hosts. The application in a WPAR thinks that it is being executed in
 its own dedicated AIX instance.
+* [Utilization vs. SLO-Based Control for Dynamic Sizing of Resource Partitions](http://www.hpl.hp.com/techreports/2005/HPL-2005-126R1.pdf)
