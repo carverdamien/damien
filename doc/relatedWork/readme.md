@@ -7,6 +7,7 @@ Keywords:
 
 ## Userspace
 * Damiano Carra, and Pietro Michiardi [Memory Partitioning and Management in Memcached](http://www.eurecom.fr/fr/publication/5014/download/data-publi-5014.pdf)
+* Gokul Soundararajan, Daniel Lupei, Saeed Ghanbari, Adrian Daniel Popescu, Jin Chen*, Cristiana Amza [Dynamic Resource Allocation for Database Servers Running on Virtual Storage](https://www.usenix.org/legacy/event/fast09/tech/full_papers/soundararajan/soundararajan_html/)
 ## Virtualization
 * Autoballooning
 * PUMA
