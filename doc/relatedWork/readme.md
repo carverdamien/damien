@@ -4,6 +4,7 @@ Keywords:
 * resource partitioning
 * resource allocation / realllocation
 * workload fitting
+* statefull applications
 
 ## Userspace
 * Damiano Carra, and Pietro Michiardi [Memory Partitioning and Management in Memcached](http://www.eurecom.fr/fr/publication/5014/download/data-publi-5014.pdf)
