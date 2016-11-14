@@ -15,6 +15,7 @@ Keywords:
 * Autoballooning
 * PUMA
 ## Lightweight Virtualization
+* [Linux Containers: Parallels, LXC, OpenVZ, Docker and More](https://aucouranton.com/2014/06/13/linux-containers-parallels-lxc-openvz-docker-and-more/)
 ### Container Manager
 ### Linux Kernel Control Groups
 * Jonathan Corbet July 31, 2007 [Controlling memory use in containers](http://lwn.net/Articles/243795/) : There is, thus, a significant cost associated with the memory controller - the addition of five pointers (one in struct page, four in struct meta_page) and one atomic_t for every active page in the system can only hurt.
