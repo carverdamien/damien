@@ -2,8 +2,11 @@
 todo: define the work scope
 Keywords:
 * resource partitioning
+* resource allocation / realllocation
 * workload fitting
+
 ## Userspace
+* Damiano Carra, and Pietro Michiardi [Memory Partitioning and Management in Memcached](http://www.eurecom.fr/fr/publication/5014/download/data-publi-5014.pdf)
 ## Virtualization
 * Autoballooning
 * PUMA
@@ -18,3 +21,13 @@ Keywords:
 * Johannes Weiner Nov 11, 2011 [mm: memcg: remove optimization of keeping the root_mem_cgroup LRU lists empty](https://lkml.org/lkml/2011/11/8/414): The global per-zone LRU lists are about to go away on memcg-enabled kernels, with all pages being exclusively linked to their respective per-memcg LRU lists.
 * Christoph Hellwig Jun 7, 2011 [mm: make per-memcg lru lists exclusive](https://lkml.org/lkml/2011/6/7/184)
 * Some Blog Aug 15, 2013 [All About the Linux Kernel: Cgroup’s Redesign](https://www.linux.com/blog/all-about-linux-kernel-cgroups-redesign): Cgroup allows fine-grained resource partitioning among competing processes running on the same machine.
+
+## Extra
+### Cluster Scale
+* Mesos
+* Kubernetes
+### Other
+* [IBM AIX 6.1](http://www.mi.fu-berlin.de/wiki/pub/Tec/ArtLehreSystemverwaltung2010/WPAR-sg247431.pdf): A WPAR (workload partition) is a software-created, virtualized OS environment within a single AIX V6
+image. Each workload partition is a secure and isolated environment for the
+application it hosts. The application in a WPAR thinks that it is being executed in
+its own dedicated AIX instance.
