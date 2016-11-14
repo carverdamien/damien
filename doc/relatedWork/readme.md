@@ -30,6 +30,7 @@ Keywords:
 * Mesos
 * Kubernetes
 * [Vertical Scaling of Pods](https://github.com/kubernetes/features/issues/21): Make it possible to vary the resource limits on a pod over its lifetime. In particular, this is valuable for pets (i.e., pods that are very costly to destroy and re-create).
+* [Vertical pod auto-sizer](https://github.com/kubernetes/kubernetes/issues/10782)
 ### Other
 * [IBM AIX 6.1](http://www.mi.fu-berlin.de/wiki/pub/Tec/ArtLehreSystemverwaltung2010/WPAR-sg247431.pdf): A WPAR (workload partition) is a software-created, virtualized OS environment within a single AIX V6
 image. Each workload partition is a secure and isolated environment for the
