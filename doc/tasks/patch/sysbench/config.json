@@ -1,6 +1,6 @@
 { 
     "sourceId" : "515f1e0d6ebe318b0dc70fdbe13d836f365c086fe6eb4d3defd6083b",
-    "kernel" : "4.6.002a7a2f+",
+    "kernel" : "4.6.0faf2346+",
     "total_mem_limit" : 3896508416,
     "containers" : [
         {
