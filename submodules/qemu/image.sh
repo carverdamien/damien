@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -x
 IMAGE=image
-: ${SIZE:=$((2*2**30))}
+: ${SIZE:=$((4*2**30))}
 ! mount | grep ${IMAGE}.tmp
 dd if=/dev/zero of=${IMAGE}.tmp bs=1M count=$((SIZE / 2**20))
 mkfs.ext4 -F ${IMAGE}.tmp

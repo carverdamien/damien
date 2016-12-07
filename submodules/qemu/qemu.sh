@@ -1,9 +1,10 @@
 #!/bin/bash
+: ${KERNEL:=/home/dc/Git/linux/build/acdc/arch/x86/boot/bzImage}
 sudo qemu-system-x86_64 \
 -cpu host -smp cores=4,threads=2,sockets=1 \
 -m 4G \
 -enable-kvm \
--kernel /home/dc/Git/linux/build/develop/arch/x86/boot/bzImage \
+-kernel "${KERNEL}" \
 -chardev stdio,id=stdio,mux=on,signal=off \
 -device virtio-serial-pci \
 -device virtconsole,chardev=stdio \
