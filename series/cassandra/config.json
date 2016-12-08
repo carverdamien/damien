@@ -1,5 +1,5 @@
 {
-    "sourceId" : "59620b6fa0ddf37a87aecfe7212b884dc4b4a27e5da6337f1aa9e314",
+    "sourceId" : "93399045b795f9f017adad8ccbe40eda2aa4ef407c18918669d9a7c0",
     "containers": [
 	{
             "name" : "cassandra0",
@@ -29,17 +29,20 @@
     "cassandra_ctl": [
 	{
 	    "container": "cassandra0",
-	    "schedule": [[0,120]]
+	    "threads" : 1,
+	    "schedule": [[60,"180s"]]
 	},
 	{
 	    "container": "cassandra1",
-	    "schedule": [[0,120]]
+	    "threads" : 1,
+	    "schedule": [[60,"60s"],[60,"60s"]]
 	},
 	{
 	    "container": "cassandra2",
-	    "schedule": [[0,120]]
+	    "threads" : 1,
+	    "schedule": [[120,"60s"]]
 	}
     ],
-    "kernel": "4.6.0faf2346+",
-    "total_mem_limit": 10737418240
+    "kernel": "4.6.0+",
+    "total_mem_limit": 5368709120
 }

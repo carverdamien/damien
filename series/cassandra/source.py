@@ -120,8 +120,10 @@ class Boot(threading.Thread):
         time.sleep(self.duration)
         docker.Client().stop(self.container)
 
+cassandra_expected_output = """total,{:s}{total_ops},{:s}{op_s},{:s}{pk_s},{:s}{row_ps},{:s}{mean},{:s}{med},{:s}{perc95},{:s}{perc99},{:s}{perc999},{:s}{max},{:s}{time},{:s}{stderr},{:s}{erros},{:s}{gc_count},{:s}{max_ms},{:s}{sum_ms},{:s}{sdv_ms},{:s}{mb}"""
+cassandra_parser = parse.compile(cassandra_expected_output)
 class Cassandra(threading.Thread):
-    def __init__(self, container, schedule):
+    def __init__(self, container, schedule, threads):
         super(Cassandra, self).__init__()
         container = docker.Client().inspect_container(container)
         while not container['State']['Running']:
@@ -130,10 +132,21 @@ class Cassandra(threading.Thread):
             container = docker.Client().inspect_container(container)
         self.container = container
         self.schedule = schedule
+        self.threads = threads
     def run(self):
         for delay, duration in self.schedule:
             time.sleep(delay)
-            time.sleep(duration) # TODO
+            cmd = ['cassandra-stress', 'write', 'duration=%s' % duration, '-rate', 'threads=%s' % self.threads]
+            dockerexec = docker.Client().exec_create(container=self.container, cmd=cmd)
+            for line in docker.Client().exec_start(dockerexec, stream=True):
+                timestamp = time.time()
+                res = cassandra_parser.search(line)
+                if res != None:
+                    res.named['Id'] = self.container['Id']
+                    res.named['timestamp'] = timestamp
+                    db.cassandra.insert_one(res.named)
+                elif line not in ['','\n']:
+                    print(line[:-1])
 
 sysbench_bin_path = './sysbench/sysbench'
 sysbench_lua_path = './sysbench/tests/db/oltp.lua'
@@ -202,14 +215,14 @@ class Sysbench(threading.Thread):
                    '--num-threads=%d' % self.threads, 'run']
             if self.oltp_read_only:
                 cmd = ['--oltp-read-only=on'] + cmd
-                dockerexec = self.sysbench(cmd)
-                for line in docker.Client().exec_start(dockerexec, stream=True):
-                    res = sysbench_parser.search(line)
-                    if res != None:
-                        res.named['Id'] = self.client_container['Id']
-                        db.sysbench.insert_one(res.named)
-                    elif line not in ['','\n']:
-                        print(line[:-1])
+            dockerexec = self.sysbench(cmd)
+            for line in docker.Client().exec_start(dockerexec, stream=True):
+                res = sysbench_parser.search(line)
+                if res != None:
+                    res.named['Id'] = self.client_container['Id']
+                    db.sysbench.insert_one(res.named)
+                elif line not in ['','\n']:
+                    print(line[:-1])
 ### MAIN ###
 if not platform.release() == kernel:
     environ = os.environ.copy()

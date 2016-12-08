@@ -37,7 +37,7 @@ config = {
   {
    "command": [
     "-c", 
-    "while : ; do sleep 1; done"
+    "while : ; do dd if=/dev/urandom of=/dev/null bs=1M count=1; done"
    ], 
    "entrypoint": "bash", 
    "host_config": {
@@ -129,7 +129,7 @@ config = {
  ], 
  "sourceId": "515f1e0d6ebe318b0dc70fdbe13d836f365c086fe6eb4d3defd6083b",
  "total_mem_limit": 3065118720,
- "kernel" : "4.6.0+"
+ "kernel" : "4.6.0faf2346+"
 }
 
 print(json.dumps(config, sort_keys=True, indent=1))
