@@ -1,0 +1,45 @@
+{
+    "sourceId" : "59620b6fa0ddf37a87aecfe7212b884dc4b4a27e5da6337f1aa9e314",
+    "containers": [
+	{
+            "name" : "cassandra0",
+            "image" : "cassandra:latest",
+            "host_config" : {
+		"oom_kill_disable" : true,
+		"cpuset_cpus" : "2,3,6,7"
+            }
+        },
+	{
+            "name" : "cassandra1",
+            "image" : "cassandra:latest",
+            "host_config" : {
+		"oom_kill_disable" : true,
+		"cpuset_cpus" : "0,1,4,5"
+            }
+        },
+	{
+            "name" : "cassandra2",
+            "image" : "cassandra:latest",
+            "host_config" : {
+		"oom_kill_disable" : true,
+		"cpuset_cpus" : "0,1,4,5"
+            }
+        }
+    ],
+    "cassandra_ctl": [
+	{
+	    "container": "cassandra0",
+	    "schedule": [[0,120]]
+	},
+	{
+	    "container": "cassandra1",
+	    "schedule": [[0,120]]
+	},
+	{
+	    "container": "cassandra2",
+	    "schedule": [[0,120]]
+	}
+    ],
+    "kernel": "4.6.0faf2346+",
+    "total_mem_limit": 10737418240
+}
