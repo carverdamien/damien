@@ -1,0 +1,132 @@
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 15%,   1 secs]  1 threads:       29162 ops,   29160 (avg:   29160) ops/sec, 1.30GB/sec (avg: 1.30GB/sec),  0.03 (avg:  0.03) msec latency[RUN #1 30%,   2 secs]  1 threads:       60363 ops,   31198 (avg:   30179) ops/sec, 1.39GB/sec (avg: 1.34GB/sec),  0.03 (avg:  0.03) msec latency[RUN #1 46%,   3 secs]  1 threads:       91454 ops,   31088 (avg:   30482) ops/sec, 1.38GB/sec (avg: 1.35GB/sec),  0.03 (avg:  0.03) msec latency[RUN #1 62%,   4 secs]  1 threads:      124188 ops,   32730 (avg:   31044) ops/sec, 1.45GB/sec (avg: 1.38GB/sec),  0.03 (avg:  0.03) msec latency[RUN #1 76%,   5 secs]  1 threads:      152873 ops,   28682 (avg:   30572) ops/sec, 1.27GB/sec (avg: 1.36GB/sec),  0.03 (avg:  0.03) msec latency[RUN #1 93%,   6 secs]  1 threads:      185501 ops,   32625 (avg:   30914) ops/sec, 1.45GB/sec (avg: 1.37GB/sec),  0.03 (avg:  0.03) msec latency[RUN #1 100%,   6 secs]  0 threads:      200000 ops,   32625 (avg:   31019) ops/sec, 1.45GB/sec (avg: 1.38GB/sec),  0.03 (avg:  0.03) msec latency
+
+setting requests to 200000
+1         Threads
+1         Connections per thread
+200000    Requests per thread
+Type        Ops/sec     Hits/sec   Misses/sec      Latency       KB/sec
+------------------------------------------------------------------------
+Sets        2820.01          ---          ---      0.18100   1443957.59
+Gets       28199.81         0.00     28199.81      0.01600       673.17
+Waits          0.00          ---          ---      0.00000          ---
+Totals     31019.82         0.00     28199.81      0.03100   1444630.76
+
+
+Request Latency Distribution
+Type     <= msec         Percent
+------------------------------------------------------------------------
+SET       0.120         0.79
+SET       0.130         2.80
+SET       0.140         3.26
+SET       0.150         3.33
+SET       0.160         3.57
+SET       0.170        47.87
+SET       0.180        75.84
+SET       0.190        81.25
+SET       0.200        83.80
+SET       0.210        85.02
+SET       0.220        97.54
+SET       0.230        98.39
+SET       0.240        98.96
+SET       0.250        99.36
+SET       0.260        99.67
+SET       0.270        99.84
+SET       0.280        99.95
+SET       0.290        99.98
+SET       0.300        99.98
+SET       0.320        99.99
+SET       0.340        99.99
+SET       0.360       100.00
+---
+GET       0.013         0.06
+GET       0.014        35.88
+GET       0.015        71.17
+GET       0.016        76.26
+GET       0.017        81.29
+GET       0.018        83.39
+GET       0.019        84.16
+GET       0.020        84.40
+GET       0.021        84.55
+GET       0.022        84.98
+GET       0.023        89.55
+GET       0.024        97.03
+GET       0.025        97.77
+GET       0.026        97.90
+GET       0.027        98.09
+GET       0.028        98.84
+GET       0.029        99.49
+GET       0.030        99.57
+GET       0.031        99.61
+GET       0.032        99.64
+GET       0.033        99.68
+GET       0.034        99.71
+GET       0.035        99.73
+GET       0.036        99.74
+GET       0.037        99.76
+GET       0.038        99.77
+GET       0.039        99.79
+GET       0.040        99.80
+GET       0.041        99.81
+GET       0.042        99.82
+GET       0.043        99.83
+GET       0.044        99.84
+GET       0.045        99.85
+GET       0.046        99.86
+GET       0.047        99.87
+GET       0.048        99.87
+GET       0.049        99.87
+GET       0.050        99.87
+GET       0.051        99.88
+GET       0.052        99.88
+GET       0.053        99.89
+GET       0.054        99.89
+GET       0.055        99.90
+GET       0.056        99.90
+GET       0.057        99.90
+GET       0.058        99.91
+GET       0.059        99.91
+GET       0.060        99.91
+GET       0.061        99.92
+GET       0.062        99.92
+GET       0.063        99.93
+GET       0.064        99.93
+GET       0.065        99.94
+GET       0.066        99.94
+GET       0.067        99.94
+GET       0.068        99.94
+GET       0.069        99.95
+GET       0.071        99.95
+GET       0.072        99.95
+GET       0.073        99.95
+GET       0.074        99.95
+GET       0.075        99.96
+GET       0.076        99.96
+GET       0.077        99.96
+GET       0.078        99.96
+GET       0.079        99.97
+GET       0.080        99.97
+GET       0.081        99.97
+GET       0.082        99.97
+GET       0.083        99.97
+GET       0.084        99.97
+GET       0.085        99.97
+GET       0.086        99.97
+GET       0.088        99.98
+GET       0.089        99.98
+GET       0.091        99.98
+GET       0.092        99.98
+GET       0.093        99.98
+GET       0.094        99.98
+GET       0.095        99.99
+GET       0.096        99.99
+GET       0.097        99.99
+GET       0.098        99.99
+GET       0.099        99.99
+GET       0.100        99.99
+GET       0.110       100.00
+GET       0.120       100.00
+GET       0.140       100.00
+GET       0.340       100.00
+---
