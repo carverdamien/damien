@@ -8,3 +8,6 @@
 [submodule "submodules/grub-list"]
 	path = submodules/grub-list
 	url = https://github.com/carverdamien/grub-list
+[submodule "submodules/twemperf/twemperf"]
+	path = submodules/twemperf/twemperf
+	url = https://github.com/twitter/twemperf
