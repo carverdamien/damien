@@ -1,5 +1,5 @@
 {
-    "sourceId" : "8ee5af8f11c1ae4d6d5cc26aef64de249246ca3d60d3f04ef4bc8b36",
+    "sourceId" : "d8b81c0295fbdc858b28f23f01ca32061d88e0a643f926548c167147",
     "kernel": "4.6.0faf2346+",
     "containers": [
 	{
@@ -7,7 +7,8 @@
             "image" : "cassandra:latest",
             "host_config" : {
 		"oom_kill_disable" : true,
-		"cpuset_cpus" : "2,3,6,7"
+		"cpuset_cpus" : "2,3,6,7",
+		"mem_limit" : 2684354560
             }
         },
 	{
@@ -15,7 +16,8 @@
             "image" : "cassandra:latest",
             "host_config" : {
 		"oom_kill_disable" : true,
-		"cpuset_cpus" : "0,1,4,5"
+		"cpuset_cpus" : "0,1,4,5",
+		"mem_limit" : 2684354560
             }
         },
 	{
@@ -23,24 +25,28 @@
             "image" : "cassandra:latest",
             "host_config" : {
 		"oom_kill_disable" : true,
-		"cpuset_cpus" : "0,1,4,5"
+		"cpuset_cpus" : "0,1,4,5",
+		"mem_limit" : 2684354560
             }
         }
     ],
     "cassandra_ctl": [
 	{
 	    "container": "cassandra0",
-	    "writes" : 1000000,
+	    "writes" : 16000000,
+	    "threads": 8,
 	    "schedule": [[0,"840s"]]
 	},
 	{
 	    "container": "cassandra1",
-	    "writes" : 1000000,
+	    "writes" : 16000000,
+	    "threads": 8,
 	    "schedule": [[120,"120s"],[360,"120s"]]
 	},
 	{
 	    "container": "cassandra2",
-	    "writes" : 1000000,
+	    "writes" : 16000000,
+	    "threads": 8,
 	    "schedule": [[360,"120s"]]
 	}
     ],
