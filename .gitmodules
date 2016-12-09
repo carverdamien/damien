@@ -11,3 +11,6 @@
 [submodule "submodules/twemperf/twemperf"]
 	path = submodules/twemperf/twemperf
 	url = https://github.com/twitter/twemperf
+[submodule "submodules/memtier_benchmark/memtier_benchmark"]
+	path = submodules/memtier_benchmark/memtier_benchmark
+	url = https://github.com/RedisLabs/memtier_benchmark
