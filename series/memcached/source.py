@@ -120,6 +120,54 @@ class Boot(threading.Thread):
         time.sleep(self.duration)
         docker.Client().stop(self.container)
 
+memtier_expected_output  = """[RUN{}]{:s}{threads} threads:{:s}{ops} ops,{:s}{ops_s} (avg:{:s}{avg_ops_s}) ops/sec,{:s}{mem_s} (avg:{:s}{avg_mem_s}),{:s}{ms_s} (avg:{:s}{avg_ms_s}) msec latency"""
+memtier_parser = parse.compile(memtier_expected_output)
+class Memtier(threading.Thread):
+    def __init__(self, client_container, server_container, schedule):
+        client_container = docker.Client().inspect_container(client_container)
+        while not client_container['State']['Running']:
+            print('Starting %s' % (client_container))
+            docker.Client().start(client_container)
+            client_container = docker.Client().inspect_container(client_container)
+        self.client_container = client_container
+        server_container = docker.Client().inspect_container(server_container)
+        while not server_container['State']['Running']:
+            print('Starting %s' % (server_container))
+            docker.Client().start(server_container)
+            server_container = docker.Client().inspect_container(server_container)
+        self.server_container = server_container
+        self.schedule = schedule
+        self.host = server_container['NetworkSettings']['IPAddress']
+        self.port = '11211'
+        self.protocol = 'memcache_text'
+        self.datasize = 2**19
+        self.nbc = 1
+        self.nbt = 1
+
+    def run(self):
+        for delay, duration in self.schedule:
+            time.sleep(delay)
+            cmd = [ 'memtier_benchmark',
+                    '-s', self.host,
+                    '-p', self.port,
+                    '-P', self.protocol,
+                    '-d', self.datasize,
+                    '--test-time=%d' % duration,
+                    '-c', self.nbc,
+                    '-t', self.nbt,
+                    '--key-pattern=S:S',
+                    '--key-maximum=200000']
+            dockerexec = docker.Client().exec_create(container=container['Id'], cmd=cmd)
+            for line in docker.Client().exec_start(dockerexec, stream=True):
+                timestamp = time.time()
+                res = memtier_parser.search(line)
+                if res != None:
+                    res.named['Id'] = self.client_container['Id']
+                    res.named['timestamp'] = timestamp
+                    db.memtier.insert_one(res.named)
+                elif line not in ['','\n']:
+                    print(line[:-1])
+
 cassandra_expected_output = """total,{:s}{total_ops},{:s}{op_s},{:s}{pk_s},{:s}{row_ps},{:s}{mean},{:s}{med},{:s}{perc95},{:s}{perc99},{:s}{perc999},{:s}{max},{:s}{time},{:s}{stderr},{:s}{erros},{:s}{gc_count},{:s}{max_ms},{:s}{sum_ms},{:s}{sdv_ms},{:s}{mb}"""
 cassandra_parser = parse.compile(cassandra_expected_output)
 class Cassandra(threading.Thread):
