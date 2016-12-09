@@ -1,5 +1,5 @@
 {
-    "sourceId" : "38f7e6ceacf877b9e7c8b1f07575eeb81c44cba27c30a71e68ac0125",
+    "sourceId" : "de4bf2cc25e40e5f446c32d179972c2aec432451b854299ceaaffd39",
     "kernel": "4.6.0faf2346+",
     "containers": [
 	{
@@ -23,7 +23,7 @@
 	{
             "name" : "memcached0",
             "image" : "memcached:latest",
-	    "command" : [ '-m', 5120 ],
+	    "command" : [ "-m", "2560" ],
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "2,3,6,7",
@@ -33,7 +33,7 @@
 	{
             "name" : "memcached1",
             "image" : "memcached:latest",
-	    "command" : [ '-m', 5120 ],
+	    "command" : [ "-m", "2560" ],
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
@@ -43,7 +43,7 @@
 	{
             "name" : "memcached2",
             "image" : "memcached:latest",
-	    "command" : [ '-m', 5120 ],
+	    "command" : [ "-m", "2560" ],
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",

@@ -124,6 +124,7 @@ memtier_expected_output  = """[RUN{}]{:s}{threads} threads:{:s}{ops} ops,{:s}{op
 memtier_parser = parse.compile(memtier_expected_output)
 class Memtier(threading.Thread):
     def __init__(self, client_container, server_container, schedule):
+        super(Memtier, self).__init__()
         client_container = docker.Client().inspect_container(client_container)
         while not client_container['State']['Running']:
             print('Starting %s' % (client_container))
@@ -157,7 +158,7 @@ class Memtier(threading.Thread):
                     '-t', self.nbt,
                     '--key-pattern=S:S',
                     '--key-maximum=200000']
-            dockerexec = docker.Client().exec_create(container=container['Id'], cmd=cmd)
+            dockerexec = docker.Client().exec_create(container=self.client_container['Id'], cmd=[str(c) for c in cmd])
             for line in docker.Client().exec_start(dockerexec, stream=True):
                 timestamp = time.time()
                 res = memtier_parser.search(line)
