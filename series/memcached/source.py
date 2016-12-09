@@ -7,7 +7,7 @@ assert(run != None)
 kernel = config['kernel']
 total_mem_limit = config['total_mem_limit']
 containers = config['containers']
-ALL_CTL = ['filebench_ctl', 'anon_ctl', 'boot_ctl', 'sysbench_ctl', 'cassandra_ctl']
+ALL_CTL = ['filebench_ctl', 'anon_ctl', 'boot_ctl', 'sysbench_ctl', 'cassandra_ctl', 'memtier_ctl']
 for ctl in ALL_CTL:
     if ctl in config:
         globals()[ctl] = config[ctl]
@@ -315,6 +315,7 @@ ctl += [Anon(**conf) for conf in anon_ctl]
 ctl += [Boot(**conf) for conf in boot_ctl]
 ctl += [Sysbench(**conf) for conf in sysbench_ctl]
 ctl += [Cassandra(**conf) for conf in cassandra_ctl]
+ctl += [Memtier(**conf) for conf in memtier_ctl]
 try:
     with open('/proc/sys/vm/drop_caches', 'w') as f:
         f.write("3\n")

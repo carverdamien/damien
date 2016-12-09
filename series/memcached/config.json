@@ -1,10 +1,29 @@
 {
-    "sourceId" : "d8b81c0295fbdc858b28f23f01ca32061d88e0a643f926548c167147",
+    "sourceId" : "38f7e6ceacf877b9e7c8b1f07575eeb81c44cba27c30a71e68ac0125",
     "kernel": "4.6.0faf2346+",
     "containers": [
 	{
-            "name" : "cassandra0",
-            "image" : "cassandra:latest",
+	    "name":"memtier0",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ]
+	},
+	{
+	    "name":"memtier1",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ]
+	},
+	{
+	    "name":"memtier2",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ]
+	},
+	{
+            "name" : "memcached0",
+            "image" : "memcached:latest",
+	    "command" : [ '-m', 5120 ],
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "2,3,6,7",
@@ -12,8 +31,9 @@
             }
         },
 	{
-            "name" : "cassandra1",
-            "image" : "cassandra:latest",
+            "name" : "memcached1",
+            "image" : "memcached:latest",
+	    "command" : [ '-m', 5120 ],
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
@@ -21,8 +41,9 @@
             }
         },
 	{
-            "name" : "cassandra2",
-            "image" : "cassandra:latest",
+            "name" : "memcached2",
+            "image" : "memcached:latest",
+	    "command" : [ '-m', 5120 ],
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
@@ -30,24 +51,21 @@
             }
         }
     ],
-    "cassandra_ctl": [
+    "memtier_ctl": [
 	{
-	    "container": "cassandra0",
-	    "writes" : 16000000,
-	    "threads": 8,
-	    "schedule": [[0,"840s"]]
+	    "client_container": "memtier0",
+	    "server_container": "memcached0",
+	    "schedule": [[0,840]]
 	},
 	{
-	    "container": "cassandra1",
-	    "writes" : 16000000,
-	    "threads": 8,
-	    "schedule": [[120,"120s"],[360,"120s"]]
+	    "client_container": "memtier1",
+	    "server_container": "memcached1",
+	    "schedule": [[120,120],[360,120]]
 	},
 	{
-	    "container": "cassandra2",
-	    "writes" : 16000000,
-	    "threads": 8,
-	    "schedule": [[360,"120s"]]
+	    "client_container": "memtier2",
+	    "server_container": "memcached2",
+	    "schedule": [[360,120]]
 	}
     ],
     "total_mem_limit": 5368709120
