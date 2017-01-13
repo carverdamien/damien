@@ -120,7 +120,7 @@ class Boot(threading.Thread):
         time.sleep(self.duration)
         docker.Client().stop(self.container)
 
-memtier_expected_output  = """[RUN{}]{:s}{threads} threads:{:s}{ops} ops,{:s}{ops_s} (avg:{:s}{avg_ops_s}) ops/sec,{:s}{mem_s} (avg:{:s}{avg_mem_s}),{:s}{ms_s} (avg:{:s}{avg_ms_s}) msec latency"""
+memtier_expected_output  = """[RUN{}]{:s}{threads} threads:{:s}{ops} ops,{:s}{ops_s} (avg:{:s}{avg_ops_s}) ops/sec,{:s}{mem_s}/sec (avg:{:s}{avg_mem_s}/sec),{:s}{ms_s} (avg:{:s}{avg_ms_s}) msec latency"""
 memtier_parser = parse.compile(memtier_expected_output)
 class Memtier(threading.Thread):
     def __init__(self, client_container, server_container, schedule):
