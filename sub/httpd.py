@@ -123,6 +123,10 @@ def httpd_dockerstats_csv(listId,stat):
                     X = []
                     YPGPGIN = []
                     YPGPGOUT = []
+                    YRSA = []
+                    YRSF = []
+                    YRRA = []
+                    YRRF = []
                     for entry in db.dockerstats.find({'Id':Id},{'memory_stats':1,'read':1}):
                         x = entry['read']
                         x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
@@ -139,6 +143,14 @@ def httpd_dockerstats_csv(listId,stat):
                                     YPGPGIN.append(y)
                                 elif key[-1] == 'pgpgout':
                                     YPGPGOUT.append(y)
+                                elif key[-1] == 'recent_rotated_anon':
+                                    YRRA.append(y)
+                                elif key[-1] == 'recent_rotated_file':
+                                    YRRF.append(y)
+                                elif key[-1] == 'recent_scanned_anon':
+                                    YRSA.append(y)
+                                elif key[-1] == 'recent_scanned_file':
+                                    YRSF.append(y)
                                 csvwriter.writerow([x,y,".".join(key)])
                         flat(label,y)
                     dt = np.gradient([time.mktime(x.timetuple()) for x in X])
@@ -160,6 +172,12 @@ def httpd_dockerstats_csv(listId,stat):
                     dindout = np.gradient(YPGPGIN,dout)
                     for x,y in itertools.izip(X,dindout):
                         csvwriter.writerow([x,y,".".join(label + ['dpgpgin/dpgpgout'])])
+                    if len(YRRA) > 0:
+                        for x,y in itertools.izip(X, np.array(YRSA) / np.array(YRRA)):
+                            csvwriter.writerow([x,y,".".join(label + ['anon scanned/rotated'])])
+                    if len(YRRF) > 0:
+                        for x,y in itertools.izip(X, np.array(YRSF) / np.array(YRRF)):
+                            csvwriter.writerow([x,y,".".join(label + ['file scanned/rotated'])])
                 elif stat == 'cpu':
                     X = []
                     YSYS = []
