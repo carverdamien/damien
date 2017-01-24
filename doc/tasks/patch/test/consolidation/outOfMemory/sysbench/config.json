@@ -1,7 +1,7 @@
 { 
     "sourceId" : "515f1e0d6ebe318b0dc70fdbe13d836f365c086fe6eb4d3defd6083b",
-    "kernel" : "4.6.0faf2346+",
-    "total_mem_limit" : 3896508416,
+    "kernel" : "4.6.0.7e8002e+",
+    "total_mem_limit" : 3496505344,
     "containers" : [
         {
             "name" : "sysbench1",
@@ -52,6 +52,7 @@
             "image" : "cassandra:latest",
             "host_config" : {
                 "oom_kill_disable" : true,
+		"mem_swappiness" : 0,
                 "cpuset_cpus" : "2,3,6,7"
             }
         }
