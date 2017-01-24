@@ -3,7 +3,7 @@
   {
    "container": "anon", 
    "duration": 120, 
-   "memory_in_bytes": 1518741824, 
+   "memory_in_bytes": 1124392960, 
    "start_delay": 360
   }
  ], 
@@ -19,7 +19,7 @@
     "device_read_bps": [
      {
       "Path": "/dev/sda", 
-      "Rate": 83886080
+      "Rate": 10485760
      }
     ], 
     "device_write_bps": [
@@ -28,7 +28,7 @@
       "Rate": 1099511627776
      }
     ], 
-    "mem_limit": 1532559360, 
+    "mem_limit": 1124392960, 
     "mem_swappiness": 100, 
     "oom_kill_disable": true, 
     "privileged": true
@@ -50,7 +50,7 @@
     "device_read_bps": [
      {
       "Path": "/dev/sda", 
-      "Rate": 83886080
+      "Rate": 10485760
      }
     ], 
     "device_write_bps": [
@@ -59,7 +59,7 @@
       "Rate": 1099511627776
      }
     ], 
-    "mem_limit": 1532559360, 
+    "mem_limit": 1124392960, 
     "mem_swappiness": 100, 
     "oom_kill_disable": true, 
     "privileged": true
@@ -77,11 +77,11 @@
    ], 
    "entrypoint": "bash", 
    "host_config": {
-    "cpuset_cpus": "2", 
+    "cpuset_cpus": "4", 
     "device_read_bps": [
      {
       "Path": "/dev/sda", 
-      "Rate": 83886080
+      "Rate": 10485760
      }
     ], 
     "device_write_bps": [
@@ -90,7 +90,7 @@
       "Rate": 1099511627776
      }
     ], 
-    "mem_limit": 1532559360, 
+    "mem_limit": 1124392960, 
     "mem_swappiness": 100, 
     "oom_kill_disable": true, 
     "privileged": true
@@ -124,7 +124,7 @@
    "start_delay": 0
   }
  ], 
- "kernel": "4.6.0faf2346+", 
+ "kernel": "4.6.0.8b7a062+", 
  "sourceId": "515f1e0d6ebe318b0dc70fdbe13d836f365c086fe6eb4d3defd6083b", 
- "total_mem_limit": 3065118720
+ "total_mem_limit": 2248785920
 }

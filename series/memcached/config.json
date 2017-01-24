@@ -1,6 +1,6 @@
 {
     "sourceId" : "fb0e3ffac3a11f3ab8186f5a61c8fef3fd8c89e23f7bee265ab807f4",
-    "kernel": "4.6.0faf2346+",
+    "kernel": "4.6.0.7e8002e+",
     "containers": [
 	{
 	    "name":"memtier0",
