@@ -104,7 +104,8 @@
  ], 
  "filebench_ctl": [
   {
-   "container": "filebench1", 
+      "container": "filebench1",
+      "sleep": 1,
    "duration": 840, 
    "profile": {
     "name": "procA", 
@@ -113,7 +114,8 @@
    "start_delay": 0
   }, 
   {
-   "container": "filebench2", 
+      "container": "filebench2",
+      "sleep": 1,
    "duration": 480, 
    "pause_delay": 240, 
    "pause_duration": 360, 
@@ -124,7 +126,7 @@
    "start_delay": 0
   }
  ], 
- "kernel": "4.6.0.8b7a062+", 
- "sourceId": "515f1e0d6ebe318b0dc70fdbe13d836f365c086fe6eb4d3defd6083b", 
+ "kernel": "4.6.0.7e8002e+", 
+ "sourceId": "80d6412add775cb3cd717a58eaf23664672bfcfcf7bdfc48498ef86f", 
  "total_mem_limit": 2248785920
 }

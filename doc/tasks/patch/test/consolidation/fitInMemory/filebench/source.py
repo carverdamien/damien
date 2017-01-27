@@ -22,7 +22,7 @@ if 'sysbench_ctl' in config:
     sysbench_ctl = config['sysbench_ctl']
 
 class Filebench(threading.Thread):
-    def __init__(self, container, duration, profile, pause_delay=None, pause_duration=None, start_delay=0, eventgen=1000, **kwargs):
+    def __init__(self, container, duration, profile, pause_delay=None, pause_duration=None, start_delay=0, eventgen=1000, sleep=10, **kwargs):
         super(Filebench, self).__init__()
         container = docker.Client().inspect_container(container)
         while not container['State']['Running']:
@@ -36,6 +36,7 @@ class Filebench(threading.Thread):
         self.pause_delay = pause_delay
         self.profile = profile
         self.eventgen = eventgen
+        self.sleep = sleep
         self.create_profile()
         self.create_fileset()
     def create_profile(self):
@@ -61,7 +62,7 @@ class Filebench(threading.Thread):
     def run(self):
         time.sleep(self.start_delay)
         fbcmd = ["load %s" % (self.profile['name']), "create files", "create processes", "eventgen rate = %d" % self.eventgen]
-        fbcmd += ["stats clear", "sleep 10", "stats snap", 'stats dump "statsdump-%s.csv"' % (self.profile['name'])] * (self.duration/10)
+        fbcmd += ["stats clear", "sleep %d" % (self.sleep), "stats snap", 'stats dump "statsdump-%s.csv"' % (self.profile['name'])] * (self.duration/self.sleep)
         fbcmd += ["shutdown processes", "quit"]
         fbcmd = "\n".join(fbcmd)
         cmd = ['bash', '-c', "echo $$ >> /sys/fs/cgroup/freezer/%s/tasks && echo -e '%s' | filebench" % (self.profile['name'],fbcmd)]
