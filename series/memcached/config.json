@@ -6,19 +6,34 @@
 	    "name":"memtier0",
 	    "image":"memtier_benchmark:latest",
 	    "entrypoint": "/bin/bash",
-	    "command" : ["-c","while :; do sleep 1; done" ]
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"oom_kill_disable" : true,
+		"cpuset_cpus" : "2,3,6,7",
+		"mem_limit" : 12582912
+            }
 	},
 	{
 	    "name":"memtier1",
 	    "image":"memtier_benchmark:latest",
 	    "entrypoint": "/bin/bash",
-	    "command" : ["-c","while :; do sleep 1; done" ]
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"oom_kill_disable" : true,
+		"cpuset_cpus" : "0,1,4,5",
+		"mem_limit" : 12582912
+            }
 	},
 	{
 	    "name":"memtier2",
 	    "image":"memtier_benchmark:latest",
 	    "entrypoint": "/bin/bash",
-	    "command" : ["-c","while :; do sleep 1; done" ]
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"oom_kill_disable" : true,
+		"cpuset_cpus" : "0,1,4,5",
+		"mem_limit" : 12582912
+            }
 	},
 	{
             "name" : "memcached0",
@@ -27,7 +42,7 @@
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "2,3,6,7",
-		"mem_limit" : 2684354560
+		"mem_limit" : 2415919104
             }
         },
 	{
@@ -37,7 +52,7 @@
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 2684354560
+		"mem_limit" : 2415919104
             }
         },
 	{
@@ -47,7 +62,7 @@
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 2684354560
+		"mem_limit" : 2415919104
             }
         }
     ],
@@ -68,5 +83,5 @@
 	    "schedule": [[360,120]]
 	}
     ],
-    "total_mem_limit": 5368709120
+    "total_mem_limit": 4844421120
 }
