@@ -319,18 +319,11 @@ def httpd_analytics(name, view):
     with open(filename_csv, 'w') as f:
         csvwriter = csv.writer(f)
         header = None
-        for data in dataref:
-            try:
-                results = view(data)
-                if type(results) == dict:
-                    results = [results]
-                for res in results:
-                    if header == None:
-                        header = res.keys()
-                        csvwriter.writerow(header)
-                    csvwriter.writerow([res[h] for h in header])
-            except Exception as e:
-                print(e)
+        for res in view(dataref):
+            if header == None:
+                header = res.keys()
+                csvwriter.writerow(header)
+            csvwriter.writerow([res[h] for h in header])
     with open(filename_csv) as f:
         return f.read()
     return "x,y,label\n0,0,oops\n"

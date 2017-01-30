@@ -1,5 +1,5 @@
 {
-    "sourceId" : "fb0e3ffac3a11f3ab8186f5a61c8fef3fd8c89e23f7bee265ab807f4",
+    "sourceId" : "5ceba926a527ab3782272e23fa88943da15b2f844634f9d43d680332",
     "kernel": "4.6.0.7e8002e+",
     "containers": [
 	{
@@ -42,7 +42,7 @@
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "2,3,6,7",
-		"mem_limit" : 2415919104
+		"mem_limit" : 2304401408
             }
         },
 	{
@@ -52,7 +52,7 @@
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 2415919104
+		"mem_limit" : 2304401408
             }
         },
 	{
@@ -62,7 +62,7 @@
             "host_config" : {
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 2415919104
+		"mem_limit" : 2304401408
             }
         }
     ],
@@ -83,5 +83,5 @@
 	    "schedule": [[360,120]]
 	}
     ],
-    "total_mem_limit": 4853858304
+    "total_mem_limit": 4646551552
 }
