@@ -1,0 +1,35 @@
+{
+    "sourceId" : "5ceba926a527ab3782272e23fa88943da15b2f844634f9d43d680332",
+    "kernel": "4.6.0+",
+    "containers": [
+	{
+	    "name":"memtier0",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"oom_kill_disable" : true,
+		"cpuset_cpus" : "2,3,6,7",
+		"mem_limit" : 12582912
+            }
+	},
+	{
+            "name" : "memcached0",
+            "image" : "memcached:latest",
+	    "command" : [ "-m", "2560" ],
+            "host_config" : {
+		"oom_kill_disable" : true,
+		"cpuset_cpus" : "2,3,6,7",
+		"mem_limit" : 2415919104
+            }
+        }
+    ],
+    "memtier_ctl": [
+	{
+	    "client_container": "memtier0",
+	    "server_container": "memcached0",
+	    "schedule": [[0,120]]
+	}
+    ],
+    "total_mem_limit": 4853858304
+}
