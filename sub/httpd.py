@@ -127,6 +127,9 @@ def httpd_dockerstats_csv(listId,stat):
                     YRSF = []
                     YRRA = []
                     YRRF = []
+                    YAF  = []
+                    YAFR = []
+                    YAFU = []
                     for entry in db.dockerstats.find({'Id':Id},{'memory_stats':1,'read':1}):
                         x = entry['read']
                         x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
@@ -151,6 +154,12 @@ def httpd_dockerstats_csv(listId,stat):
                                     YRSA.append(y)
                                 elif key[-1] == 'recent_scanned_file':
                                     YRSF.append(y)
+                                elif key[-1] == 'active_file':
+                                    YAF.append(y)
+                                elif key[-1] == 'active_file_referenced':
+                                    YAFR.append(y)
+                                elif key[-1] == 'active_file_unreferenced':
+                                    YAFU.append(y)
                                 csvwriter.writerow([x,y,".".join(key)])
                         flat(label,y)
                     dt = np.gradient([time.mktime(x.timetuple()) for x in X])
@@ -178,6 +187,9 @@ def httpd_dockerstats_csv(listId,stat):
                     if len(YRRF) > 0:
                         for x,y in itertools.izip(X, np.array(YRSF) / np.array(YRRF)):
                             csvwriter.writerow([x,y,".".join(label + ['file scanned/rotated'])])
+                    if len(YAFU) > 0 and len(YAFR) > 0:
+                        for x,y in itertools.izip(X, np.array(YAF) - np.array(YAFR) - np.array(YAFU)):
+                            csvwriter.writerow([x,y,".".join(label + ['af-afr-afu'])])
                 elif stat == 'cpu':
                     X = []
                     YSYS = []

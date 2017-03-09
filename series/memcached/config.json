@@ -1,6 +1,6 @@
 {
     "sourceId" : "5ceba926a527ab3782272e23fa88943da15b2f844634f9d43d680332",
-    "kernel": "4.6.0.7e8002e+",
+    "kernel": "4.6.0.ab793bf+",
     "containers": [
 	{
 	    "name":"memtier0",
@@ -40,9 +40,10 @@
             "image" : "memcached:latest",
 	    "command" : [ "-m", "2560" ],
             "host_config" : {
+		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "2,3,6,7",
-		"mem_limit" : 2304401408
+		"mem_limit" : 2303172608
             }
         },
 	{
@@ -50,9 +51,10 @@
             "image" : "memcached:latest",
 	    "command" : [ "-m", "2560" ],
             "host_config" : {
+		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 2304401408
+		"mem_limit" : 2303172608
             }
         },
 	{
@@ -60,9 +62,10 @@
             "image" : "memcached:latest",
 	    "command" : [ "-m", "2560" ],
             "host_config" : {
+		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 2304401408
+		"mem_limit" : 2303172608
             }
         }
     ],
@@ -83,5 +86,6 @@
 	    "schedule": [[360,120]]
 	}
     ],
-    "total_mem_limit": 4646551552
+    "total_mem_limit": 4711202816,
+    "extra" : "64M"
 }

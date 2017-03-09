@@ -1,0 +1,143 @@
+{
+ "anon_ctl": [
+  {
+   "container": "anon", 
+   "duration": 120, 
+   "memory_in_bytes": 1124392960, 
+   "start_delay": 360
+  }
+ ], 
+    "containers": [
+	{
+	    "image" : "ubuntu:latest",
+	    "name" : "krefreshd_monitor",
+	    "entrypoint" : "bash",
+	    "command" : ["-c", "pidof krefreshd > /sys/fs/cgroup/cpuacct/tasks && sleep infinity"],
+	    "host_config" : {
+		"pid_mode" : "host",
+		"privileged" : true
+	    }
+	    
+	},
+  {
+   "command": [
+    "-c", 
+    "sysctl -w vm.dirty_background_bytes=32768 -w vm.dirty_bytes=67108864 -w vm.dirty_expire_centisecs=200 -w vm.dirty_writeback_centisecs=100 && while : ; do sleep 1; done"
+   ], 
+   "entrypoint": "bash", 
+   "host_config": {
+    "cpuset_cpus": "0", 
+    "device_read_bps": [
+     {
+      "Path": "/dev/sda", 
+      "Rate": 10485760
+     }
+    ], 
+    "device_write_bps": [
+     {
+      "Path": "/dev/sda", 
+      "Rate": 1099511627776
+     }
+    ], 
+    "mem_limit": 1124392960, 
+    "mem_swappiness": 100, 
+    "oom_kill_disable": true, 
+    "privileged": true
+   }, 
+   "image": "fban:latest", 
+   "name": "filebench1", 
+   "volumes": [
+    "/data"
+   ]
+  }, 
+  {
+   "command": [
+    "-c", 
+    "while : ; do dd if=/dev/urandom of=/dev/null bs=1M count=1; done"
+   ], 
+   "entrypoint": "bash", 
+   "host_config": {
+    "cpuset_cpus": "2", 
+    "device_read_bps": [
+     {
+      "Path": "/dev/sda", 
+      "Rate": 10485760
+     }
+    ], 
+    "device_write_bps": [
+     {
+      "Path": "/dev/sda", 
+      "Rate": 1099511627776
+     }
+    ], 
+    "mem_limit": 1124392960, 
+    "mem_swappiness": 100, 
+    "oom_kill_disable": true, 
+    "privileged": true
+   }, 
+   "image": "fban:latest", 
+   "name": "filebench2", 
+   "volumes": [
+    "/data"
+   ]
+  }, 
+  {
+   "command": [
+    "-c", 
+    "while : ; do sleep 1; done"
+   ], 
+   "entrypoint": "bash", 
+   "host_config": {
+    "cpuset_cpus": "4", 
+    "device_read_bps": [
+     {
+      "Path": "/dev/sda", 
+      "Rate": 10485760
+     }
+    ], 
+    "device_write_bps": [
+     {
+      "Path": "/dev/sda", 
+      "Rate": 1099511627776
+     }
+    ], 
+    "mem_limit": 1124392960, 
+    "mem_swappiness": 100, 
+    "oom_kill_disable": true, 
+    "privileged": true
+   }, 
+   "image": "fban:latest", 
+   "name": "anon", 
+   "volumes": [
+    "/data"
+   ]
+  }
+ ], 
+ "filebench_ctl": [
+  {
+   "container": "filebench1", 
+   "duration": 840, 
+   "profile": {
+    "name": "procA", 
+    "value": "set $dir=/data/procA\nset $iosize=1m\n\ndefine file name=hotfile,path=$dir,size=1g,reuse,prealloc\n# define file name=coldfile,path=$dir,size=5g,reuse,prealloc\n\n# 16 hit for 0 seq miss\n\ndefine process name=processA, instances=1\n{\nthread name=HotThread, memsize=1m, instances=1\n{\nflowop semblock name=hotsemblock, value=1, highwater=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop sempost name=hotsempost, target=hotsemblockdone, value=1\n}\nthread name=ColdThread, memsize=1m, instances=1\n{\n# flowop eventlimit name=eventlimit\n# flowop read name=cold, filename=coldfile, iosize=$iosize, fd=2\n# flowop read name=cold, filename=coldfile, iosize=$iosize, fd=2\nflowop sempost name=coldsempost, target=hotsemblock, value=1\nflowop semblock name=hotsemblockdone, value=1, highwater=1\n}\n}\n"
+   }, 
+   "sleep": 1, 
+   "start_delay": 0
+  }, 
+  {
+   "container": "filebench2", 
+   "duration": 480, 
+   "pause_delay": 240, 
+   "pause_duration": 360, 
+   "profile": {
+    "name": "procB", 
+    "value": "set $dir=/data/procB\nset $iosize=1m\n\ndefine file name=hotfile,path=$dir,size=1g,reuse,prealloc\n# define file name=coldfile,path=$dir,size=5g,reuse,prealloc\n\n# 16 hit for 0 seq miss\n\ndefine process name=processB, instances=1\n{\nthread name=HotThread, memsize=1m, instances=1\n{\nflowop semblock name=hotsemblock, value=1, highwater=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop read name=hot, filename=hotfile, iosize=$iosize, fd=1\nflowop sempost name=hotsempost, target=hotsemblockdone, value=1\n}\nthread name=ColdThread, memsize=1m, instances=1\n{\n# flowop eventlimit name=eventlimit\n# flowop read name=cold, filename=coldfile, iosize=$iosize, fd=2\n# flowop read name=cold, filename=coldfile, iosize=$iosize, fd=2\nflowop sempost name=coldsempost, target=hotsemblock, value=1\nflowop semblock name=hotsemblockdone, value=1, highwater=1\n}\n}\n"
+   }, 
+   "sleep": 1, 
+   "start_delay": 0
+  }
+ ], 
+    "kernel": "4.6.0.7a721cf+",
+ "sourceId": "80d6412add775cb3cd717a58eaf23664672bfcfcf7bdfc48498ef86f", 
+ "total_mem_limit": 2248785920
+}
