@@ -7,8 +7,9 @@ assert(run != None)
 
 kernel = config['kernel']
 containers = config['containers']
+root_mem_cgroup = subprocess.check_output(['lssubsys', '-m', 'memory'])[:-1].split(' ')[1]
 mem_cgroup = {
-    "/sys/fs/cgroup/memory/docker" : {
+    "docker" : {
         "memory" : {
             "use_hierarchy" : "1",
             "limit_in_bytes" : 2**30
@@ -256,7 +257,7 @@ def destroy_mem_cgroup(path, memory={}, children={}):
         recrmdir(path)
 
 for k in mem_cgroup:
-    create_mem_cgroup(k, **mem_cgroup[k])
+    create_mem_cgroup(os.path.join(root_mem_cgroup, k), **mem_cgroup[k])
         
 def create_container(containers):
     if type(containers) != list:
@@ -281,4 +282,4 @@ for c in containers:
     client.remove_container(c, v=True)
 db.run.update_one({'_id':run['_id']}, {'$set':{ 'containers': containers }})
 for k in mem_cgroup:
-    destroy_mem_cgroup(k, **mem_cgroup[k])
+    destroy_mem_cgroup(os.path.join(root_mem_cgroup, k), **mem_cgroup[k])

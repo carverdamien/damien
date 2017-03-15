@@ -1,14 +1,20 @@
 {
     "mem_cgroup" : {
-	"/sys/fs/cgroup/memory/docker" : {
+	"docker" : {
 	    "memory" : {
-		"use_hierarchy" : "1",
 		"limit_in_bytes" : 2248785920
 	    },
 	    "children" : {
-		"foo" : {
+		"private" : {
+		    "memory" : {
+			"limit_in_bytes" : 1124392960
+		    }
 		},
-		"bar" : {
+		"shared" : {
+		    "memory" : {
+			"use_hierarchy" : "1",
+			"limit_in_bytes" : 1124392960
+		    }
 		}
 	    }
 	}
@@ -67,7 +73,8 @@
     "sysctl -w vm.dirty_background_bytes=32768 -w vm.dirty_bytes=67108864 -w vm.dirty_expire_centisecs=200 -w vm.dirty_writeback_centisecs=100 && while : ; do sleep 1; done"
    ], 
    "entrypoint": "bash", 
-   "host_config": {
+      "host_config": {
+	  "cgroup_parent" : "docker/private",
     "cpuset_cpus": "0", 
     "device_read_bps": [
      {
@@ -98,7 +105,8 @@
     "while : ; do dd if=/dev/urandom of=/dev/null bs=1M count=1; done"
    ], 
    "entrypoint": "bash", 
-   "host_config": {
+      "host_config": {
+	  "cgroup_parent" : "docker/shared",
     "cpuset_cpus": "2", 
     "device_read_bps": [
      {
@@ -129,7 +137,8 @@
     "while : ; do sleep 1; done"
    ], 
    "entrypoint": "bash", 
-   "host_config": {
+      "host_config": {
+	  "cgroup_parent" : "docker/shared",
     "cpuset_cpus": "4", 
     "device_read_bps": [
      {
@@ -197,5 +206,5 @@
 	}
     ],
     "kernel": "4.6.0+",
-    "sourceId": "1891e0d2be43cea8bac154c0641b768567772ddf128078cc94dda942"
+    "sourceId": "10bcf6022a376f59d434cf4f67dc478ee7c3008aa93fb33a86dc74b1"
 }
