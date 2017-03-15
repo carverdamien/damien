@@ -8,18 +8,18 @@
 	},
 	"server" : {
 	    "memory" : {
-		"limit_in_bytes" : 6909517824
+		"limit_in_bytes" : 3240000000
 	    },
 	    "children" : {
 		"private" : {
 		    "memory" : {
-			"limit_in_bytes" : 2303172608
+			"limit_in_bytes" : 1080000000
 		    }
 		},
 		"shared" : {
 		    "memory" : {
 			"use_hierarchy" : "1",
-			"limit_in_bytes" : 4606345216
+			"limit_in_bytes" : 2160000000
 		    }
 		}
 	    }
@@ -77,49 +77,49 @@
 	{
             "name" : "memcached0",
             "image" : "memcached:latest",
-	    "command" : [ "-m", "2560" ],
+	    "command" : [ "-m", "1024" ],
             "host_config" : {
 		"cgroup_parent" : "server/private",
 		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "2,3,6,7",
-		"mem_limit" : 2303172608
+		"mem_limit" : 1080000000
             }
         },
 	{
             "name" : "memcached1",
             "image" : "memcached:latest",
-	    "command" : [ "-m", "2560" ],
+	    "command" : [ "-m", "1024" ],
             "host_config" : {
 		"cgroup_parent" : "server/shared",
 		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 2303172608
+		"mem_limit" : 1080000000
             }
         },
 	{
             "name" : "memcached2",
             "image" : "memcached:latest",
-	    "command" : [ "-m", "2560" ],
+	    "command" : [ "-m", "1024" ],
             "host_config" : {
 		"cgroup_parent" : "server/shared",
 		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 2303172608
+		"mem_limit" : 1080000000
             }
         },
 	{
             "name" : "memcached3",
             "image" : "memcached:latest",
-	    "command" : [ "-m", "2560" ],
+	    "command" : [ "-m", "1024" ],
             "host_config" : {
 		"cgroup_parent" : "server/shared",
 		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 2303172608
+		"mem_limit" : 1080000000
             }
         }
     ],
