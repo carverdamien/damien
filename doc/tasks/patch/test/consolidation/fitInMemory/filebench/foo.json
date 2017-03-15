@@ -10,10 +10,38 @@
     "containers": [
 	{
 	    "image" : "ubuntu:latest",
+	    "name" : "kidled_monitor",
+	    "entrypoint" : "bash",
+	    "command" : ["-c", "pidof kidled | tee /sys/fs/cgroup/cpu{,acct}/tasks && sleep infinity"],
+	    "host_config" : {
+		"cpu_period": 1000000,
+		"cpu_quota":    10000,
+		"pid_mode" : "host",
+		"privileged" : true
+	    }
+	    
+	},
+	{
+	    "image" : "ubuntu:latest",
 	    "name" : "krefreshd_monitor",
 	    "entrypoint" : "bash",
-	    "command" : ["-c", "pidof krefreshd > /sys/fs/cgroup/cpuacct/tasks && sleep infinity"],
+	    "command" : ["-c", "pidof krefreshd | tee /sys/fs/cgroup/cpu{,acct}/tasks && sleep infinity"],
 	    "host_config" : {
+		"cpu_period": 1000000,
+		"cpu_quota":    10000,
+		"pid_mode" : "host",
+		"privileged" : true
+	    }
+	    
+	},
+	{
+	    "image" : "ubuntu:latest",
+	    "name" : "kstaled_monitor",
+	    "entrypoint" : "bash",
+	    "command" : ["-c", "pidof kstaled | tee /sys/fs/cgroup/cpu{,acct}/tasks && sleep infinity"],
+	    "host_config" : {
+		"cpu_period": 1000000,
+		"cpu_quota":    10000,
 		"pid_mode" : "host",
 		"privileged" : true
 	    }
@@ -136,8 +164,25 @@
    "sleep": 1, 
    "start_delay": 0
   }
- ], 
-    "kernel": "4.6.0.7a721cf+",
+ ],
+    "boot_ctl" :[
+	{
+	    "container":"kidled_monitor",
+	    "start_delay":0,
+	    "duration":1080
+	},
+	{
+	    "container":"krefreshd_monitor",
+	    "start_delay":0,
+	    "duration":1080
+	},
+	{
+	    "container":"kstaled_monitor",
+	    "start_delay":0,
+	    "duration":1080
+	}
+    ],
+    "kernel": "4.6.0.60ac907+",
  "sourceId": "80d6412add775cb3cd717a58eaf23664672bfcfcf7bdfc48498ef86f", 
  "total_mem_limit": 2248785920
 }
