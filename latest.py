@@ -319,7 +319,7 @@ def create_mem_cgroup(path, memory={}, children={}):
         with open(p,'w') as f:
             f.write("%d\n" % value)
         with open(p) as f:
-            assert (value == int(f.read())), 'Could not set %s as %s' % (p,v)
+            assert (value == int(f.read())), 'Could not set %s as %s' % (p,value)
     for c in children:
         v = children[c]
         p = os.path.join(path,c)

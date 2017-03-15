@@ -8,18 +8,18 @@
 	},
 	"server" : {
 	    "memory" : {
-		"limit_in_bytes" : 3240000000
+		"limit_in_bytes" : 3240001536
 	    },
 	    "children" : {
 		"private" : {
 		    "memory" : {
-			"limit_in_bytes" : 1080000000
+			"limit_in_bytes" : 1080000512
 		    }
 		},
 		"shared" : {
 		    "memory" : {
 			"use_hierarchy" : "1",
-			"limit_in_bytes" : 2160000000
+			"limit_in_bytes" : 2160001024
 		    }
 		}
 	    }
@@ -83,7 +83,7 @@
 		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "2,3,6,7",
-		"mem_limit" : 1080000000
+		"mem_limit" : 1080000512
             }
         },
 	{
@@ -95,7 +95,7 @@
 		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 1080000000
+		"mem_limit" : 1080000512
             }
         },
 	{
@@ -107,7 +107,7 @@
 		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 1080000000
+		"mem_limit" : 1080000512
             }
         },
 	{
@@ -119,7 +119,7 @@
 		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "0,1,4,5",
-		"mem_limit" : 1080000000
+		"mem_limit" : 1080000512
             }
         }
     ],
