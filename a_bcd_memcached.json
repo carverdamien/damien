@@ -19,7 +19,7 @@
 		"shared" : {
 		    "memory" : {
 			"use_hierarchy" : "1",
-			"limit_in_bytes" : 3240001536
+			"limit_in_bytes" : 2160001024
 		    }
 		}
 	    }
@@ -79,7 +79,7 @@
             "image" : "memcached:latest",
 	    "command" : [ "-m", "1024" ],
             "host_config" : {
-		"cgroup_parent" : "server/shared",
+		"cgroup_parent" : "server/private",
 		"mem_swappiness" : 100,
 		"oom_kill_disable" : true,
 		"cpuset_cpus" : "2,3,6,7",
