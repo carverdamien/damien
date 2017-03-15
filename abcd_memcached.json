@@ -1,6 +1,6 @@
 {
     "sourceId" : "ad23f2b4e5413f9de4f838621b80e3c39af2286068dd3892f58f0fde",
-    "kernel": "4.6.0+",
+    "kernel": "4.6.0.2888675+",
     "mem_cgroup" : {
 	"system" : {
 	},
@@ -34,7 +34,7 @@
 	    "host_config" : {
 		"cgroup_parent" : "system",
 		"cpu_period": 1000000,
-		"cpu_quota":    10000,
+		"cpu_quota":  1000000,
 		"pid_mode" : "host",
 		"privileged" : true
 	    }
@@ -62,7 +62,7 @@
 	    "host_config" : {
 		"cgroup_parent" : "system",
 		"cpu_period": 1000000,
-		"cpu_quota":    10000,
+		"cpu_quota":  1000000,
 		"pid_mode" : "host",
 		"privileged" : true
 	    }

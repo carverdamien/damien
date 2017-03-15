@@ -37,12 +37,12 @@ def httpd_cache_index():
 
 def httpd_run_list():
     table = [['runId', 'configId', 'config']]
-    for run in db.run.find({'status':'done'}).sort([('_id',pymongo.DESCENDING)]):
+    for run in db.run.find({'status':'done'}).sort([('_id',pymongo.DESCENDING)]).limit(10):
         runId = run['runId']
         configId = run['configId']
         link_runId = HTML.link(runId[-4:],'/run/%s' % runId)
         link_configId = HTML.link(configId[:4],'/config/%s' % configId)
-        config = next(db.config.find({'configId':configId},{'_id':0, 'sourceId':0, 'configId':0}))
+        config = next(db.config.find({'configId':configId},{'_id':0, 'sourceId':0, 'configId':0}).limit(1))
         table.append([link_runId, link_configId, HTML.json(config)])
     return HTML.table(table)
 
@@ -61,9 +61,9 @@ def httpd_run_show(runId):
     if len(split) > 1:
         return "".join([httpd_run_show(runId) for runId in split])
     res = ""
-    run = next(db.run.find({'runId':runId}))
+    run = next(db.run.find({'runId':runId}).limit(1))
     res += '<h1>Config</h1>'
-    config = next(db.config.find({'configId':run['configId']}, {'_id':0, 'sourceId':0, 'configId':0}))
+    config = next(db.config.find({'configId':run['configId']}, {'_id':0, 'sourceId':0, 'configId':0}).limit(1))
     res += HTML.json(config)
     containers = []
     if 'container' in run:
@@ -100,7 +100,7 @@ def httpd_run_show(runId):
 
 @bottle.route('/dockercontainers/<Id>')
 def httpd_dockercontainers(Id):
-    for container in db.dockercontainers.find({'Id':Id}).limit(1):
+    for container in db.dockercontainers.find({'Id':Id}).limit(10):
         return str(container)
     return "Not Found"
 
@@ -287,7 +287,7 @@ def httpd_plot_any(plottype, collection, selector, filename):
 @bottle.route('/config')
 def httpd_config_list():
     table = [['configId', 'sourceId', 'values']]
-    for config in db.config.find({},{'_id':0}):
+    for config in db.config.find({},{'_id':0}).limit(10):
         configId = config['configId']
         del config['configId']
         sourceId = config['sourceId']
@@ -301,7 +301,7 @@ def httpd_config_list():
 @bottle.route('/config/<configId>')
 def httpd_config_show(configId):
     table = [['runId', 'status', 'extra']]
-    for run in db.run.find({'configId':configId}, {'_id':0, 'configId':0}):
+    for run in db.run.find({'configId':configId}, {'_id':0, 'configId':0}).limit(10):
         runId = run['runId']
         del run['runId']
         status = run['status']
@@ -322,7 +322,7 @@ def httpd_analytics(name, view):
     if not os.path.exists(directory_csv):
         os.makedirs(directory_csv)
     filename_csv = os.path.join(directory_csv, view + '.csv.tmp') # TODO: cachable?
-    analytics = next(db.analytics.find({'name':name}))
+    analytics = next(db.analytics.find({'name':name}).limit(1))
     dataref = analytics['dataref']
     view = analytics['view'][view]
     _globals = globals().copy()

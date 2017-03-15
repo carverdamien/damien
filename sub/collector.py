@@ -15,7 +15,11 @@ def collect(db, fs, args):
         for stat in clt.stats(Id, decode=True):
             count += 1
             stat['Id'] = Id
-            db.dockerstats.insert_one(stat)
+            try:
+                db.dockerstats.insert_one(stat)
+            except Exception as e:
+                print(e)
+                print(stat)
             print(Id, count)
     def spawn_worker(Id):
             t = threading.Thread(target=collect, args=(db, clt, Id))
