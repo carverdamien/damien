@@ -134,7 +134,7 @@ class Boot(threading.Thread):
 memtier_expected_output  = """[RUN{}]{:s}{threads} threads:{:s}{ops} ops,{:s}{ops_s} (avg:{:s}{avg_ops_s}) ops/sec,{:s}{mem_s}/sec (avg:{:s}{avg_mem_s}/sec),{:s}{ms_s} (avg:{:s}{avg_ms_s}) msec latency"""
 memtier_parser = parse.compile(memtier_expected_output)
 class Memtier(threading.Thread):
-    def __init__(self, client_container, server_container, schedule, maxkey=10000000):
+    def __init__(self, client_container, server_container, schedule, args=[]):
         super(Memtier, self).__init__()
         client_container = docker.Client().inspect_container(client_container)
         while not client_container['State']['Running']:
@@ -155,7 +155,7 @@ class Memtier(threading.Thread):
         self.datasize = 2**19
         self.nbc = 1
         self.nbt = 1
-        self.maxkey = maxkey
+        self.args = args
 
     def run(self):
         for delay, duration in self.schedule:
@@ -167,9 +167,7 @@ class Memtier(threading.Thread):
                     '-d', self.datasize,
                     '--test-time=%d' % duration,
                     '-c', self.nbc,
-                    '-t', self.nbt,
-                    '--key-pattern=S:S',
-                    '--key-maximum=%s' % (self.maxkey)]
+                    '-t', self.nbt ] + self.args
             dockerexec = docker.Client().exec_create(container=self.client_container['Id'], cmd=[str(c) for c in cmd])
             for line in docker.Client().exec_start(dockerexec, stream=True):
                 timestamp = time.time()

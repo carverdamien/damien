@@ -1,0 +1,289 @@
+{
+    "sourceId" : "cf54168b526707abd211dba01ebea19efc73629b41db7d30f944826c",
+    "_kernel": "4.6.0+",
+    "kernel": "4.6.0.53bebc5+",
+    "mem_cgroup" : {
+	"system" : {
+	},
+	"client" : {
+	},
+	"server" : {
+	    "memory" : {
+		"limit_in_bytes" : 5580005376
+	    },
+	    "children" : {
+		"private" : {
+		    "memory" : {
+			"limit_in_bytes" : 930000896
+		    }
+		},
+		"shared" : {
+		    "memory" : {
+			"use_hierarchy" : "1",
+			"limit_in_bytes" : 5580005376
+		    }
+		}
+	    }
+	}
+    },
+    "containers": [
+	{
+	    "image" : "ubuntu:latest",
+	    "name" : "kidled_monitor",
+	    "entrypoint" : "bash",
+	    "command" : ["-c", "pidof kidled | tee /sys/fs/cgroup/cpu{,acct}/tasks && sleep infinity"],
+	    "host_config" : {
+		"cgroup_parent" : "system",
+		"cpu_period": 1000000,
+		"cpu_quota":  1000000,
+		"pid_mode" : "host",
+		"privileged" : true
+	    }
+	    
+	},
+	{
+	    "image" : "ubuntu:latest",
+	    "name" : "krefreshd_monitor",
+	    "entrypoint" : "bash",
+	    "command" : ["-c", "pidof krefreshd | tee /sys/fs/cgroup/cpu{,acct}/tasks && sleep infinity"],
+	    "host_config" : {
+		"cgroup_parent" : "system",
+		"cpu_period": 1000000,
+		"cpu_quota":    10000,
+		"pid_mode" : "host",
+		"privileged" : true
+	    }
+	    
+	},
+	{
+	    "image" : "ubuntu:latest",
+	    "name" : "kstaled_monitor",
+	    "entrypoint" : "bash",
+	    "command" : ["-c", "pidof kstaled | tee /sys/fs/cgroup/cpu{,acct}/tasks && sleep infinity"],
+	    "host_config" : {
+		"cgroup_parent" : "system",
+		"cpu_period": 1000000,
+		"cpu_quota":  1000000,
+		"pid_mode" : "host",
+		"privileged" : true
+	    }
+	    
+	},
+	{
+	    "name":"memtier0",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"cgroup_parent" : "client",
+		"oom_kill_disable" : true,
+		"mem_limit" : 12582912
+            }
+	},
+	{
+	    "name":"memtier1",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"cgroup_parent" : "client",
+		"oom_kill_disable" : true,
+		"mem_limit" : 12582912
+            }
+	},
+	{
+	    "name":"memtier2",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"cgroup_parent" : "client",
+		"oom_kill_disable" : true,
+		"mem_limit" : 12582912
+            }
+	},
+	{
+	    "name":"memtier3",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"cgroup_parent" : "client",
+		"oom_kill_disable" : true,
+		"mem_limit" : 12582912
+            }
+	},
+	{
+	    "name":"memtier4",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"cgroup_parent" : "client",
+		"oom_kill_disable" : true,
+		"mem_limit" : 12582912
+            }
+	},
+	{
+	    "name":"memtier5",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"cgroup_parent" : "client",
+		"oom_kill_disable" : true,
+		"mem_limit" : 12582912
+            }
+	},
+	{
+	    "name":"memtier6",
+	    "image":"memtier_benchmark:latest",
+	    "entrypoint": "/bin/bash",
+	    "command" : ["-c","while :; do sleep 1; done" ],
+	    "host_config" : {
+		"cgroup_parent" : "client",
+		"oom_kill_disable" : true,
+		"mem_limit" : 12582912
+            }
+	},
+	{
+            "name" : "memcached0",
+            "image" : "memcached:latest",
+	    "command" : [ "-m", "1024" ],
+            "host_config" : {
+		"cgroup_parent" : "server/shared",
+		"mem_swappiness" : 100,
+		"oom_kill_disable" : true,
+		"mem_limit" : 930000896
+            }
+        },
+	{
+            "name" : "memcached1",
+            "image" : "memcached:latest",
+	    "command" : [ "-m", "1024" ],
+            "host_config" : {
+		"cgroup_parent" : "server/shared",
+		"mem_swappiness" : 100,
+		"oom_kill_disable" : true,
+		"mem_limit" : 930000896
+            }
+        },
+	{
+            "name" : "memcached2",
+            "image" : "memcached:latest",
+	    "command" : [ "-m", "1024" ],
+            "host_config" : {
+		"cgroup_parent" : "server/shared",
+		"mem_swappiness" : 100,
+		"oom_kill_disable" : true,
+		"mem_limit" : 930000896
+            }
+        },
+	{
+            "name" : "memcached3",
+            "image" : "memcached:latest",
+	    "command" : [ "-m", "1024" ],
+            "host_config" : {
+		"cgroup_parent" : "server/shared",
+		"mem_swappiness" : 100,
+		"oom_kill_disable" : true,
+		"mem_limit" : 930000896
+            }
+        },
+	{
+            "name" : "memcached4",
+            "image" : "memcached:latest",
+	    "command" : [ "-m", "1024" ],
+            "host_config" : {
+		"cgroup_parent" : "server/shared",
+		"mem_swappiness" : 100,
+		"oom_kill_disable" : true,
+		"mem_limit" : 930000896
+            }
+        },
+	{
+            "name" : "memcached5",
+            "image" : "memcached:latest",
+	    "command" : [ "-m", "1024" ],
+            "host_config" : {
+		"cgroup_parent" : "server/shared",
+		"mem_swappiness" : 100,
+		"oom_kill_disable" : true,
+		"mem_limit" : 930000896
+            }
+        },
+	{
+            "name" : "memcached6",
+            "image" : "memcached:latest",
+	    "command" : [ "-m", "1024" ],
+            "host_config" : {
+		"cgroup_parent" : "server/shared",
+		"mem_swappiness" : 100,
+		"oom_kill_disable" : true,
+		"mem_limit" : 930000896
+            }
+        }
+	
+    ],
+    "boot_ctl" :[
+	{
+	    "container":"kidled_monitor",
+	    "start_delay":0,
+	    "duration":1320
+	},
+	{
+	    "container":"krefreshd_monitor",
+	    "start_delay":0,
+	    "duration":1320
+	},
+	{
+	    "container":"kstaled_monitor",
+	    "start_delay":0,
+	    "duration":1320
+	}
+    ],
+    "memtier_ctl": [
+	{
+	    "client_container": "memtier0",
+	    "server_container": "memcached0",
+	    "args":["--key-pattern=G:G", "--key-maximum=100000000", "--key-stddev=300"],
+	    "schedule": [[0,120],[360,840]]
+	},
+	{
+	    "client_container": "memtier1",
+	    "server_container": "memcached1",
+	    "args":["--key-pattern=G:G", "--key-maximum=100000000", "--key-stddev=300"],
+	    "schedule": [[0,120],[360,840]]
+	},
+	{
+	    "client_container": "memtier2",
+	    "server_container": "memcached2",
+	    "args":["--key-pattern=G:G", "--key-maximum=100000000", "--key-stddev=300"],
+	    "schedule": [[0,120],[360,840]]
+	},
+	{
+	    "client_container": "memtier3",
+	    "server_container": "memcached3",
+	    "args":["--key-pattern=G:G", "--key-maximum=100000000", "--key-stddev=300"],
+	    "schedule": [[0,120],[360,840]]
+	},		
+	{
+	    "client_container": "memtier4",
+	    "server_container": "memcached4",
+	    "args":["--key-pattern=G:G", "--key-maximum=100000000", "--key-stddev=300"],
+	    "schedule": [[120,120],[240,120],[120,120],[120,120],[120,120]]
+	},
+	{
+	    "client_container": "memtier5",
+	    "server_container": "memcached5",
+	    "args":["--key-pattern=G:G", "--key-maximum=100000000", "--key-stddev=300"],
+	    "schedule": [[240,120],[240,120],[360,120]]
+	},
+	{
+	    "client_container": "memtier6",
+	    "server_container": "memcached6",
+	    "args":["--key-pattern=G:G", "--key-maximum=100000000", "--key-stddev=300"],
+	    "schedule": [[360,120],[360,120]]
+	}
+    ]
+}
