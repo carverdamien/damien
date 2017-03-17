@@ -1,0 +1,9 @@
+version: '2'
+services:
+  web:
+    image: "nginx:latest"
+    network_mode: "host"
+    volumes:
+      - /tmp/httpd/:/usr/share/nginx/html
+      - ./conf.d:/etc/nginx/conf.d
+      
