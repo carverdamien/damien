@@ -134,7 +134,7 @@ class Boot(threading.Thread):
 memtier_expected_output  = """[RUN{}]{:s}{threads} threads:{:s}{ops} ops,{:s}{ops_s} (avg:{:s}{avg_ops_s}) ops/sec,{:s}{mem_s}/sec (avg:{:s}{avg_mem_s}/sec),{:s}{ms_s} (avg:{:s}{avg_ms_s}) msec latency"""
 memtier_parser = parse.compile(memtier_expected_output)
 class Memtier(threading.Thread):
-    def __init__(self, client_container, server_container, schedule, args=[]):
+    def __init__(self, client_container, server_container, schedule, args=[], **kwargs):
         super(Memtier, self).__init__()
         client_container = docker.Client().inspect_container(client_container)
         while not client_container['State']['Running']:
@@ -182,7 +182,7 @@ class Memtier(threading.Thread):
 cassandra_expected_output = """total,{:s}{total_ops},{:s}{op_s},{:s}{pk_s},{:s}{row_ps},{:s}{mean},{:s}{med},{:s}{perc95},{:s}{perc99},{:s}{perc999},{:s}{max},{:s}{time},{:s}{stderr},{:s}{erros},{:s}{gc_count},{:s}{max_ms},{:s}{sum_ms},{:s}{sdv_ms},{:s}{mb}"""
 cassandra_parser = parse.compile(cassandra_expected_output)
 class Cassandra(threading.Thread):
-    def __init__(self, container, schedule, writes, threads):
+    def __init__(self, container, schedule, writes, threads, **kwargs):
         super(Cassandra, self).__init__()
         container = docker.Client().inspect_container(container)
         while not container['State']['Running']:
@@ -218,7 +218,7 @@ sysbench_lua_path = './sysbench/tests/db/oltp.lua'
 sysbench_expected_v05_intermediate_output = """[{}] timestamp: {timestamp}, threads: {threads}, tps: {trps}, reads: {rdps}, writes: {wrps}, response time: {rtps}ms ({}%), errors: {errps}, reconnects:  {recops}"""
 sysbench_parser = parse.compile(sysbench_expected_v05_intermediate_output)
 class Sysbench(threading.Thread):
-    def __init__(self, client_container, server_container, dbsize, oltp_read_only, threads, schedule, dbname='sysbench'):
+    def __init__(self, client_container, server_container, dbsize, oltp_read_only, threads, schedule, dbname='sysbench', **kwargs):
         super(Sysbench, self).__init__()
         client_container = docker.Client().inspect_container(client_container)
         while not client_container['State']['Running']:
