@@ -106,6 +106,8 @@ def httpd_dockercontainers(Id):
 
 @bottle.route('/dockerstats/<listId>/<stat>.csv')
 def httpd_dockerstats_csv(listId,stat):
+    def str2datetime(x):
+        return datetime.datetime.strptime(x[:len("2017-03-22T14:03:52")], "%Y-%m-%dT%H:%M:%S")
     if stat not in ['memory', 'blkio', 'cpu']:
         return "x,y,label\n0,0,Oops:%s not implemented" % stat
     directory = os.path.join(cache_dir,'dockerstats',listId)
@@ -132,7 +134,7 @@ def httpd_dockerstats_csv(listId,stat):
                     YAFU = []
                     for entry in db.dockerstats.find({'Id':Id},{'memory_stats':1,'read':1}):
                         x = entry['read']
-                        x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+                        x = str2datetime(x)
                         X.append(x)
                         y = entry['memory_stats']
                         def flat(key, y):
@@ -196,7 +198,7 @@ def httpd_dockerstats_csv(listId,stat):
                     YUSR = []
                     for entry in db.dockerstats.find({'Id':Id},{'cpu_stats':1,'read':1}):
                         x = entry['read']
-                        x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+                        x = str2datetime(x)
                         X.append(x)
                         YSYS.append(entry['cpu_stats']['system_cpu_usage'])
                         YUSR.append(entry['cpu_stats']['cpu_usage']['total_usage'])
@@ -211,7 +213,7 @@ def httpd_dockerstats_csv(listId,stat):
                     YWRITE = []
                     for entry in db.dockerstats.find({'Id':Id},{'blkio_stats':1,'read':1}):
                         x = entry['read']
-                        x = datetime.datetime.strptime(x[:-4], "%Y-%m-%dT%H:%M:%S.%f")
+                        x = str2datetime(x)
                         yr = 0
                         yw = 0
                         for data in entry['blkio_stats']['io_service_bytes_recursive']:
