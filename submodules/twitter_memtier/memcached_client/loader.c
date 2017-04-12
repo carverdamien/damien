@@ -336,6 +336,7 @@ int main(int argc, char** argv){
 
   setupLoad(config);
   createWorkers(config);
+  createMaster(config);
   statsLoop(config);
   return 0;
 
