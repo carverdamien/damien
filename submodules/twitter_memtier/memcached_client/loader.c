@@ -225,9 +225,11 @@ void loadServerFile(struct config* config){
   char lineBuffer[1024]; 
   int i=0;
   while (fgets(lineBuffer, sizeof(lineBuffer), file)) {
-    char* ipaddress = nslookup(strtok(lineBuffer, " ,\n"));
-    config->server_port[i]=atoi(strtok(NULL, " ,\n"));
-    config->server_ip_address[i]=calloc(strlen(ipaddress)+1, sizeof(char));
+    char* ipaddress;
+    printf("nslookup\n");
+    ipaddress = nslookup(strtok(lineBuffer, " ,\n"));
+    config->server_port[i] = atoi(strtok(NULL, " ,\n"));
+    config->server_ip_address[i] = calloc(strlen(ipaddress)+1, sizeof(char));
     strcpy(config->server_ip_address[i], ipaddress);   
     i++;
   }
@@ -269,6 +271,8 @@ void setupLoad(struct config* config) {
     printf("Option '-s' is mandatory and requires a server configuration file as an argument\n");
     exit(-1);	
   }
+
+  printf("loadServerFile\n");
   loadServerFile(config);
 
   if(config->n_workers % config->n_servers != 0){
@@ -281,9 +285,13 @@ void setupLoad(struct config* config) {
    exit(-1);	
   }
   
-  if(!config->pre_load || (config->scaling_factor==1)) config->dep_dist = loadDepFile(config);
-  else config->dep_dist = loadAndScaleDepFile(config);
-  
+  if(!config->pre_load || (config->scaling_factor==1)) {
+    printf("loadDepFile\n");
+    config->dep_dist = loadDepFile(config);
+  } else {
+    printf("loadAndScaleDepFile\n");
+    config->dep_dist = loadAndScaleDepFile(config);
+  }
 
   if(config->value_size_dist == NULL){
     config->value_size_dist = createUniformDistribution(1, 1024); 
@@ -333,9 +341,14 @@ int main(int argc, char** argv){
   
   struct config* config = parseArgs(argc, argv);
   printConfiguration(config);
-
+  
+  printf("setupLoad..\n");
   setupLoad(config);
+  printf("done\n");
+  printf("createWorkers...\n");
   createWorkers(config);
+  printf("done\n");
+  printf("statsLoop\n");
   statsLoop(config);
   return 0;
 

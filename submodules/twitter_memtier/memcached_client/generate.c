@@ -165,12 +165,16 @@ double harmonicSum(int size, double alpha){
 }
 struct dep_dist* loadDepFile(struct config* config) { 
 
-  printf("Loading key value file...");
+  printf("Loading key value file...\n");
   struct dep_dist* dist = malloc(sizeof(struct dep_dist));
 
   char lineBuffer[1024];
   int lines = 0;
   FILE* file = fopen(config->input_file, "r");
+  if (!file) {
+    printf("Error loadDepFile:%s", config->input_file);
+    exit(-1);
+  }
   while (fgets(lineBuffer, sizeof(lineBuffer), file)) {
     lines++;
   }
