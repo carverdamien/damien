@@ -28,6 +28,10 @@ struct worker {
   int cpu_num;
   struct timeval last_write_time;
   int interarrival_time;
+  unsigned long load_requested;
+  unsigned long load_generated;
+  pthread_cond_t load_requested_cond;
+  pthread_mutex_t load_requested_lock;
 
   //Circular queue
   struct request* request_queue[QUEUE_SIZE];
