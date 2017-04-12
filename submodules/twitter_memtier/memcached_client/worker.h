@@ -58,6 +58,6 @@ void workerLoop(struct worker* worker);
 void createWorkers(struct config* config);
 struct worker* createWorker(struct config* config, int cpuNum);
 int pushRequest(struct worker* worker, struct request* request);
-
+void worker_add_load(struct worker* worker, unsigned long load);
 
 #endif

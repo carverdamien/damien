@@ -168,6 +168,13 @@ void sendCallback(int fd, short eventType, void* args) {
  
 }//End sendCallback()
 
+void worker_add_load(struct worker* worker, unsigned long load)
+{
+	pthread_mutex_lock(&worker->load_requested_lock);
+	worker->load_requested += load;
+	pthread_cond_signal(&worker->load_requested_cond);
+	pthread_mutex_unlock(&worker->load_requested_lock);
+}
 
 void receiveCallback(int fd, short eventType, void* args) {
 
