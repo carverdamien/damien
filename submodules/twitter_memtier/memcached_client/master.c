@@ -14,7 +14,8 @@ void* masterFunction(void *args) {
 }
 
 void createMaster(struct config* config) {
-	config->master.config = config;
-	if (pthread_create(&config->master.thread, NULL, masterFunction, config->master))
+	config->master = malloc(sizeof(struct master));
+	config->master->config = config;
+	if (pthread_create(&config->master->thread, NULL, masterFunction, config->master))
 		printf("Error creating master\n");
 }
