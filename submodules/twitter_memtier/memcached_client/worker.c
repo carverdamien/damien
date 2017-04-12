@@ -123,7 +123,18 @@ void sendCallback(int fd, short eventType, void* args) {
           return;
       }
   }
+
   worker->interarrival_time = -1;
+
+  // 0 <= load_requested means no waiting
+  if (worker->load_requested > 0) {
+	  pthread_mutex_lock(&worker->load_requested_lock);
+	  while (worker->load_requested <= worker->load_generated) {
+		  pthread_cond_wait(&worker->load_requested_cond, &worker->load_requested_lock);
+	  }
+	  pthread_mutex_unlock(&worker->load_requested_lock);
+  }
+  worker->load_generated++;
 
   timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time; 
   timeradd(&(worker->last_write_time), &timeadd, &(worker->last_write_time));
@@ -157,6 +168,13 @@ void sendCallback(int fd, short eventType, void* args) {
  
 }//End sendCallback()
 
+void worker_add_load(struct worker* worker, unsigned long load)
+{
+	pthread_mutex_lock(&worker->load_requested_lock);
+	worker->load_requested += load;
+	pthread_cond_signal(&worker->load_requested_cond);
+	pthread_mutex_unlock(&worker->load_requested_lock);
+}
 
 void receiveCallback(int fd, short eventType, void* args) {
 
@@ -263,7 +281,10 @@ struct worker* createWorker(struct config* config, int cpuNum) {
     worker->warmup_key = config->keysToPreload-1;
     worker->warmup_key_check = 0;
   }
-
+  worker->load_requested = 0;
+  worker->load_generated = 0;
+  pthread_cond_init(&worker->load_requested_cond, NULL);
+  pthread_mutex_init(&worker->load_requested_lock, NULL);
 
   return worker;
 

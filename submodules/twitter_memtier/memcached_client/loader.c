@@ -333,6 +333,7 @@ void cleanUp(struct config* config) {
   free(config->key_list);
   free(config->value_size_dist);
   free(config->key_pop_dist);
+  free(config->master);
   free(config);
 }
 
@@ -349,6 +350,7 @@ int main(int argc, char** argv){
   createWorkers(config);
   printf("done\n");
   printf("statsLoop\n");
+  //createMaster(config);
   statsLoop(config);
   return 0;
 
