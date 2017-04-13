@@ -16,12 +16,14 @@ void* masterFunction(void *args) {
 	  timersub(&timestamp, &last_write_time, &timediff);
 	  diff = timediff.tv_usec * 1e-6  + timediff.tv_sec;
 	  
-	  if (interarrival_time <= 0) {
-	    interarrival_time = getIntQuantile(interarrival_dist); //In microseconds
-	  }
+	  if (interarrival_dist) {
+	    if (interarrival_time <= 0) {
+	      interarrival_time = getIntQuantile(interarrival_dist); //In microseconds
+	    }
 
-	  if (interarrival_time/1.0e6 > diff)
-	    continue;
+	    if (interarrival_time/1.0e6 > diff)
+	      continue;
+	  }
 
 	  timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time; 
 	  interarrival_time = -1;
