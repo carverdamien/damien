@@ -123,6 +123,12 @@ void sendCallback(int fd, short eventType, void* args) {
       }
       pthread_mutex_unlock(&worker->load_requested_lock);
     }
+    if (worker->interarrival_time <=0)
+      return;
+    interarrival_time = worker->interarrival_time; 
+    if( interarrival_time/1.0e6 > diff)
+      return;
+    worker->load_generated++;
   } else {
     //Null interarrival_dist means no waiting
     if(interarrival_dist != NULL) {
@@ -139,12 +145,10 @@ void sendCallback(int fd, short eventType, void* args) {
     }
   }
 
-  worker->load_generated++;
   worker->interarrival_time = -1;
 
   timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time;
   timeradd(&(worker->last_write_time), &timeadd, &(worker->last_write_time));
-
   struct request* request = NULL;
   if(worker->incr_fix_queue_tail != worker->incr_fix_queue_head) {
     request = worker->incr_fix_queue[worker->incr_fix_queue_head];
@@ -205,6 +209,18 @@ void receiveCallback(int fd, short eventType, void* args) {
     printf("You are warmed up, sir\n");
     exit(0);
   }
+  /* if (worker->load_requested > 0) { */
+  /*   if (worker->load_requested <= worker->load_generated) { */
+  /*     // return; */
+  /*     // The following code slows down receiveCallback */
+  /*     pthread_mutex_lock(&worker->load_requested_lock); */
+  /*     while (worker->load_requested <= worker->load_generated) { */
+  /* 	//pthread_mutex_unlock(&worker->load_requested_lock);return; */
+  /* 	pthread_cond_wait(&worker->load_requested_cond, &worker->load_requested_lock); */
+  /*     } */
+  /*     pthread_mutex_unlock(&worker->load_requested_lock); */
+  /*   } */
+  /* } */
 }//End receiveCallback()
 
 void readF(int* temp){
