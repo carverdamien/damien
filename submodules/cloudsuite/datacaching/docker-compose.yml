@@ -3,11 +3,17 @@
    client:
      build: client
      volumes:
-       - ./data/twitter:/data
+       - ./data/twitter/twitter_dataset_unscaled:/data/twitter_dataset_unscaled
      environment:
+       - RPS=${RPS}
        - SERVERS=${SERVERS}
+       - WORKER=${WORKER}
+       - SCALE=${SCALE}
+       - MEMORY=${MEMORY}
+       - CONNECTION=${CONNECTION}
+       - MASTER=${MASTER}
      links:
        - server:server
    server:
      image: memcached
-     command: [ '-t', '4', '-m', '600', '-n', '550' ]
+     command: [ '-t', '1', '-m', '${MEMORY}', '-n', '550' ]
