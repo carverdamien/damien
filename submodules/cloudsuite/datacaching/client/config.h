@@ -61,7 +61,7 @@ struct config {
 
   uint32_t current_request_uid;
 
-
+  int use_master;
 };
 
 #endif

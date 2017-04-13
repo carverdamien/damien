@@ -32,7 +32,8 @@ void printUsage() {
                 "        [-t arg  runtime of loadtesting in seconds (default: run forever)]\n"
                 "        [-T arg  interval between stats printing (default: 1)]\n"
                 "        [-w number of worker threads]\n"
-                "        [-x run timing tests instead of loadtesting]\n");
+                "        [-x run timing tests instead of loadtesting]\n"
+		"        [-M use master]\n");
 }
 
 
@@ -72,6 +73,7 @@ struct config* parseArgs(int argc, char** argv) {
   config->output_file=NULL;
   config->server_memory=1024;
   config->server_file=NULL;
+  config->use_master=0;
   int i;
   for(i=0; i<MAX_SERVERS; i++){
     config->server_port[i]=MEMCACHED_PORT;
@@ -209,6 +211,15 @@ struct config* parseArgs(int argc, char** argv) {
       case 'z':
         config->zynga = 1;     
         break;
+	
+    case 'M':
+      config->use_master = 1;
+      break;
+
+    default:
+      printf("ERROR getopt\n");
+      exit(-1);
+      break;
     }
   }
 
@@ -333,7 +344,8 @@ void cleanUp(struct config* config) {
   free(config->key_list);
   free(config->value_size_dist);
   free(config->key_pop_dist);
-  free(config->master);
+  if(config->use_master)
+    free(config->master);
   free(config);
 }
 
@@ -350,7 +362,8 @@ int main(int argc, char** argv){
   createWorkers(config);
   printf("done\n");
   printf("statsLoop\n");
-  //createMaster(config);
+  if(config->use_master)
+    createMaster(config);
   statsLoop(config);
   return 0;
 

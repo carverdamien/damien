@@ -110,33 +110,39 @@ void sendCallback(int fd, short eventType, void* args) {
 
   struct int_dist* interarrival_dist = worker->config->interarrival_dist;
   int interarrival_time  = 0;
-  //Null interarrival_dist means no waiting
-  if(interarrival_dist != NULL){
-    if(worker->interarrival_time <= 0){
-        interarrival_time = getIntQuantile(interarrival_dist); //In microseconds
-        //   printf("new interarrival_time %d\n", interarrival_time);
-        worker->interarrival_time = interarrival_time;
-    } else {
-        interarrival_time = worker->interarrival_time; 
-    }
-      if( interarrival_time/1.0e6 > diff){
-          return;
-      }
-  }
-
-  worker->interarrival_time = -1;
 
   // 0 <= load_requested means no waiting
   if (worker->load_requested > 0) {
-	  pthread_mutex_lock(&worker->load_requested_lock);
-	  while (worker->load_requested <= worker->load_generated) {
-		  pthread_cond_wait(&worker->load_requested_cond, &worker->load_requested_lock);
-	  }
-	  pthread_mutex_unlock(&worker->load_requested_lock);
+    if (worker->load_requested <= worker->load_generated) {
+      return;
+      // The following code slows down receiveCallback
+      pthread_mutex_lock(&worker->load_requested_lock);
+      while (worker->load_requested <= worker->load_generated) {
+	//pthread_mutex_unlock(&worker->load_requested_lock);return;
+	pthread_cond_wait(&worker->load_requested_cond, &worker->load_requested_lock);
+      }
+      pthread_mutex_unlock(&worker->load_requested_lock);
+    }
+  } else {
+    //Null interarrival_dist means no waiting
+    if(interarrival_dist != NULL) {
+      if(worker->interarrival_time <= 0) {
+        interarrival_time = getIntQuantile(interarrival_dist); //In microseconds
+        //   printf("new interarrival_time %d\n", interarrival_time);
+        worker->interarrival_time = interarrival_time;
+      } else {
+        interarrival_time = worker->interarrival_time; 
+      }
+      if( interarrival_time/1.0e6 > diff){
+	return;
+      }
+    }
   }
-  worker->load_generated++;
 
-  timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time; 
+  worker->load_generated++;
+  worker->interarrival_time = -1;
+
+  timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time;
   timeradd(&(worker->last_write_time), &timeadd, &(worker->last_write_time));
 
   struct request* request = NULL;

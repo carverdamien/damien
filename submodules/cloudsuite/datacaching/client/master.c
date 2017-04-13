@@ -3,12 +3,33 @@
 void* masterFunction(void *args) {
 	struct master *master = args;
 	struct config* config = master->config;
+	int i = 0;
+	struct timeval last_write_time;
+	double diff;
+	int interarrival_time = 0;
+	struct int_dist* interarrival_dist = config->interarrival_dist;
+	gettimeofday(&last_write_time, NULL);
 	while(1) {
-		int i;
-		for(i = 0; i < config->n_workers; i++) {
-			worker_add_load(config->workers[i], 100);
-		}
-		sleep(1);
+	  struct timeval timestamp, timediff, timeadd;
+
+	  gettimeofday(&timestamp, NULL);
+	  timersub(&timestamp, &last_write_time, &timediff);
+	  diff = timediff.tv_usec * 1e-6  + timediff.tv_sec;
+	  
+	  if (interarrival_time <= 0) {
+	    interarrival_time = getIntQuantile(interarrival_dist); //In microseconds
+	  }
+
+	  if (interarrival_time/1.0e6 > diff)
+	    continue;
+
+	  timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time; 
+	  interarrival_time = -1;
+	  timeradd(&last_write_time, &timeadd, &last_write_time);
+	  
+	  // Round robin load
+	  worker_add_load(config->workers[i], 1);
+	  i = (i + 1) % config->n_workers;
 	}
 	return NULL;
 }
