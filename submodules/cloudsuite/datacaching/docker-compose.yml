@@ -4,6 +4,8 @@
      build: client
      volumes:
        - ./data/twitter:/data
+     environment:
+       - SERVERS=${SERVERS}
      links:
        - server:server
    server:
