@@ -1,0 +1,11 @@
+ version: '2'
+ services:
+   client:
+     build: client
+     volumes:
+       - ./data/twitter:/data
+     links:
+       - server:server
+   server:
+     image: memcached
+     command: [ '-t', '4', '-m', '600', '-n', '550' ]
