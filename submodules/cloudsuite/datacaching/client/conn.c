@@ -3,10 +3,11 @@
 
 extern int verbose;
 
-struct conn* createConnection(const char* ip_address, int port, int protocol, int naggles) {
+struct conn* createConnection(struct worker* worker, const char* ip_address, int port, int protocol, int naggles) {
 
   struct conn* connection = malloc(sizeof(struct conn));
   memset(connection, 0, sizeof(struct conn));
+  connection->worker = worker;
 
   if(protocol == UDP_MODE) {
 

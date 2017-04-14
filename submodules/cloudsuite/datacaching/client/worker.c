@@ -269,7 +269,7 @@ void createWorkers(struct config* config) {
     int j;
     int server=i % config->n_servers; 
     for(j = 0; j < num_worker_connections; j++) {
-      config->workers[i]->connections[j] = createConnection(config->server_ip_address[server], config->server_port[server], config->protocol_mode, config->naggles);
+      config->workers[i]->connections[j] = createConnection(config->workers[i], config->server_ip_address[server], config->server_port[server], config->protocol_mode, config->naggles);
     }
     int rc;
     //Create receive thread
