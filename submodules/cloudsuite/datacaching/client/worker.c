@@ -18,6 +18,7 @@ void* workerFunction(void* arg) {
   gettimeofday(&timestamp, NULL);
   int seed=(timestamp.tv_usec+worker->cpu_num)%2309;			 
   sgenrand(seed, &(worker->myMT19937p));
+  worker->next_server = getIntQuantile(worker->config->server_dist);
 // sgenrand(worker->config->random_seed, &(worker->myMT19937p));
 /* Set affinity mask to include CPUs 0 to 7 */
 /*  CPU_ZERO(&cpuset);
@@ -71,13 +72,20 @@ void workerLoop(struct worker* worker) {
 void sendCallback(int fd, short eventType, void* args) {
   struct conn* conn = args;
   struct worker* worker = conn->worker;
+  struct config* config = worker->config;
   struct timeval timestamp, timediff, timeadd;
-  gettimeofday(&timestamp, NULL);
 
+  if (conn->server != worker->next_server) {
+    // This slows down the rps
+    //printf("DEBUG: %d %d\n", conn->server, worker->next_server);
+    //return;
+  }
+
+  gettimeofday(&timestamp, NULL);
   timersub(&timestamp, &(worker->last_write_time), &timediff);
   double diff = timediff.tv_usec * 1e-6  + timediff.tv_sec;
 
-  struct int_dist* interarrival_dist = worker->config->interarrival_dist;
+  struct int_dist* interarrival_dist = config->interarrival_dist;
   int interarrival_time  = 0;
 
   //Null interarrival_dist means no waiting
@@ -98,6 +106,9 @@ void sendCallback(int fd, short eventType, void* args) {
 
   timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time;
   timeradd(&(worker->last_write_time), &timeadd, &(worker->last_write_time));
+
+  worker->next_server = getIntQuantile(config->server_dist);
+
   struct request* request = NULL;
   int len;
   QUEUE_LEN(len,
@@ -113,10 +124,10 @@ void sendCallback(int fd, short eventType, void* args) {
 	      INCR_FIX_QUEUE_SIZE);
   } else {
   //  printf(")preload %d warmup key %d\n", worker->config->pre_load, worker->warmup_key);
-    if(worker->config->pre_load == 1 && worker->warmup_key < 0) {
+    if(config->pre_load == 1 && worker->warmup_key < 0) {
       return;
     } else {
-      request = generateRequest(worker->config, worker);
+      request = generateRequest(config, worker);
     }
   }
   if(request->header.opcode == OP_SET){
@@ -207,6 +218,7 @@ void createWorkers(struct config* config) {
     for(j = 0; j < num_worker_connections; j++) {
       server = j % config->n_servers;
       config->workers[i]->connections[j] = createConnection(config->workers[i], config->server_ip_address[server], config->server_port[server], config->protocol_mode, config->naggles);
+      config->workers[i]->connections[j]->server = server;
     }
     int rc;
     //Create receive thread

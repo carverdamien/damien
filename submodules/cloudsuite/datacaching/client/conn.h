@@ -29,6 +29,7 @@ struct conn {
   int uid;
   int protocol;
   struct worker *worker;
+  int server;
   //Circular queues
   struct request* request_queue[QUEUE_SIZE];
   int request_queue_head;

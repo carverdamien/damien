@@ -280,11 +280,6 @@ void setupLoad(struct config* config) {
 
   printf("loadServerFile\n");
   loadServerFile(config);
-
-  if(config->n_workers % config->n_servers != 0){
-   printf("Number of client (worker) threads must be divisible by the number of servers\n");
-   exit(-1);	
-  }
   
   if((config->output_file == NULL) && (config->scaling_factor>1)){
    printf("Preloading requires an output file\n");
@@ -313,6 +308,9 @@ void setupLoad(struct config* config) {
   if(config->multiget_dist == NULL) {
     config->multiget_dist = createUniformDistribution(2, 10);
   }
+
+  // TODO: server popularity distribution option. Example: zipf.
+  config->server_dist = createUniformDistribution(0, config->n_servers - 1);
 
   printf("rps %d cpus %d\n", config->rps, config->n_workers);
   if (config->rps == -1 || config->rps == 0)

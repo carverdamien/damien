@@ -9,7 +9,7 @@
 
 #define TCP_MODE 0
 #define UDP_MODE 1
-#define MAX_SERVERS 4
+#define MAX_SERVERS 128
 
 //#define FLEXUS
 
@@ -47,6 +47,7 @@ struct config {
   struct int_dist* value_size_dist;
   struct int_dist* multiget_dist;
   struct int_dist* interarrival_dist;
+  struct int_dist* server_dist;
   struct dep_dist* dep_dist;
   int arrival_distribution_type;
   int received_warmup_keys;

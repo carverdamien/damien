@@ -33,6 +33,7 @@ struct worker {
   int warmup_key;
   int warmup_key_check;	
   int received_warmup_keys;
+  int next_server;
 
 };
 

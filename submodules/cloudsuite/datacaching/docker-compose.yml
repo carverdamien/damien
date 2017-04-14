@@ -13,6 +13,8 @@
        - CONNECTION=${CONNECTION}
      links:
        - server:server
+     cpuset: 0,1,2,3
    server:
      image: memcached
      command: [ '-t', '1', '-m', '${MEMORY}', '-n', '550' ]
+     cpuset: 4,5,6,7
