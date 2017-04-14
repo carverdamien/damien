@@ -1,4 +1,5 @@
 #include "response.h"
+#include "queue.h"
 #ifdef GEM5
 #include "m5op.h"
 #endif
@@ -182,12 +183,21 @@ int processResponse(struct response* response, int final, double difftime){
     struct conn* conn = response->request->connection;
     struct request* request = createRequest(op, conn, worker, key, 0, type);
     request->next_request = NULL;
-    if( ((worker->incr_fix_queue_tail + 1) % INCR_FIX_QUEUE_SIZE) == worker->incr_fix_queue_head) {
+    int len;
+    QUEUE_LEN(len,
+	      conn->incr_fix_queue,
+	      conn->incr_fix_queue_head,
+	      conn->incr_fix_queue_tail,
+	      INCR_FIX_QUEUE_SIZE);
+    if(len == INCR_FIX_QUEUE_SIZE) {
       printf("I was hoping this would never happen\n");
       exit(-1);
     }
-    worker->incr_fix_queue[worker->incr_fix_queue_tail] = request;
-    worker->incr_fix_queue_tail = (worker->incr_fix_queue_tail + 1) % INCR_FIX_QUEUE_SIZE;
+    QUEUE_PUSH(request,
+	       conn->incr_fix_queue,
+	       conn->incr_fix_queue_head,
+	       conn->incr_fix_queue_tail,
+	       INCR_FIX_QUEUE_SIZE);
   }
 
 

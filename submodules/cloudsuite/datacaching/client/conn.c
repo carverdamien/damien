@@ -1,4 +1,4 @@
-
+#include "queue.h"
 #include "conn.h"
 
 extern int verbose;
@@ -110,3 +110,40 @@ int openUdpSocket(const char* ipAddress, int port) {
   return sock;
 
 }//End openUdpSocket()
+
+int request_queue_len(struct conn* conn) {
+  int len;
+  QUEUE_LEN(len,
+	    conn->request_queue,
+	    conn->request_queue_head,
+	    conn->request_queue_tail,
+	    QUEUE_SIZE);
+  return len;
+}
+
+int pushRequest(struct conn* conn, struct request* request) {
+  if(request_queue_len(conn) == QUEUE_SIZE) {
+    printf("Reached queusize max\n");
+    return 0;
+  }
+  QUEUE_PUSH(request,
+	    conn->request_queue,
+	    conn->request_queue_head,
+	    conn->request_queue_tail,
+	    QUEUE_SIZE);
+  conn->worker->n_requests++;
+  return 1;
+}
+
+struct request* getNextRequest(struct conn* conn) {
+  struct request* request = NULL;
+  if(request_queue_len(conn)) {
+    QUEUE_POP(request,
+	      conn->request_queue,
+	      conn->request_queue_head,
+	      conn->request_queue_tail,
+	      QUEUE_SIZE);
+  conn->worker->n_requests--;
+  }
+  return request;
+}

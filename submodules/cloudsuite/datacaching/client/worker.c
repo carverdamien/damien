@@ -1,4 +1,4 @@
-
+#include "queue.h"
 #include "worker.h"
 
 void* workerFunction(void* arg) {
@@ -68,41 +68,9 @@ void workerLoop(struct worker* worker) {
 
 }//End workerLoop()
 
-
-int pushRequest(struct worker* worker, struct request* request) {
-
-//  printf("push: size %d head %d tail %d\n", worker->n_requests, worker->head, worker->tail);
-
-  if(worker->n_requests == QUEUE_SIZE){
-    printf("Reached queusize max\n");
-    return 0;
-  }
-  
-  worker->request_queue[worker->tail] = request;
-  worker->tail = (worker->tail + 1) % QUEUE_SIZE;
-  worker->n_requests++;
-
-  return 1;
-
-}//End pushRequest()
-
-struct request* getNextRequest(struct worker* worker) {
-
-  if(worker->n_requests == 0) {
-    return NULL;
-  }
-
-  struct request* request = worker->request_queue[worker->head];
-  worker->head = (worker->head + 1) % QUEUE_SIZE;
-  worker->n_requests--;
-
-  return request;
-
-}//End getNextRequest()
-
 void sendCallback(int fd, short eventType, void* args) {
-  struct conn* connection = args;
-  struct worker* worker = connection->worker;
+  struct conn* conn = args;
+  struct worker* worker = conn->worker;
   struct timeval timestamp, timediff, timeadd;
   gettimeofday(&timestamp, NULL);
 
@@ -151,10 +119,18 @@ void sendCallback(int fd, short eventType, void* args) {
   timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time;
   timeradd(&(worker->last_write_time), &timeadd, &(worker->last_write_time));
   struct request* request = NULL;
-  if(worker->incr_fix_queue_tail != worker->incr_fix_queue_head) {
-    request = worker->incr_fix_queue[worker->incr_fix_queue_head];
-    worker->incr_fix_queue_head = (worker->incr_fix_queue_head + 1) % INCR_FIX_QUEUE_SIZE;
-//    printf("fixing\n");
+  int len;
+  QUEUE_LEN(len,
+	    conn->incr_fix_queue,
+	    conn->incr_fix_queue_head,
+	    conn->incr_fix_queue_tail,
+	    INCR_FIX_QUEUE_SIZE);
+  if(len) {
+    QUEUE_POP(request,
+	      conn->incr_fix_queue,
+	      conn->incr_fix_queue_head,
+	      conn->incr_fix_queue_tail,
+	      INCR_FIX_QUEUE_SIZE);
   } else {
   //  printf(")preload %d warmup key %d\n", worker->config->pre_load, worker->warmup_key);
     if(worker->config->pre_load == 1 && worker->warmup_key < 0) {
@@ -166,7 +142,7 @@ void sendCallback(int fd, short eventType, void* args) {
   if(request->header.opcode == OP_SET){
 //    printf("Generated SET request of size %d\n", request->value_size);
   }
-  if( !pushRequest(worker, request) ) {
+  if( !pushRequest(conn, request) ) {
     //Queue is full, bail
 //    printf("Full queue\n");
     deleteRequest(request);
@@ -188,12 +164,12 @@ void worker_add_load(struct worker* worker, unsigned long load)
 }
 
 void receiveCallback(int fd, short eventType, void* args) {
-  struct conn* connection = args;
-  struct worker* worker = connection->worker;
+  struct conn* conn = args;
+  struct worker* worker = conn->worker;
 
-  struct request* request = getNextRequest(worker);
+  struct request* request = getNextRequest(conn);
   if(request == NULL) { 
-    printf("Error: Tried to get a null request\n");
+    //printf("Error: Tried to get a null request\n");
     return;
   }
 
@@ -293,13 +269,9 @@ struct worker* createWorker(struct config* config, int cpuNum) {
 
 
   worker->config = config;
-  worker->head = 0;
-  worker->tail = 0;
   worker->n_requests = 0;
   worker->cpu_num = cpuNum;
   worker->interarrival_time = 0;
-  worker->incr_fix_queue_tail = 0; // THSES probably need to be fixed
-  worker->incr_fix_queue_head = 0;
   if(config->dep_dist != NULL && config->pre_load) {
     worker->warmup_key = config->keysToPreload-1;
     worker->warmup_key_check = 0;
