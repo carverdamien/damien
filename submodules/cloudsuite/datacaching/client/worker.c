@@ -231,7 +231,7 @@ void createWorkers(struct config* config) {
   }
 
   if(config->n_workers > config->n_connections_total ) {
-    printf("Overridge n_connections_total because < n_workers\n");
+    printf("Override n_connections_total because < n_workers\n");
     config->n_connections_total = config->n_workers;
   }
 
@@ -243,9 +243,9 @@ void createWorkers(struct config* config) {
     config->workers[i]->connections = malloc(sizeof(struct conn*) * num_worker_connections);
     config->workers[i]->nConnections = num_worker_connections;
     config->workers[i]->received_warmup_keys = 0;
-    int j;
-    int server=i % config->n_servers; 
+    int j, server;
     for(j = 0; j < num_worker_connections; j++) {
+      server = j % config->n_servers;
       config->workers[i]->connections[j] = createConnection(config->workers[i], config->server_ip_address[server], config->server_port[server], config->protocol_mode, config->naggles);
     }
     int rc;
