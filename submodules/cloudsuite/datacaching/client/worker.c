@@ -44,11 +44,11 @@ void workerLoop(struct worker* worker) {
   int i;
   for( i = 0; i < worker->nConnections; i++) {
 
-    struct event* ev = event_new(worker->event_base, worker->connections[i]->sock, EV_WRITE|EV_PERSIST, sendCallback, worker);
+    struct event* ev = event_new(worker->event_base, worker->connections[i]->sock, EV_WRITE|EV_PERSIST, sendCallback, worker->connections[i]);
     event_priority_set(ev, 1);
     event_add(ev, NULL);
 
-    ev = event_new(worker->event_base, worker->connections[i]->sock, EV_READ|EV_PERSIST, receiveCallback, worker);
+    ev = event_new(worker->event_base, worker->connections[i]->sock, EV_READ|EV_PERSIST, receiveCallback, worker->connections[i]);
     event_priority_set(ev, 2);
     event_add(ev, NULL);
 
@@ -101,7 +101,8 @@ struct request* getNextRequest(struct worker* worker) {
 }//End getNextRequest()
 
 void sendCallback(int fd, short eventType, void* args) {
-  struct worker* worker = args;
+  struct conn* connection = args;
+  struct worker* worker = connection->worker;
   struct timeval timestamp, timediff, timeadd;
   gettimeofday(&timestamp, NULL);
 
@@ -187,8 +188,8 @@ void worker_add_load(struct worker* worker, unsigned long load)
 }
 
 void receiveCallback(int fd, short eventType, void* args) {
-
-  struct worker* worker = args;
+  struct conn* connection = args;
+  struct worker* worker = connection->worker;
 
   struct request* request = getNextRequest(worker);
   if(request == NULL) { 
