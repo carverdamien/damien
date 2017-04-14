@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include "generate.h"
 #include "pthread.h"
-#include "master.h"
 
 #define TCP_MODE 0
 #define UDP_MODE 1
@@ -27,7 +26,6 @@ struct config {
   int n_servers;
   struct worker** workers;
   int n_connections_total;
-  struct master* master;
 
   int run_time;
   int stats_time;
@@ -60,8 +58,6 @@ struct config {
   int bad_multiget;
 
   uint32_t current_request_uid;
-
-  int use_master;
 };
 
 #endif

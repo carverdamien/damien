@@ -6,7 +6,6 @@ set -e -x
 : SCALE ${SCALE:=2}
 : MEMORY ${MEMORY:=$((300*SCALE))}
 : CONNECTION ${CONNECTION:=200}
-: MASTER ${MASTER:=}
 env() {
 cat <<EOF
 RPS=${RPS}
@@ -15,7 +14,6 @@ WORKER=${WORKER}
 SCALE=${SCALE}
 MEMORY=${MEMORY}
 CONNECTION=${CONNECTION}
-MASTER=${MASTER}
 EOF
 }
 env | tee .env 

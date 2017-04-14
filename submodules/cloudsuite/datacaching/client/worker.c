@@ -80,37 +80,17 @@ void sendCallback(int fd, short eventType, void* args) {
   struct int_dist* interarrival_dist = worker->config->interarrival_dist;
   int interarrival_time  = 0;
 
-  // 0 <= load_requested means no waiting
-  if (worker->load_requested > 0) {
-    if (worker->load_requested <= worker->load_generated) {
-      return;
-      // The following code slows down receiveCallback
-      pthread_mutex_lock(&worker->load_requested_lock);
-      while (worker->load_requested <= worker->load_generated) {
-	//pthread_mutex_unlock(&worker->load_requested_lock);return;
-	pthread_cond_wait(&worker->load_requested_cond, &worker->load_requested_lock);
-      }
-      pthread_mutex_unlock(&worker->load_requested_lock);
+  //Null interarrival_dist means no waiting
+  if(interarrival_dist != NULL) {
+    if(worker->interarrival_time <= 0) {
+      interarrival_time = getIntQuantile(interarrival_dist); //In microseconds
+      //   printf("new interarrival_time %d\n", interarrival_time);
+      worker->interarrival_time = interarrival_time;
+    } else {
+      interarrival_time = worker->interarrival_time; 
     }
-    if (worker->interarrival_time <=0)
+    if( interarrival_time/1.0e6 > diff){
       return;
-    interarrival_time = worker->interarrival_time; 
-    if( interarrival_time/1.0e6 > diff)
-      return;
-    worker->load_generated++;
-  } else {
-    //Null interarrival_dist means no waiting
-    if(interarrival_dist != NULL) {
-      if(worker->interarrival_time <= 0) {
-        interarrival_time = getIntQuantile(interarrival_dist); //In microseconds
-        //   printf("new interarrival_time %d\n", interarrival_time);
-        worker->interarrival_time = interarrival_time;
-      } else {
-        interarrival_time = worker->interarrival_time; 
-      }
-      if( interarrival_time/1.0e6 > diff){
-	return;
-      }
     }
   }
 
@@ -155,14 +135,6 @@ void sendCallback(int fd, short eventType, void* args) {
  
 }//End sendCallback()
 
-void worker_add_load(struct worker* worker, unsigned long load)
-{
-	pthread_mutex_lock(&worker->load_requested_lock);
-	worker->load_requested += load;
-	pthread_cond_signal(&worker->load_requested_cond);
-	pthread_mutex_unlock(&worker->load_requested_lock);
-}
-
 void receiveCallback(int fd, short eventType, void* args) {
   struct conn* conn = args;
   struct worker* worker = conn->worker;
@@ -186,18 +158,6 @@ void receiveCallback(int fd, short eventType, void* args) {
     printf("You are warmed up, sir\n");
     exit(0);
   }
-  /* if (worker->load_requested > 0) { */
-  /*   if (worker->load_requested <= worker->load_generated) { */
-  /*     // return; */
-  /*     // The following code slows down receiveCallback */
-  /*     pthread_mutex_lock(&worker->load_requested_lock); */
-  /*     while (worker->load_requested <= worker->load_generated) { */
-  /* 	//pthread_mutex_unlock(&worker->load_requested_lock);return; */
-  /* 	pthread_cond_wait(&worker->load_requested_cond, &worker->load_requested_lock); */
-  /*     } */
-  /*     pthread_mutex_unlock(&worker->load_requested_lock); */
-  /*   } */
-  /* } */
 }//End receiveCallback()
 
 void readF(int* temp){
@@ -276,10 +236,6 @@ struct worker* createWorker(struct config* config, int cpuNum) {
     worker->warmup_key = config->keysToPreload-1;
     worker->warmup_key_check = 0;
   }
-  worker->load_requested = 0;
-  worker->load_generated = 0;
-  pthread_cond_init(&worker->load_requested_cond, NULL);
-  pthread_mutex_init(&worker->load_requested_lock, NULL);
 
   return worker;
 

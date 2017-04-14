@@ -3,8 +3,8 @@ set -e -x
 
 servers() { for s in ${SERVERS}; do echo "${s}, 11211"; done; }
 scale()  { ./loader -a ${UNSCALED_DATA} -o ${DATA} -s <(servers) -w ${WORKER} -S ${SCALE} -D ${MEMORY} -j -T 1; }
-maxrps() { ./loader ${MASTER} -a ${DATA} -s <(servers) -g ${GET_SET_RATIO} -T 1 -c ${CONNECTION} -w ${WORKER}; }
-fixrps() { ./loader ${MASTER} -a ${DATA} -s <(servers) -g ${GET_SET_RATIO} -T 1 -c ${CONNECTION} -w ${WORKER} -e -r ${RPS}; }
+maxrps() { ./loader -a ${DATA} -s <(servers) -g ${GET_SET_RATIO} -T 1 -c ${CONNECTION} -w ${WORKER}; }
+fixrps() { ./loader -a ${DATA} -s <(servers) -g ${GET_SET_RATIO} -T 1 -c ${CONNECTION} -w ${WORKER} -e -r ${RPS}; }
 
 # Defaults
 : UNSCALED_MEMORY ${UNSCALED_MEMORY:=300}
@@ -16,7 +16,6 @@ fixrps() { ./loader ${MASTER} -a ${DATA} -s <(servers) -g ${GET_SET_RATIO} -T 1 
 : SERVERS ${SERVERS:=server}
 : WORKER ${WORKER:=$(wc -l <(servers))}
 : CONNECTION ${CONNECTION:=${WORKER}}
-: MASTER ${MASTER:=}
 
 main() {
     [ -f "${UNSCALED_DATA}" ]
