@@ -277,10 +277,10 @@ struct dep_dist* loadAndScaleDepFile(struct config* config) {
   return dist;
 }
 
-struct request* generateRequest(struct config* config, struct worker* worker) {
+struct request* generateRequest(struct config* config, struct conn* conn) {
 
   //Pick a random connection
-  struct conn* conn = worker->connections[randomFunction(worker) % worker->nConnections];
+  struct worker* worker = conn->worker;
 
   char* value = NULL;
   int valueSize = 0;

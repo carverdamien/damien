@@ -16,6 +16,7 @@
 
 struct config;
 struct worker;
+struct conn;
 
 struct int_dist {
   int cdf_y[CDF_VALUES];
@@ -48,7 +49,7 @@ struct dep_dist* loadDepFile(struct config* config);
 struct dep_entry* getRandomDepEntry(struct dep_dist* dep_dist, struct worker* worker);
 struct int_dist* createExponentialDistribution(int meanInterarrival);
 struct key_list* generateKeys(struct config* config);
-struct request* generateRequest(struct config* config, struct worker* worker);
+struct request* generateRequest(struct config* config, struct conn* conn);
 double harmonicSum(int size, double alpha);
 
 #endif

@@ -19,7 +19,7 @@ struct worker {
   struct config* config;
 
   pthread_t thread;
-  struct event_base* event_base;
+  struct event_base* event_base[MAX_SERVERS];
   struct conn** connections;
   int nConnections;
   int cpu_num;

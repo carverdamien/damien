@@ -4,12 +4,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 #include <stdint.h>
+#define MAX_SERVERS 128
 #include "generate.h"
 #include "pthread.h"
 
 #define TCP_MODE 0
 #define UDP_MODE 1
-#define MAX_SERVERS 128
+
 
 //#define FLEXUS
 

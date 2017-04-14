@@ -18,7 +18,7 @@ void* workerFunction(void* arg) {
   gettimeofday(&timestamp, NULL);
   int seed=(timestamp.tv_usec+worker->cpu_num)%2309;			 
   sgenrand(seed, &(worker->myMT19937p));
-  worker->next_server = getIntQuantile(worker->config->server_dist);
+
 // sgenrand(worker->config->random_seed, &(worker->myMT19937p));
 /* Set affinity mask to include CPUs 0 to 7 */
 /*  CPU_ZERO(&cpuset);
@@ -39,17 +39,22 @@ void* workerFunction(void* arg) {
 
 void workerLoop(struct worker* worker) {
 
-  event_base_priority_init(worker->event_base, 2);
-
   //Seed event for each fd
   int i;
+  for(i=0; i<MAX_SERVERS; i++) {
+    worker->event_base[i] = event_base_new();
+    event_base_priority_init(worker->event_base[i], 2);
+  }
   for( i = 0; i < worker->nConnections; i++) {
-
-    struct event* ev = event_new(worker->event_base, worker->connections[i]->sock, EV_WRITE|EV_PERSIST, sendCallback, worker->connections[i]);
+    int server;
+    struct event* ev;
+    //server = worker->connections[i]->server;
+    server = 0;
+    ev = event_new(worker->event_base[server], worker->connections[i]->sock, EV_WRITE|EV_PERSIST, sendCallback, worker->connections[i]);
     event_priority_set(ev, 1);
     event_add(ev, NULL);
 
-    ev = event_new(worker->event_base, worker->connections[i]->sock, EV_READ|EV_PERSIST, receiveCallback, worker->connections[i]);
+    ev = event_new(worker->event_base[server], worker->connections[i]->sock, EV_READ|EV_PERSIST, receiveCallback, worker->connections[i]);
     event_priority_set(ev, 2);
     event_add(ev, NULL);
 
@@ -57,7 +62,15 @@ void workerLoop(struct worker* worker) {
 
   gettimeofday(&(worker->last_write_time), NULL);
   printf("starting receive base loop\n");
-  int error = event_base_loop(worker->event_base, 0);
+  int error;
+  worker->next_server = getIntQuantile(worker->config->server_dist);
+  
+  /* do { */
+  /*   printf("DISPATCH server=%d\n", worker->next_server); */
+  /*   error = event_base_dispatch(worker->event_base[worker->next_server]); */
+  /* } while(!error); */
+
+  error = event_base_dispatch(worker->event_base[0]);
 
   if(error == -1) {
     printf("Error starting libevent\n");
@@ -75,11 +88,8 @@ void sendCallback(int fd, short eventType, void* args) {
   struct config* config = worker->config;
   struct timeval timestamp, timediff, timeadd;
 
-  if (conn->server != worker->next_server) {
-    // This slows down the rps
-    //printf("DEBUG: %d %d\n", conn->server, worker->next_server);
-    //return;
-  }
+  if (conn->server != worker->next_server)
+    return;
 
   gettimeofday(&timestamp, NULL);
   timersub(&timestamp, &(worker->last_write_time), &timediff);
@@ -127,7 +137,7 @@ void sendCallback(int fd, short eventType, void* args) {
     if(config->pre_load == 1 && worker->warmup_key < 0) {
       return;
     } else {
-      request = generateRequest(config, worker);
+      request = generateRequest(config, conn);
     }
   }
   if(request->header.opcode == OP_SET){
@@ -202,7 +212,7 @@ void createWorkers(struct config* config) {
   }
 
   if(config->n_workers > config->n_connections_total ) {
-    printf("Override n_connections_total because < n_workers\n");
+    printf("Override n_connections_total=%d because < n_workers=%d\n", config->n_connections_total, config->n_workers);
     config->n_connections_total = config->n_workers;
   }
 
@@ -216,9 +226,8 @@ void createWorkers(struct config* config) {
     config->workers[i]->received_warmup_keys = 0;
     int j, server;
     for(j = 0; j < num_worker_connections; j++) {
-      server = j % config->n_servers;
-      config->workers[i]->connections[j] = createConnection(config->workers[i], config->server_ip_address[server], config->server_port[server], config->protocol_mode, config->naggles);
-      config->workers[i]->connections[j]->server = server;
+      server = j % (config->n_servers);
+      config->workers[i]->connections[j] = createConnection(config->workers[i], config->server_ip_address[server], config->server_port[server], config->protocol_mode, config->naggles, server);
     }
     int rc;
     //Create receive thread
@@ -237,8 +246,6 @@ struct worker* createWorker(struct config* config, int cpuNum) {
 
   //Create connections
   struct worker* worker = malloc(sizeof(struct worker));
-  worker->event_base = event_base_new();
-
 
   worker->config = config;
   worker->n_requests = 0;

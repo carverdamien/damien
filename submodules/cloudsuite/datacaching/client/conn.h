@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include "config.h"
 
-#define QUEUE_SIZE 1000
+#define QUEUE_SIZE 10000
 #define INCR_FIX_QUEUE_SIZE 100
 
 struct conn {
@@ -39,7 +39,7 @@ struct conn {
   int incr_fix_queue_tail;
 };
 
-struct conn* createConnection(struct worker* worker, const char* ip_address, int port, int protocol, int naggles);
+struct conn* createConnection(struct worker* worker, const char* ip_address, int port, int protocol, int naggles, int server);
 int openTcpSocket(const char* ipAddress, int port);
 int openUdpSocket(const char* ipAddress, int port);
 int pushRequest(struct conn* conn, struct request* request);
