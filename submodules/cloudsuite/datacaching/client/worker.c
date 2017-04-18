@@ -61,6 +61,7 @@ void workerLoop(struct worker* worker) {
   }//End for i
 
   gettimeofday(&(worker->last_write_time), NULL);
+  gettimeofday(&(worker->last_server_time), NULL);
   printf("starting receive base loop\n");
   int error;
   worker->next_server = getIntQuantile(worker->config->server_dist) - 1;
@@ -96,6 +97,7 @@ void sendCallback(int fd, short eventType, void* args) {
   double diff = timediff.tv_usec * 1e-6  + timediff.tv_sec;
 
   struct int_dist* interarrival_dist = config->interarrival_dist;
+  struct int_dist* interserver_dist = config->interserver_dist;
   int interarrival_time  = 0;
 
   //Null interarrival_dist means no waiting
@@ -117,7 +119,27 @@ void sendCallback(int fd, short eventType, void* args) {
   timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time;
   timeradd(&(worker->last_write_time), &timeadd, &(worker->last_write_time));
 
-  worker->next_server = getIntQuantile(config->server_dist) - 1;
+  // Null interserver_dist means always try to query a different server
+  if (!interserver_dist) {
+    worker->next_server = getIntQuantile(config->server_dist) - 1;
+  } else {
+    int interserver_time = 0;
+    timersub(&timestamp, &(worker->last_server_time), &timediff);
+    diff = timediff.tv_usec * 1e-6  + timediff.tv_sec;
+    
+    if(worker->interserver_time <= 0 ) {
+      interserver_time = getIntQuantile(interserver_dist);
+      worker->interserver_time = interserver_time;
+    } else {
+      interserver_time = worker->interserver_time;
+    }
+    if (interserver_time/1.0e6 <= diff) { // did wait enough
+      worker->next_server = getIntQuantile(config->server_dist) - 1;
+      worker->interserver_time = -1;
+      timeadd.tv_sec = 0; timeadd.tv_usec = interserver_time;
+      timeradd(&(worker->last_server_time), &timeadd, &(worker->last_server_time));
+    }
+  }
 
   struct request* request = NULL;
   int len;
@@ -251,6 +273,7 @@ struct worker* createWorker(struct config* config, int cpuNum) {
   worker->n_requests = 0;
   worker->cpu_num = cpuNum;
   worker->interarrival_time = 0;
+  worker->interserver_time = 0;
   if(config->dep_dist != NULL && config->pre_load) {
     worker->warmup_key = config->keysToPreload-1;
     worker->warmup_key_check = 0;

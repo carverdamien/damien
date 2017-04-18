@@ -61,7 +61,9 @@ struct config* parseArgs(int argc, char** argv) {
   config->multiget_dist = NULL;
   config->incr_frac = 0.0;
   config->arrival_distribution_type = ARRIVAL_CONSTANT;
+  config->server_distribution_type = ARRIVAL_EXPONENTIAL;
   config->rps = -1;
+  config->cps = 0.1;
   config->zipf = 0.0;
   config->random_seed = 1;
   config->pre_load = 0;
@@ -70,6 +72,7 @@ struct config* parseArgs(int argc, char** argv) {
   config->key_pop_dist = NULL;
   config->dep_dist = NULL;
   config->interarrival_dist = NULL;
+  config->interserver_dist = NULL;
   config->input_file=NULL;
   config->output_file=NULL;
   config->server_memory=1024;
@@ -81,7 +84,7 @@ struct config* parseArgs(int argc, char** argv) {
   }
 
   int c;
-  while ((c = getopt (argc, argv, "a:c:d:D:ef:g:hi:jk:l:L:m:MnN:o:p:ur:s:S:t:T:w:W:xz:")) != -1) {
+  while ((c = getopt (argc, argv, "a:c:d:D:ef:g:hi:jk:l:L:m:MnN:o:p:ur:s:S:t:T:w:W:xz:C:")) != -1) {
     switch (c) {
 
       case 'a':
@@ -211,6 +214,10 @@ struct config* parseArgs(int argc, char** argv) {
       case 'z':
 	config->zipf = atof(optarg);
         break;
+	
+      case 'C':
+        config->cps = atof(optarg);
+        break;
 
     default:
       printf("ERROR getopt\n");
@@ -328,7 +335,13 @@ void setupLoad(struct config* config) {
     config->interarrival_dist = createExponentialDistribution(meanInterarrival);
   }
 
-}//End setupLoad()
+  int meanInterserver = 1.0/config->cps/((float)config->n_workers)*1e6;
+  if(config->server_distribution_type == ARRIVAL_CONSTANT) {
+    config->interserver_dist = createConstantDistribution(meanInterserver);
+  } else {
+    config->interserver_dist = createExponentialDistribution(meanInterserver);
+  }
+}
 
 
 //Cleanup mallocs and make valgrind happy

@@ -48,11 +48,14 @@ struct config {
   struct int_dist* value_size_dist;
   struct int_dist* multiget_dist;
   struct int_dist* interarrival_dist;
+  struct int_dist* interserver_dist;
   struct int_dist* server_dist;
   struct dep_dist* dep_dist;
   int arrival_distribution_type;
+  int server_distribution_type;
   int received_warmup_keys;
   int rps;
+  double cps; // max server churn per sec 
   int fixed_size;
   double zipf;
   int random_seed;

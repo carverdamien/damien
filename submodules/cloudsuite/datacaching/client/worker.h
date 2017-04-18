@@ -25,6 +25,8 @@ struct worker {
   int cpu_num;
   struct timeval last_write_time;
   int interarrival_time;
+  struct timeval last_server_time;
+  int interserver_time;
 
   int n_requests;
   int current_request_id;
