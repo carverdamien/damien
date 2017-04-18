@@ -54,7 +54,7 @@ struct config {
   int received_warmup_keys;
   int rps;
   int fixed_size;
-  int zynga;
+  double zipf;
   int random_seed;
   int pre_load;
   int bad_multiget;

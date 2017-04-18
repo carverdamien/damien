@@ -11,6 +11,7 @@
        - SCALE=${SCALE}
        - MEMORY=${MEMORY}
        - CONNECTION=${CONNECTION}
+       - USE_ZIPF=${USE_ZIPF}
      links:
        - server:server
      cpuset: 0,1,2,3

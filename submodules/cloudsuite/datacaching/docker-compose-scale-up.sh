@@ -6,6 +6,7 @@ set -e -x
 : SCALE ${SCALE:=2}
 : MEMORY ${MEMORY:=$((300*SCALE))}
 : CONNECTION ${CONNECTION:=200}
+: USE_ZIPF ${USE_ZIPF:=-z 1.0}
 env() {
 cat <<EOF
 RPS=${RPS}
@@ -14,6 +15,7 @@ WORKER=${WORKER}
 SCALE=${SCALE}
 MEMORY=${MEMORY}
 CONNECTION=${CONNECTION}
+USE_ZIPF=${USE_ZIPF}
 EOF
 }
 env | tee .env 

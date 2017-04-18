@@ -88,47 +88,59 @@ int getIntQuantile(struct int_dist* dist) {
 
 }//End getQuantile()
 
-struct int_dist* createConstantDistribution(int constant){
-
+struct int_dist* createZipfDistribution(double s, int n) {
+  int i, k;
+  double norm = harmonicSum(n, (double)s);
+  double sum = 0;
   struct int_dist* dist = malloc(sizeof(struct int_dist));
-  int nValues = CDF_VALUES;
+
+  k = 1;
+  sum = 1.0 / pow((double)k, s);
+
+  for(i=0; i<CDF_VALUES; i++) {
+    if (i > sum * CDF_VALUES / norm) {
+      k++;
+      sum += 1.0 / pow((double)k, s);
+    }
+    dist->cdf_y[i] = k;
+  }
+  return dist;
+}
+
+struct int_dist* createConstantDistribution(int constant) {
   int i;
-  for( i = 0; i < nValues; i++ ){
+  struct int_dist* dist = malloc(sizeof(struct int_dist));
+
+  for(i=0; i<CDF_VALUES; i++) {
     dist->cdf_y[i] = constant;
-  }//End for i
+  }
 
   return dist;
-
-}//End createConstantDistribution()
+}
 
 struct int_dist* createExponentialDistribution(int meanInterarrival) {
-
-  struct int_dist* dist = malloc(sizeof(struct int_dist));
-  int nValues = CDF_VALUES;
   int i;
-  for( i = 0; i < nValues; i++ ){
-    int value = (int)(-log(1- (double)i/(double)nValues) * meanInterarrival);
+  struct int_dist* dist = malloc(sizeof(struct int_dist));
+
+  for(i=0; i<CDF_VALUES; i++) {
+    int value = (int)(-log(1- (double)i/(double)CDF_VALUES) * meanInterarrival);
     dist->cdf_y[i] = value;
-  }//End for i
+  }
 
   return dist;
-
-}//End createExponentialDistribution()
+}
 
 struct int_dist* createUniformDistribution(int min, int max) {
-
-  struct int_dist* dist = malloc(sizeof(struct int_dist));
-  int nValues = CDF_VALUES;
   int i;
-  double delta = (max - min)/((double)nValues);
-  for( i = 0; i < nValues; i++ ){
+  struct int_dist* dist = malloc(sizeof(struct int_dist));
+  double delta = (max - min)/((double)CDF_VALUES);
+
+  for(i=0; i<CDF_VALUES; i++) {
     dist->cdf_y[i] = (int)(round(delta*i + min));
-//    printf("%d, %d\n", i, dist->cdf_y[i]);
-  }//End for i
+  }
 
   return dist;
-
-}//createUniformDistribution()
+}
 
 struct int_dist* loadDistributionFile(char* filename) {
 

@@ -33,6 +33,7 @@ void printUsage() {
                 "        [-T arg  interval between stats printing (default: 1)]\n"
                 "        [-w number of worker threads]\n"
                 "        [-x run timing tests instead of loadtesting]\n"
+		"        [-z arg use zipf distribution for server popularity (default: uniform)\n"
 		);
 }
 
@@ -61,7 +62,7 @@ struct config* parseArgs(int argc, char** argv) {
   config->incr_frac = 0.0;
   config->arrival_distribution_type = ARRIVAL_CONSTANT;
   config->rps = -1;
-  config->zynga = 0;
+  config->zipf = 0.0;
   config->random_seed = 1;
   config->pre_load = 0;
   config->bad_multiget = 0;
@@ -80,7 +81,7 @@ struct config* parseArgs(int argc, char** argv) {
   }
 
   int c;
-  while ((c = getopt (argc, argv, "a:c:d:D:ef:g:hi:jk:l:L:m:MnN:o:p:ur:s:S:t:T:w:W:xz")) != -1) {
+  while ((c = getopt (argc, argv, "a:c:d:D:ef:g:hi:jk:l:L:m:MnN:o:p:ur:s:S:t:T:w:W:xz:")) != -1) {
     switch (c) {
 
       case 'a':
@@ -208,7 +209,7 @@ struct config* parseArgs(int argc, char** argv) {
         break;
 
       case 'z':
-        config->zynga = 1;     
+	config->zipf = atof(optarg);
         break;
 
     default:
@@ -309,8 +310,11 @@ void setupLoad(struct config* config) {
     config->multiget_dist = createUniformDistribution(2, 10);
   }
 
-  // TODO: server popularity distribution option. Example: zipf.
-  config->server_dist = createUniformDistribution(0, config->n_servers - 1);
+  if (config->zipf > 0)
+    config->server_dist = createZipfDistribution(config->zipf, config->n_servers);
+  else
+    config->server_dist = createUniformDistribution(1, config->n_servers);
+
 
   printf("rps %d cpus %d\n", config->rps, config->n_workers);
   if (config->rps == -1 || config->rps == 0)

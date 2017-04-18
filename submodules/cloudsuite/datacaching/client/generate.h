@@ -41,6 +41,7 @@ struct key_list {
 
 
 int getIntQuantile(struct int_dist* dist);
+struct int_dist* createZipfDistribution(double s, int n);
 struct int_dist* createUniformDistribution(int min, int max);
 struct int_dist* createConstantDistribution(int constant);
 struct int_dist* loadDistributionFile(char* filename);

@@ -63,7 +63,7 @@ void workerLoop(struct worker* worker) {
   gettimeofday(&(worker->last_write_time), NULL);
   printf("starting receive base loop\n");
   int error;
-  worker->next_server = getIntQuantile(worker->config->server_dist);
+  worker->next_server = getIntQuantile(worker->config->server_dist) - 1;
   
   /* do { */
   /*   printf("DISPATCH server=%d\n", worker->next_server); */
@@ -117,7 +117,7 @@ void sendCallback(int fd, short eventType, void* args) {
   timeadd.tv_sec = 0; timeadd.tv_usec = interarrival_time;
   timeradd(&(worker->last_write_time), &timeadd, &(worker->last_write_time));
 
-  worker->next_server = getIntQuantile(config->server_dist);
+  worker->next_server = getIntQuantile(config->server_dist) - 1;
 
   struct request* request = NULL;
   int len;
