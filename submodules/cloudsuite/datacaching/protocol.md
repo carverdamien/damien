@@ -1,8 +1,8 @@
 # Setup A
 
-* total memory 4G
-* container's memory 400MB
-* fix churn rate 0.1/sec
+* fix total memory 4G
+* fix container memory 400MB (~10 containers max)
+* fix churn rate 10/sec. (Toutes les secondes, il y a au plus 10 containers qui recoivent des requetes)
 
 ```
 Perf
@@ -12,8 +12,8 @@ Perf
 |              \
 |               \
 |                ------------- Linux
-+------------|------|-----|--> nb container
-0           10     100   1000
++------------|------------|--> nb container
+0           10           20
 ```
 
 ```
@@ -24,42 +24,42 @@ Perf
 |              --------------- ACDC
 |               
 |                
-+------------|------|-----|--> nb container
-0           10     100   1000
++------------|------------|--> nb container
+0           10           20
 ```
 
 La chute de perf depend du churn rate. Ne depend pas du nombre container.
 
 # Setup B
 
-* total memory 4G
-* container's memory 400MB
-* fix 1000 containers
-* Chute = Perf(10containers) - Perf(1000containers)
+* fix total memory 4G
+* fix container's memory 400MB
+* fix 20 containers
+* Loss = Perf(10containers) - Perf(20containers) (Ce que l'on perd en faisant de l'overcommit)
 
 ```
-Chute
-^            LINUX
+Loss
+^                  Linux
+|                  /
+|                 /
+|                /
+|               /
+|              /
 |             /
 |            /
 |           /
-|          /
-|         /
-|        /
-|       /
-|      /
-|     /
-|    /
-|   /
-|  /
-| /              
+|         _/
+|       _/  
+|     _/    
+|   _/      
+| _/              
 |/                
-+-----|------|------|-----|--> Churn Rate
-0    0.1    10     100   1000
++-----|-----|-----|-----|--> Churn Rate
+0     5     10    15    20
 ```
 
 ```
-Chute
+Loss
 ^                          ACDC
 |                         _/
 |                       _/
@@ -75,8 +75,8 @@ Chute
 |   _/
 | _/              
 |/                
-+-----|------|------|-----|--> Churn Rate
-0    0.1    10     100   1000
++-----|-----|-----|-----|--> Churn Rate
+0     5     10    15    20
 ```
 
-La perte global scale en fonction du churn rate
+La perte global scale en fonction du churn rate.
