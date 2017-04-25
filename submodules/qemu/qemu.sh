@@ -1,5 +1,5 @@
 #!/bin/bash
-: ${KERNEL:=/home/dc/Git/linux/build/acdc/arch/x86/boot/bzImage}
+: ${KERNEL:=/home/dc/Git/linux/build/idle_mem_cgroup_tracking/master/arch/x86/boot/bzImage}
 sudo qemu-system-x86_64 \
 -cpu host -smp cores=4,threads=2,sockets=1 \
 -m 4G \

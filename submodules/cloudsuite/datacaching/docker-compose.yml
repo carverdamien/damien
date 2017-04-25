@@ -30,9 +30,14 @@
      command: [ '-p', '22', '-o StrictHostKeyChecking=no', '-i', '/root/.ssh/id_rsa', '-nNL', '0.0.0.0:8086:localhost:8086', '${SSH_USER}@${SSH_HOST}']
    telegraf:
      image: telegraf:latest
-     container_name: telegraf
+     pid: "host"
+     environment:
+       - HOST_PROC=/rootfs/proc
+       - HOST_SYS=/rootfs/sys
      links:
        - influxdb
      volumes:
+       - /proc:/rootfs/proc:ro
+       - /sys:/rootfs/sys:ro
        - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
        - /var/run/docker.sock:/var/run/docker.sock 
