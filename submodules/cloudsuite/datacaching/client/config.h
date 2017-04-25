@@ -26,7 +26,7 @@ struct config {
   int n_workers;
   int n_servers;
   struct worker** workers;
-  int n_connections_total;
+  int n_connections_per_worker;
 
   int run_time;
   int stats_time;

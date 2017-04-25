@@ -1,6 +1,7 @@
 {
-    "sourceId" : "ad23f2b4e5413f9de4f838621b80e3c39af2286068dd3892f58f0fde",
-    "kernel": "4.6.0.2888675+",
+    "sourceId" : "ae850ced13f41db74736ec48fdbf4695573b3bfafa38afc0e6f6ca2f",
+    "_kernel": "4.6.0+",
+    "kernel": "4.6.0.53bebc5+",
     "mem_cgroup" : {
 	"system" : {
 	},
@@ -186,22 +187,22 @@
 	{
 	    "client_container": "memtier0",
 	    "server_container": "memcached0",
-	    "schedule": [[0,840]]
+	    "schedule": [[0,120],[360,840]]
 	},
 	{
 	    "client_container": "memtier1",
 	    "server_container": "memcached1",
-	    "schedule": [[0,120],[120,120],[120,120],[120,120]]
+	    "schedule": [[120,120],[240,120],[120,120],[120,120],[120,120]]
 	},
 	{
 	    "client_container": "memtier2",
 	    "server_container": "memcached2",
-	    "schedule": [[120,120],[360,120]]
+	    "schedule": [[240,120],[240,120],[360,120]]
 	},
 	{
 	    "client_container": "memtier3",
 	    "server_container": "memcached3",
-	    "schedule": [[360,120]]
+	    "schedule": [[360,120],[360,120]]
 	}
     ]
 }

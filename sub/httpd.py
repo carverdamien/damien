@@ -104,6 +104,10 @@ def httpd_dockercontainers(Id):
         return str(container)
     return "Not Found"
 
+@bottle.route('/dockercontainers')
+def httpd_dockercontainers_all():
+    return HTML.json([container for container in db.dockercontainers.find()])
+
 @bottle.route('/dockerstats/<listId>/<stat>.csv')
 def httpd_dockerstats_csv(listId,stat):
     def str2datetime(x):

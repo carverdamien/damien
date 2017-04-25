@@ -15,8 +15,17 @@
        - USE_ZIPF=${USE_ZIPF}
      links:
        - server:server
+       - influxdb:influxdb
      cpuset: 0,1,2,3
    server:
      image: memcached
      command: [ '-t', '4', '-m', '${MEMORY}', '-n', '550' ]
      cpuset: 4,5,6,7
+   influxdb:
+     build: proxy
+     volumes:
+       - ${SSH_PRI_KEY}:/root/.ssh/id_rsa
+       - ${SSH_PUB_KEY}:/root/.ssh/id_rsa.pub
+     entrypoint: ssh
+     command: [ '-p', '22', '-o StrictHostKeyChecking=no', '-i', '/root/.ssh/id_rsa', '-nNL', '0.0.0.0:8086:localhost:8086', '${SSH_USER}@${SSH_HOST}']
+     

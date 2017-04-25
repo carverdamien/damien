@@ -122,25 +122,25 @@ void printGlobalStats(struct config* config) {
   printf("{ ");
   int i;
   for(i=0; i<config->n_workers; i++) {
-    printf("worker%d:%d, ", i, config->workers[i]->n_requests);
+    printf("\"worker%d\":%d, ", i, config->workers[i]->n_requests);
   }
     printf(
-	 "time:%f, "
-	 //"timeDiff:%f, "
-	 "rps:%f, "
-	 "requests:%d, "
-	 "gets:%d, "
-	 "sets:%d, "
-	 "hits:%d, "
-	 "misses:%d, "
-	 "avg_lat:%f, "
-	 "90th:%f, "
-	 "95th:%f, "
-	 "99th:%f, "
-	 "std:%f, "
-	 "min:%f, "
-	 "max:%f, "
-	 "avgGetSize:%f }\n"
+	 "\"time\":%f, "
+	 //"\"timeDiff\":%f, "
+	 "\"rps\":%f, "
+	 "\"requests\":%d, "
+	 "\"gets\":%d, "
+	 "\"sets\":%d, "
+	 "\"hits\":%d, "
+	 "\"misses\":%d, "
+	 "\"avg_lat\":%f, "
+	 "\"90th\":%f, "
+	 "\"95th\":%f, "
+	 "\"99th\":%f, "
+	 "\"std\":%f, "
+	 "\"min\":%f, "
+	 "\"max\":%f, "
+	 "\"avgGetSize\":%f }\n"
 	 ,
 	 t,
 	 //timeDiff,

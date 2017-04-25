@@ -233,14 +233,14 @@ void createWorkers(struct config* config) {
     config->workers[i] = createWorker(config, i);
   }
 
-  if(config->n_workers > config->n_connections_total ) {
-    printf("Override n_connections_total=%d because < n_workers=%d\n", config->n_connections_total, config->n_workers);
-    config->n_connections_total = config->n_workers;
+  if(config->n_servers > config->n_connections_per_worker ) {
+    printf("Override n_connections_per_worker=%d because < n_servers=%d\n", config->n_connections_per_worker, config->n_servers);
+    config->n_connections_per_worker = config->n_servers;
   }
 
   int total_connections = 0;
   for(i = 0; i < config->n_workers; i++) {
-    int num_worker_connections = config->n_connections_total/config->n_workers + (i < config->n_connections_total % config->n_workers);
+    int num_worker_connections = config->n_connections_per_worker;
     printf("num_worker_connections %d\n", num_worker_connections);
     total_connections += num_worker_connections;
     config->workers[i]->connections = malloc(sizeof(struct conn*) * num_worker_connections);

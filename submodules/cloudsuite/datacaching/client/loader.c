@@ -11,7 +11,7 @@ void printUsage() {
 
         printf( "usage: loader [-option]\n"
                 "        [-a arg  input distribution file]\n"
-                "        [-c arg  total number of connections]\n"
+                "        [-c arg  number of connections per worker]\n"
                 "        [-d arg  value size distribution file]\n"
                 "        [-D arg  size of main memory available to each memcached server in MB]\n"
                 "        [-e use  an exponential arrival distribution (default: constant)]\n"
@@ -52,7 +52,7 @@ struct config* parseArgs(int argc, char** argv) {
   config->multiget_frac = 0.0;
   config->run_time  = -1;
   config->stats_time  = 1;
-  config->n_connections_total = 1;
+  config->n_connections_per_worker = 1;
   config->naggles = 0;
   config->fixed_size = -1;
   config->get_frac = 0.9f;
@@ -93,7 +93,7 @@ struct config* parseArgs(int argc, char** argv) {
         break;
 
       case 'c':
-        config->n_connections_total = atoi(optarg);
+        config->n_connections_per_worker = atoi(optarg);
         break;
 
       case 'd':
@@ -260,7 +260,7 @@ void printConfiguration(struct config* config) {
   printf("nWorkers: %d\n", config->n_workers);
   printf("runtime: %d\n", config->run_time);
 
-//  printf("Connecterions per worker: %d\n",  config->n_connections_per_worker);
+  printf("Connecterions per worker: %d\n",  config->n_connections_per_worker);
   if(config->fixed_size > 0){
     printf("Fixed value size: %d\n", config->fixed_size);
   }

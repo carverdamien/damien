@@ -1,7 +1,7 @@
 {
     "sourceId" : "cf54168b526707abd211dba01ebea19efc73629b41db7d30f944826c",
-    "_kernel": "4.6.0+",
-    "kernel": "4.6.0.53bebc5+",
+    "kernel": "4.6.0+",
+    "_kernel": "4.6.0.53bebc5+",
     "mem_cgroup" : {
 	"system" : {
 	},
