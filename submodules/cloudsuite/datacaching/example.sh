@@ -1,0 +1,3 @@
+#!/bin/bash
+set -e -x
+RPS=200000 SERVER=16 CONNECTION=128 MEMORY=1024 TOTAL_MEMORY= WORKER=4 CHURN='-C 2' USE_ZIPF='-z 1.5820230265586939' bash docker-compose-scale-up.sh

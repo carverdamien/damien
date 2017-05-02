@@ -21,6 +21,7 @@
      image: memcached
      command: [ '-t', '4', '-m', '${MEMORY}', '-n', '550' ]
      cpuset: 4,5,6,7
+     cgroup_parent: docker/servers
    influxdb:
      build: proxy
      volumes:
