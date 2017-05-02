@@ -1,0 +1,170 @@
+{ 
+    "sourceId" : "ae850ced13f41db74736ec48fdbf4695573b3bfafa38afc0e6f6ca2f",
+    "kernel": "4.6.0+",
+    "_kernel": "4.6.0.38ba428+",
+    "__kernel": "4.6.0.ac45f71+",
+    "mem_cgroup" : {
+        "system" : {
+        },
+        "client" : {
+        },
+        "server" : {
+            "memory" : { "limit_in_bytes" : 3896508416 },
+            "children" : {
+                "private" : {
+                    "memory" : { "limit_in_bytes" : 1073741824 }
+                },
+                "shared" : {
+                    "memory" : { "use_hierarchy" : "1", "limit_in_bytes" : 3896508416 }
+                }
+            }
+        }
+    },
+    "containers" : [
+        {
+            "image" : "ubuntu:latest",
+            "name" : "kidled_monitor",
+            "entrypoint" : "bash",
+            "command" : ["-c", "pidof kidled | tee /sys/fs/cgroup/cpu{,acct}/tasks && sleep infinity"],
+            "host_config" : {
+                "cgroup_parent" : "system",
+                "cpu_period": 1000000,
+                "cpu_quota":  1000000,
+                "pid_mode" : "host",
+                "privileged" : true
+            }
+            
+        },
+        {
+            "image" : "ubuntu:latest",
+            "name" : "krefreshd_monitor",
+            "entrypoint" : "bash",
+            "command" : ["-c", "pidof krefreshd | tee /sys/fs/cgroup/cpu{,acct}/tasks && sleep infinity"],
+            "host_config" : {
+                "cgroup_parent" : "system",
+                "cpu_period": 1000000,
+                "cpu_quota":    10000,
+                "pid_mode" : "host",
+                "privileged" : true
+            }
+            
+        },
+        {
+            "image" : "ubuntu:latest",
+            "name" : "kstaled_monitor",
+            "entrypoint" : "bash",
+            "command" : ["-c", "pidof kstaled | tee /sys/fs/cgroup/cpu{,acct}/tasks && sleep infinity"],
+            "host_config" : {
+                "cgroup_parent" : "system",
+                "cpu_period": 1000000,
+                "cpu_quota":  1000000,
+                "pid_mode" : "host",
+                "privileged" : true
+            }
+            
+        },
+        {
+            "name" : "sysbench1",
+            "image" : "sysbench:latest",
+            "entrypoint" : "bash",
+            "command" : [ "-c", "while : ; do sleep 1; done" ],
+            "host_config" : {
+                "cgroup_parent" : "client",
+                "cpuset_cpus" : "0,1,4,5"
+            }
+        },
+        {
+            "name" : "sysbench2",
+            "image" : "sysbench:latest",
+            "entrypoint" : "bash",
+            "command" : [ "-c", "while : ; do sleep 1; done" ],
+            "host_config" : {
+                "cgroup_parent" : "client",
+                "cpuset_cpus" : "2,3,6,7"
+            }
+        },
+        {
+            "name" : "mysql1",
+            "image" : "mysql:latest",
+            "environment" : { "MYSQL_ALLOW_EMPTY_PASSWORD" : "yes" },
+            "host_config" : {
+                "cgroup_parent" : "server/shared",
+                "binds" : ["db1-10000000:/var/lib/mysql"],
+                "oom_kill_disable" : true,
+                "mem_limit" : 1073741824,
+                "mem_reservation" : 536870912,
+                "cpuset_cpus" : "0,1,4,5",
+                "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : 524288000 } ],
+                "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : 20971520 } ]
+          }
+        },
+        {
+            "name" : "mysql2",
+            "image" : "mysql:latest",
+            "environment" : { "MYSQL_ALLOW_EMPTY_PASSWORD" : "yes" },
+            "host_config" : {
+                "cgroup_parent" : "server/shared",
+                "binds" : ["db2-10000000:/var/lib/mysql"],
+                "oom_kill_disable" : true,
+                "mem_limit" : 1073741824,
+                "mem_reservation" : 536870912,
+                "cpuset_cpus" : "2,3,6,7",
+                "device_write_bps" : [ { "Path" : "/dev/sda", "Rate" : 524288000 } ],
+                "device_read_bps" : [ { "Path" : "/dev/sda", "Rate" : 20971520 } ]
+          }
+        },
+        {
+            "name" : "cassandra",
+            "image" : "cassandra:latest",
+            "host_config" : {
+                "cgroup_parent" : "server/shared",
+                "oom_kill_disable" : true,
+                "mem_limit" : 1749024768,
+                "mem_reservation" : 874512384,
+                "cpuset_cpus" : "2,3,6,7"
+            }
+        }
+    ],
+    "boot_ctl" : [
+        {
+            "container":"kidled_monitor",
+            "start_delay":0,
+            "duration":840
+        },
+        {
+            "container":"krefreshd_monitor",
+            "start_delay":0,
+            "duration":840
+        },
+        {
+            "container":"kstaled_monitor",
+            "start_delay":0,
+            "duration":840
+        },
+        {
+            "container" : "cassandra",
+            "start_delay" : 360,
+            "duration" : 120
+        }
+    ],
+    "sysbench_ctl" : [
+        {
+            "client_container" : "sysbench1",
+            "server_container" : "mysql1",
+            "dbname" : "db1",
+            "schedule" : [[0,840]],
+            "dbsize" : 10000000,
+            "oltp_read_only" : true,
+            "threads" : 8
+        },
+        {
+            "client_container" : "sysbench2",
+            "server_container" : "mysql2",
+            "dbname" : "db2",
+            "schedule" : [[0,240], [360,240]],
+            "dbsize" : 10000000,
+            "oltp_read_only" : true,
+            "threads" : 8
+        }
+    ]
+}
